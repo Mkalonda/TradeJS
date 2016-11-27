@@ -1,0 +1,21 @@
+:host {
+    height: 100px;
+    border: 1px solid black;
+    overflow: auto;
+}
+
+:host table th,
+:host table td {
+    padding: 0 !important;
+    font-size: 10px !important;
+}
+
+.debuggerContent {
+    overflow: auto;
+}
+
+.splitter {
+    width: 100%;
+    display: block;
+    cursor: ns-resize;
+}

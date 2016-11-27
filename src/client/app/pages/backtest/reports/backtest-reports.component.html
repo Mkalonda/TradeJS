@@ -1,0 +1,85 @@
+<div class="panel panel-default no-horizontal-border">
+    <div class="panel-heading">
+        <h3 class="panel-title">Reports</h3>
+    </div>
+    <div class="panel-body">
+        <div *ngIf="report != null">
+            <h4>General</h4>
+            <div class="row" >
+                <div class="col-sm-3">
+                    <ul class="key-value-list">
+                        <li><span>Started</span>{{report.started}}</li>
+                        <li><span>From</span>{{report.fromPretty}}</li>
+                        <li><span>Until</span>{{report.untilPretty}}</li>
+                    </ul>
+                </div>
+                <div class="col-sm-3">
+                    <ul class="key-value-list">
+                        <li><span>Diff</span>{{report.diff}}</li>
+                        <li><span>Equality</span>{{report.equality}}</li>
+                        <li><span>Nr of trades</span>{{report.nrOfTrades}}</li>
+                    </ul>
+                </div>
+                <div class="col-sm-3">
+                    <ul class="key-value-list">
+                        <li><span>Completed in</span>{{report.time.totalPretty}}</li>
+                        <li><span>Fetching</span>{{report.time.fetchingPretty}}</li>
+                        <li><span>Testing</span>{{report.time.testingPretty}}</li>
+                    </ul>
+                </div>
+
+                <div class="col-sm-3">
+                    <ul class="key-value-list">
+                        <li><span>Ticks</span>{{report.ticksPretty}}</li>
+                        <li><span>Ticks p / s</span>{{report.ticksPerSecondPretty}}</li>
+                    </ul>
+                </div>
+            </div>
+            <hr/>
+
+            <div *ngFor="let instrument of report.instruments">
+                <div class="tpl-report">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="container-fluid">
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <h5>{{instrument.instrument}}</h5>
+
+                                        <ul class="key-value-list">
+                                            <li><span>Diff</span>{{diff}}</li>
+                                            <li><span>Equality</span>{{instrument.equality}}</li>
+                                            <li><span>Nr of trades</span>{{instrument.nrOfTrades}}</li>
+                                        </ul>
+                                        <ul class="key-value-list">
+                                            <li><span>Completed in</span>{{instrument.time.totalPretty}}</li>
+                                            <li><span>Fetching</span>{{instrument.time.fetchingPretty}}</li>
+                                            <li><span>Testing</span>{{instrument.time.testingPretty}}</li>
+                                        </ul>
+                                        <ul class="key-value-list">
+                                            <li><span>Time frame</span>{{instrument.timeFrame}}</li>
+                                            <li><span>Ticks</span>{{instrument.ticksPretty}}</li>
+                                            <li><span>Ticks p / s</span>{{instrument.ticksPerSecondPretty}}</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        <chart [options]="instrument"></chart>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div *ngIf="report == null && !loading" class="container-fluid">
+            <p class="text-muted">No report... Run a test to start.</p>
+        </div>
+
+        <div *ngIf="loading" class="spinner">
+            <div class="dot1"></div>
+            <div class="dot2"></div>
+        </div>
+    </div>
+</div>

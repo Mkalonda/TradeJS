@@ -1,0 +1,73 @@
+@import '../../style/variables/variables';
+
+:host {
+    height: 18px;
+    border-top: 1px solid $border-color-grey;
+    position: relative;
+    background: $background-dark;
+}
+
+.splitter {
+    position: absolute;
+    top: -6px;
+    left: 0;
+    right: 0;
+    height: 20px;
+    cursor: ns-resize;
+    text-align: center;
+    font-size: 10px;
+    padding-left: 1px;
+
+    transition: transform .2s;
+
+    &:hover {
+        transform: scale(2);
+        transform-origin: 50% 30%;
+    }
+}
+
+.debuggerTable {
+    position: absolute;
+    top: 17px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: auto;
+
+    width: 50%;
+    border-right: 1px solid $border-color-grey;
+
+    background: $background-light;
+}
+
+table {
+    margin-bottom: 0;
+
+    thead {
+        tr {
+            th {
+                border: none;
+            }
+        }
+    }
+
+    th,
+    td {
+        font-size: 10px;
+        padding: 0 0 0 5px;
+        border-color: $border-color-grey;
+        color: $font-color-light;
+    }
+
+    td:first-child {
+        text-align: center;
+    }
+}
+
+.fa-info {
+    color: $general-info;
+}
+
+.fa-close {
+    color: $general-error;
+}

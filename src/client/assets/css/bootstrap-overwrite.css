@@ -1,0 +1,79 @@
+/* ##### PANEL PANEL ####### */
+.panel-default {
+    background: none;
+}
+
+.panel-default.no-horizontal-border {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+}
+
+.panel-default > .panel-heading {
+    background-color: rgb(18, 19, 45);
+    padding: 5px 15px;
+    color: #fff;
+}
+
+/* ##### MODAL MODAL ####### */
+.modal-header {
+    padding: 10px 10px 10px 15px;
+}
+
+.modal.modal-custom {
+
+}
+
+
+/* ##### NAV NAV NAV NAV ####### */
+.navbar-default {
+    background: #000;
+    border: none;
+    border-radius: unset;
+    margin-bottom: 10px;
+}
+
+.navbar-default .navbar-nav > li > a,
+.navbar-default .navbar-nav > li > a:focus,
+.navbar-default .navbar-header > a,
+.navbar-default .navbar-header > a:focus {
+    color: white;
+    transition: color .3s;
+}
+
+.navbar-default .navbar-nav > li > a:hover,
+.navbar-default .navbar-header > a:hover {
+    color: #f00;
+}
+
+/* Medium Devices, Desktops */
+@media only screen and (min-width : 992px) {
+    .navbar-default .navbar-nav > li > a,
+    .navbar-default .navbar-header > a {
+        padding: 0 15px;
+        height: auto;
+    }
+
+    .navbar.navbar-default {
+        min-height: unset;
+    }
+
+    .navbar-default .navbar-nav > li > a,
+    .navbar-default .navbar-header > a {
+        padding: 0 15px;
+        height: auto;
+    }
+}
+
+.dropdown-menu {
+    background-color: black;
+}
+
+
+.dropdown-menu > li > a {
+    color: white;
+}
+
+.form-control {
+    background: #d2d2d2;
+}

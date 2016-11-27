@@ -1,0 +1,108 @@
+html, body {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+}
+
+html {
+    background: black;
+}
+
+body {
+    position: relative;
+    background: #2d2d2d;
+    font-size: 12px;
+}
+
+@-webkit-keyframes animation {
+    0%     {background-color:white;}
+    100.0%  {background-color:#454443;}
+}
+
+@keyframes animation {
+    0%     {background-color:white;}
+    100.0%  {background-color:#454443;}
+}
+
+body {
+    /* disabled */
+    aanimation-name: animation;
+    animation-duration: 2s;
+    animation-timing-function: ease-in-out;
+    animation-play-state: running;
+    animation-fill-mode: forwards;
+    animation-delay: unset;
+}
+
+* {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+a, p, li, span, h1, h2, h3, h4, h5, h6, td, th, label {
+    color: white;
+}
+
+button {
+    color: black;
+}
+
+ul {
+    list-style: none;
+}
+
+a {
+    cursor: pointer;
+}
+
+a:hover {
+    text-decoration: none;
+}
+
+ss-multiselect-dropdown > div,
+ss-multiselect-dropdown > div > button {
+    width: 100%;
+}
+
+.text-white {
+    color: #fff;
+}
+
+.text-dark {
+    color: #000
+}
+
+.key-value-list {
+    padding-left: 20px;
+    text-align: left;
+}
+
+.key-value-list li {
+    font-size: 12px;
+}
+
+.key-value-list span {
+    display: inline-block;
+    width: 100px;
+    font-weight: bold;
+}
+
+.key-value-list span:after {
+    content: ":";
+    width: 10px;
+    float: right;
+}
+
+.vertical-divider {
+    border-left:1px solid #38546d;
+    border-right:1px solid #16222c;
+    height:80px;
+    position:absolute;
+    right:249px;
+    top:10px;
+}
+
+.jstree-anchor {
+    color: white !important;
+}

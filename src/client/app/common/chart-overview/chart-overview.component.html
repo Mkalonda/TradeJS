@@ -1,0 +1,8 @@
+<div>
+    <chart
+            *ngFor="let instrument of charts" [options]="instrument"
+            (close)="onCloseChart($event)"
+    >
+        <script>alert('chart')</script>
+    </chart>
+</div>

@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+<head>
+    <base href="/">
+    <meta charset="utf-8">
+    <title>TradeJS - Kewin Brandsma</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+    <style>
+        body {
+            background: #2d2d2d;
+        }
+
+        .spinner {
+            margin: 50px auto;
+            width: 40px;
+            height: 40px;
+            text-align: center;
+
+            transition: opacity .5s ease;
+
+            -webkit-animation: sk-rotate 2.0s infinite linear;
+            animation: sk-rotate 2.0s infinite linear;
+        }
+
+        .spinner.absolute {
+            margin: 0;
+            position: absolute;
+            top: 40%;
+            left: 50%;
+        }
+
+        .dot1, .dot2 {
+            width: 60%;d
+            height: 60%;
+            display: inline-block;
+            position: absolute;
+            top: 0;
+            background-color: #fff;
+            border-radius: 100%;
+
+            -webkit-animation: sk-bounce 2.0s infinite ease-in-out;
+            animation: sk-bounce 2.0s infinite ease-in-out;
+        }
+
+        .dot2 {
+            top: auto;
+            bottom: 0;
+            -webkit-animation-delay: -1.0s;
+            animation-delay: -1.0s;
+        }
+
+        @-webkit-keyframes sk-rotate { 100% { -webkit-transform: rotate(360deg) }}
+        @keyframes sk-rotate { 100% { transform: rotate(360deg); -webkit-transform: rotate(360deg) }}
+
+        @-webkit-keyframes sk-bounce {
+            0%, 100% { -webkit-transform: scale(0.0) }
+            50% { -webkit-transform: scale(1.0) }
+        }
+
+        @keyframes sk-bounce {
+            0%, 100% {
+                transform: scale(0.0);
+                -webkit-transform: scale(0.0);
+            } 50% {
+                  transform: scale(1.0);
+                  -webkit-transform: scale(1.0);
+              }
+        }
+    </style>
+
+    <script>
+       window.tradeJsStartTime = Date.now();
+    </script>
+</head>
+<body>
+
+<div class="spinner absolute">
+    <div class="dot1"></div>
+    <div class="dot2"></div>
+</div>
+
+<app-root class="r_flex_container" style="opacity: 0; transition: opacity 1s ease;"></app-root>
+
+
+<!-- Insert this line above script imports  -->
+<script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+<script src="assets/js/jquery/jquery.min.js"></script>
+<!-- Insert this line after script imports -->
+<script>if (window.module) module = window.module;</script>
+
+</body>
+</html>

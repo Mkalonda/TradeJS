@@ -1,0 +1,30 @@
+.three-column {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+
+    border-top: 1px solid #c3c3c3;
+}
+
+.three-column:nth-child(1) {
+    width: 230px;
+    left: 0;
+    right: 200px;
+    overflow: auto;
+    text-align: left;
+
+    border-right: 1px solid #c3c3c3;
+}
+
+.three-column:nth-child(2) {
+    left: 230px;
+    right: 200px;
+}
+
+.three-column:nth-child(3) {
+    right: 0;
+    width: 200px;
+    text-align: center;
+
+    border-left: 1px solid #c3c3c3;
+}

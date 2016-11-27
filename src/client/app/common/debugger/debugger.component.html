@@ -1,0 +1,26 @@
+<i class="splitter fa fa-bars text-white" aria-hidden="true">&nbsp;</i>
+<p style="font-size: 10px; margin-left: 2px;">Debugger ({{_messages.length}})</p>
+
+<div class="debuggerTable">
+    <table class="table">
+        <thead>
+        <tr>
+            <th style="width: 30px;"></th>
+            <th>Message</th>
+            <th>Time</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let message of _messages">
+            <td>
+                <i *ngIf="message.type === 'info'" class="fa fa-info">&nbsp;</i>
+                <i *ngIf="message.type === 'error'" class="fa fa-close">&nbsp;</i>
+                <i *ngIf="message.type === 'warning'" class="fa fa-warning-sign">&nbsp;</i>
+            </td>
+            <td>{{message.text}}</td>
+            <td>{{message.timePretty}}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+

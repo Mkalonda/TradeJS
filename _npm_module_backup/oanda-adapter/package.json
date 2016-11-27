@@ -1,0 +1,87 @@
+{
+  "_args": [
+    [
+      {
+        "raw": "oanda-adapter@^0.1.15",
+        "scope": null,
+        "escapedName": "oanda-adapter",
+        "name": "oanda-adapter",
+        "rawSpec": "^0.1.15",
+        "spec": ">=0.1.15 <0.2.0",
+        "type": "range"
+      },
+      "/Users/kewinbrandsma/Projects/TradeJS"
+    ]
+  ],
+  "_from": "oanda-adapter@>=0.1.15 <0.2.0",
+  "_id": "oanda-adapter@0.1.15",
+  "_inCache": true,
+  "_location": "/oanda-adapter",
+  "_nodeVersion": "0.12.0",
+  "_npmUser": {
+    "name": "cloud9trader",
+    "email": "support@cloud9trader.com"
+  },
+  "_npmVersion": "2.5.1",
+  "_phantomChildren": {},
+  "_requested": {
+    "raw": "oanda-adapter@^0.1.15",
+    "scope": null,
+    "escapedName": "oanda-adapter",
+    "name": "oanda-adapter",
+    "rawSpec": "^0.1.15",
+    "spec": ">=0.1.15 <0.2.0",
+    "type": "range"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/oanda-adapter/-/oanda-adapter-0.1.15.tgz",
+  "_shasum": "2fad82a464db76e241d74849bb68d039f06ff42d",
+  "_shrinkwrap": null,
+  "_spec": "oanda-adapter@^0.1.15",
+  "_where": "/Users/kewinbrandsma/Projects/TradeJS",
+  "author": {
+    "name": "Jon Kafton",
+    "email": "support@cloud9trader.com"
+  },
+  "bugs": {
+    "url": "https://github.com/Cloud9Trader/oanda-adapter/issues"
+  },
+  "dependencies": {
+    "backbone-events-standalone": "~0.2.1",
+    "underscore": "~1.6.0"
+  },
+  "description": "Node.js adapter for OANDA's REST and streaming API.",
+  "devDependencies": {},
+  "directories": {},
+  "dist": {
+    "shasum": "2fad82a464db76e241d74849bb68d039f06ff42d",
+    "tarball": "https://registry.npmjs.org/oanda-adapter/-/oanda-adapter-0.1.15.tgz"
+  },
+  "gitHead": "4ce0898a3ae1e7a042343ba4837ca812d4a5b14a",
+  "homepage": "https://github.com/Cloud9Trader/oanda-adapter",
+  "keywords": [
+    "trading",
+    "broker",
+    "adapter",
+    "server"
+  ],
+  "license": "MIT",
+  "main": "OandaAdapter.js",
+  "maintainers": [
+    {
+      "name": "cloud9trader",
+      "email": "support@cloud9trader.com"
+    }
+  ],
+  "name": "oanda-adapter",
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cloud9Trader/oanda-adapter.git"
+  },
+  "scripts": {},
+  "version": "0.1.15"
+}
