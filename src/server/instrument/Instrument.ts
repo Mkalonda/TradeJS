@@ -1,9 +1,12 @@
-import * as path       from 'path';
-import InstrumentCache from './InstrumentCache';
+import * as path        from 'path';
+import InstrumentCache  from './InstrumentCache';
+import Indicator        from "../../shared/indicators/Indicator";
 
 const PATH_INDICATORS = path.join(__dirname, '../../../dist/shared/indicators/');
 
 export default class Instrument extends InstrumentCache {
+
+    private _unique: number = 0;
 
     indicators = {};
 
@@ -19,25 +22,32 @@ export default class Instrument extends InstrumentCache {
         }
     }
 
-    setIndicator(name, ...params)  {
-        let indicatorPath = path.join(PATH_INDICATORS, name + '.js');
-        let indicator = new (require(indicatorPath).default)(this.ticks, ...params);
-        this.indicators[name] = indicator;
+    addIndicator(name, options)  {
+        let indicator = null;
 
-        indicator._doCatchUp();
+        try {
+            let id = name + '_' + ++this._unique;
+            let indicatorPath = path.join(PATH_INDICATORS, name, 'index.js');
+            let indicator: Indicator = new (require(indicatorPath).default)(this.ticks, options);
+            this.indicators[id] = indicator;
+
+            indicator._doCatchUp();
+        } catch (err) {
+            console.log('Could not add indicator', err);
+        }
 
         return indicator;
     }
 
-    getIndicatorData(name:string, count:number, shift?:number) {
-        return this.indicators[name].getDrawBuffersData(count, shift);
+    getIndicatorData(id:string, count:number, shift?:number) {
+        return this.indicators[id].getDrawBuffersData(count, shift);
     }
 
     getIndicatorsData(count:number, shift?:number) {
         let data = {};
 
-        for (let name in this.indicators) {
-            data[name] = this.getIndicatorData(name, count, shift);
+        for (let id in this.indicators) {
+            data[id] = this.getIndicatorData(id, count, shift);
         }
 
         return data;
@@ -65,7 +75,7 @@ export default class Instrument extends InstrumentCache {
 
         this._ipc.on('indicator:add', async (data:any, cb:Function) => {
             try {
-                this.setIndicator(data.name, data.options);
+                this.addIndicator(data.name, data.options);
                 cb(null, await this.getIndicatorsData(data.count, data.shift));
             } catch (error) {
                 console.log('Error:', error);

@@ -1,0 +1,15 @@
+{
+  "name": "MA",
+  "inputs": [
+    {
+      "name": "period",
+      "type": "number",
+      "value": 14
+    },
+    {
+      "name": "color",
+      "type": "color",
+      "value": "#ff0000"
+    }
+  ]
+}

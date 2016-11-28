@@ -11,9 +11,6 @@
     "listFiles": true,
     "typeRoots": [
       "../../node_modules/@types"
-    ],
-    "exclude": [
-      "**/shared/**"
     ]
   }
 }

@@ -1,10 +1,12 @@
 import Socket = SocketIO.Socket;
+
 require('source-map-support').install({
     handleUncaughtExceptions: true
 });
 
-process.on("unhandledRejection", function (event) {
-    console.log("!unhandledRejection", event);
+process.on("unhandledRejection", function (error) {
+    console.log("!unhandledRejection");
+    console.error(error);
 });
 
 import './util/more-info-console';
@@ -42,8 +44,17 @@ const
  */
 export default class App extends Base {
 
-    controllers: any = {};
-    settings: any;
+    public controllers: {
+        config: ConfigController,
+        system: SystemController,
+        broker: BrokerController,
+        cache: CacheController,
+        editor: EditorController,
+        instrument: InstrumentController
+    } = <any>{};
+
+    public settings: any;
+
     electron = {
         init: false,
         path: null

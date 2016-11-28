@@ -31,17 +31,12 @@ gulp.task('server:run', function(callback) {
     });
 
     callback();
-    //
-    // node.on('message', message => {
-    //     if (message === 'app:ready') {
-    //         callback();
-    //     }
-    // });
 });
 
 gulp.task('server:compile', function() {
 
     let pipes = ['server', 'shared'].map(dir => {
+
         let tsProject = ts.createProject(`./src/${dir}/tsconfig.json`),
             tsResult = tsProject.src()
                 .pipe(sourcemaps.init())
@@ -56,11 +51,17 @@ gulp.task('server:compile', function() {
 });
 
 gulp.task('server:compile:run', function() {
-    runSequence('server:kill', ['server:compile'], 'server:run');
+    runSequence('server:kill', ['copy-shared-assets', 'server:compile'], 'server:run');
 });
 
 gulp.task('server:watch', [], function() {
     gulp.watch(['./src/server/**/*.ts', './src/shared/**/*.ts'], ['server:compile:run']);
+});
+
+/** TEMP NEEDED TO COPY OVER JSON FILES TO DIST FOLDER **/
+gulp.task('copy-shared-assets', function() {
+    gulp.src(['./src/shared/**/*.json', '!**/tsconfig.json'])
+        .pipe(gulp.dest('./dist/shared'));
 });
 
 

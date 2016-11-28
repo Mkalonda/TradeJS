@@ -19,14 +19,9 @@ const app = new App({
     }
 });
 
-app
-    .init()
-    .then(() => {
-
-    })
-    .catch(console.error);
-
 export default app;
+
+app.init().catch(console.error);
 
 
 /*

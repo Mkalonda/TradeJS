@@ -70,7 +70,6 @@ export default class InstrumentCache extends WorkerChild {
      * @returns {Promise}
      */
     async fetch(from, until) {
-        console.log('ads77777777777777', arguments);
         let chunks = this._map.getMissingChunks(this.instrument, this.timeFrame, from, until),
             pList;
 

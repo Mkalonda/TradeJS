@@ -46,7 +46,6 @@ export default class ChartOverviewService {
     }
 
     async create(instrumentSettings:InstrumentSettings) {
-        console.log("SETTINGS!", instrumentSettings);
         // merge settings with defaults
 
 

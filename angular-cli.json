@@ -28,7 +28,7 @@
         "app/style/helpers/spinner.scss",
         "app/style/helpers/spinner-button.scss",
         "app/style/helpers/three-column.scss",
-        "assets/css/bootstrap-overwrite.css",
+        "app/style/bootstrap-overwrite.scss",
         "assets/css/main.css"
       ],
       "scripts": [

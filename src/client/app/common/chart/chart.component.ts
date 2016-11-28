@@ -1,6 +1,7 @@
+import {DialogAnchorDirective} from "../../directives/dialoganchor.directive";
 declare var $:any;
 
-import {Component, OnInit, OnDestroy, ElementRef, Input, Output, EventEmitter, ChangeDetectionStrategy} from '@angular/core';
+import {Component, OnInit, OnDestroy, ElementRef, Input, Output, EventEmitter, ChangeDetectionStrategy, ViewChild} from '@angular/core';
 import * as moment          from 'moment/moment';
 import * as _               from 'lodash';
 import {SocketService}      from "../../services/socket.service";
@@ -10,6 +11,8 @@ import ChartOverviewService from "../../services/chart-overview.service";
 // Load themes
 import ThemeDefault from './theme/theme.default';
 import './theme/theme.dark';
+import {DialogComponent} from "../dialog/dialog.component";
+import IndicatorModel from "../../models/indicator";
 
 const Highcharts = require('highcharts/highstock');
 
@@ -17,10 +20,12 @@ const Highcharts = require('highcharts/highstock');
     selector: 'chart',
     templateUrl: 'chart.component.html',
     styleUrls: ['chart.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    entryComponents: [DialogComponent]
 })
 
 export class ChartComponent implements OnInit, OnDestroy {
+    @ViewChild(DialogAnchorDirective) dialogAnchor: DialogAnchorDirective;
 
     @Input() options = <any>{};
 
@@ -87,7 +92,7 @@ export class ChartComponent implements OnInit, OnDestroy {
                 if (err)
                     return alert('Error!' + err);
 
-                this.setIndicators(data);
+                this.updateIndicators(data);
             });
         });
     }
@@ -129,29 +134,82 @@ export class ChartComponent implements OnInit, OnDestroy {
         });
     }
 
-    addIndicator(name) {
-        this.socket.emit('instrument:indicator:add', {id: this.id, name: name}, data => {
+    async addIndicator(name) {
+        let length = this.chart.series[0].data.length,
+            indicatorModel = await this.getIndicatorOptions(name),
+            confirmed = await this.showIndicatorOptionsMenu(indicatorModel);
 
+        if (confirmed)
+
+            this.socket.emit('instrument:indicator:add', {id: this.id, name: name, options: indicatorModel.inputs, readCount: length, shift: 0}, (err, data) => {
+                this.updateIndicators(data.data);
+                console.log('dfsfirwereuruururur', this.chart.series);
+            });
+    }
+
+    updateIndicators(indicators) {
+
+        for (let id in indicators) {
+
+            for (let drawBuffer in indicators[id]) {
+
+                let unique = id + '_' + indicators[id][drawBuffer].id;
+
+                // New series
+                let series = this.chart.get(unique);
+
+                // Update
+                if (series) {
+                    alert('series exists!');
+                    console.log('SERIES!!!!', series);
+                }
+
+                // Create
+                else {
+
+                    this.chart.addSeries({
+                        type: 'line',
+                        name : id,
+                        //id: unique,
+                        data : indicators[id][drawBuffer].data,
+                        color: 'red',
+                        yAxis: 0
+                    });
+                }
+            }
+        }
+    }
+
+    getIndicatorOptions(name: string): Promise<IndicatorModel> {
+        return new Promise((resolve, reject) => {
+            this.socket.emit('instrument:indicator:options', {name: name}, (err, data) => {
+                err ? reject(err) : resolve(new IndicatorModel(data));
+            });
         });
     }
 
-    setIndicators(indicators) {
+    showIndicatorOptionsMenu(indicatorModel: IndicatorModel): Promise<IndicatorModel> {
+        return new Promise((resolve) => {
 
-        for (let name in indicators) {
+            this.dialogAnchor.createDialog(DialogComponent, {
+                title: indicatorModel.name,
+                model: indicatorModel,
+                buttons: [
+                    {value: 'add', text: 'Add', type: 'primary'},
+                    {text: 'Cancel', type: 'default'}
+                ],
+                onClickButton(value) {
+                  if (value === 'add') {
+                      resolve(true);
+                  } else
+                      resolve(false)
+                }
+            });
+        });
+    }
 
-            for (let drawBuffer in indicators[name]) {
+    setIndicatorOptions() {
 
-                let data = indicators[name][drawBuffer].data;
-
-                this.chart.addSeries({
-                    type: 'line',
-                    name : name,
-                    data : indicators[name][drawBuffer].data,
-                    color: 'red',
-                    yAxis: 0
-                });
-            }
-        }
     }
 
     static prepareData(data:any) {

@@ -4,20 +4,25 @@ interface IDrawBufferSettings {
     data? : Array<any>,
     style?: {color?: string, width?: number}
 }
-let counter = 0;
+
 export default class Indicator {
 
-    points = [];
-    type: string = '';
-    drawBuffers: {} = {};
+    options: any = {};
+    drawBuffers: Object = {};
 
-    value = 12;
+    constructor(protected ticks, private _options = <any>{}) {
+        this._setOptions(_options);
 
-    constructor(protected ticks) {
         this.init();
     }
 
-    init(){}
+    private _setOptions(_options) {
+        for (let i = 0, len = _options.length; i < len; i++) {
+            this.options[_options[i].name] = _options[i].value;
+        }
+    }
+
+    async init() {}
 
     add(id, time, data) {
         this.drawBuffers[id].data.push([time, data]);
@@ -25,7 +30,7 @@ export default class Indicator {
 
     addDrawBuffer(settings: IDrawBufferSettings) {
         if (this.drawBuffers[settings.id])
-            throw new Error('Buffer already set!');
+            throw new Error(`Buffer with name [${settings.id}] already set!`);
 
         settings.data = settings.data || [];
         this.drawBuffers[settings.id] = settings;

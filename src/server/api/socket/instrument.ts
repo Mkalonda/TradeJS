@@ -79,6 +79,10 @@ module.exports = (app, socket) => {
         cb(null, await app.controllers.broker.getInstrumentList());
     });
 
+    socket.on('instrument:indicator:options', async (data, cb) => {
+        cb(null, await app.controllers.instrument.getIndicatorOptions(data))
+    });
+
     socket.on('instrument:indicator:add', async (data, cb) => {
         cb(null, await app.controllers.instrument.addIndicator(data));
     });

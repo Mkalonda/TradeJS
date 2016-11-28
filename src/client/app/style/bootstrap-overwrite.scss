@@ -1,3 +1,5 @@
+@import 'variables/variables';
+
 /* ##### PANEL PANEL ####### */
 .panel-default {
     background: none;
@@ -10,7 +12,7 @@
 }
 
 .panel-default > .panel-heading {
-    background-color: rgb(18, 19, 45);
+    background-color: $panel-heading;
     padding: 5px 15px;
     color: #fff;
 }
@@ -76,4 +78,10 @@
 
 .form-control {
     background: #d2d2d2;
+}
+
+/*** BUTTON BUTTON **/
+.btn-sm {
+    padding-top: 2px;
+    padding-bottom: 2px;
 }

@@ -1,0 +1,48 @@
+@import '../../style/variables/variables';
+
+.dialog {
+    width: 450px;
+    position: absolute;
+    border: 1px solid black;
+    border-radius: 5px;
+    overflow: hidden;
+    left: calc(50% - 125px);
+    top: 40px;
+    z-index: 100;
+    background: rgba(0,0,0,0.7);
+    min-height: 150px;
+}
+
+.dialog-header {
+    //background: $panel-heading;
+    background: rgba(86, 15, 15, 0.72);
+    padding: 5px;
+    text-align: center;
+    color: $font-color-light;
+}
+
+
+.dialog-body {
+    text-align: left;
+    padding: 5px;
+}
+
+.dialog-footer {
+    button {
+        margin: 0 5px;
+    }
+}
+
+.fa-close {
+    cursor: pointer;
+    float: right;
+    font-size: 16px;
+}
+
+dialog-footer {
+    cursor: default;
+
+    button {
+        cursor: pointer;
+    }
+}

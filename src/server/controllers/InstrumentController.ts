@@ -1,3 +1,4 @@
+import * as fs      from 'fs';
 import * as path    from 'path';
 import WorkerHost   from '../classes/worker/WorkerHost';
 
@@ -71,20 +72,46 @@ export default class InstrumentController {
             return Promise.reject(`Reject: Instrument '${params.id}' does not exist`);
 
         return this.instruments[params.id].worker.send('get-data', {
+                name: params.name,
                 from: params.from,
                 until: params.until,
                 count: params.count
             });
     }
 
-    addIndicator(params) {
-        return this
-            .instruments[params.id]
-            .worker
-            .send('indicator:add', {
+    async getIndicatorOptions(params) {
+
+        return new Promise((resolve, reject) => {
+
+            const PATH_INDICATORS = path.join(__dirname, '../../shared/indicators');
+
+            let configPath = `${PATH_INDICATORS}/${params.name}/config.json`;
+
+            try {
+                resolve(require(configPath));
+            } catch(err) {
+                reject(err);
+            }
+        });
+    }
+
+    async addIndicator(params) {
+        let id, data;
+
+        id = await this.instruments[params.id].worker.send('indicator:add', {
                 name: params.name,
                 options: params.options
             });
+
+        if (params.readCount) {
+            data = await this.getData({
+                id: params.id,
+                name: params.name,
+                count: params.readCount
+            });
+        }
+
+        return {id, data};
     }
 
     removeIndicator() {

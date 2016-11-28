@@ -1,31 +1,28 @@
-import Indicator from "./Indicator";
-import test       from '../instrument/test';
+import Indicator from "../Indicator";
 
 export default class MA extends Indicator {
 
-    init() {
+    async init() {
         this.addDrawBuffer({
             id: 'MA',
             type: 'line',
             style: {
-                color: 'red'
+                color: this.options.color
             }
         });
     }
 
     onTick(shift:number = 0) {
-        let length = 20,
-            ticks = this.ticks.slice((this.ticks.length - shift) - length, this.ticks.length - shift);
+        let period = this.options.period,
+            ticks = this.ticks.slice((this.ticks.length - shift) - period, this.ticks.length - shift);
 
-        if (!ticks.length || ticks.length < length) {
+        if (!ticks.length || ticks.length < period) {
             if (this.ticks[this.ticks.length - shift])
                 return this.add('MA', this.ticks[this.ticks.length - shift][0], undefined);
         }
 
-
-        let time = ticks[ticks.length-1][0];
-
-        let sum = 0, i = 0, len = ticks.length;
+        let time = ticks[ticks.length-1][0],
+            sum = 0, i = 0, len = ticks.length;
 
         for(; i < len; i++) {
             sum += ticks[i][2];

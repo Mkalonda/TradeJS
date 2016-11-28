@@ -47,6 +47,8 @@ import {SystemService} from "./services/system.service";
 import {ConstantsService} from "./services/constants.service";
 import ChartOverviewService from "./services/chart-overview.service";
 import {TodoService} from "./services/todo.service";
+import {DialogComponent} from "./common/dialog/dialog.component";
+import {DialogAnchorDirective} from "./directives/dialoganchor.directive";
 
 @NgModule({
     declarations: [
@@ -70,7 +72,9 @@ import {TodoService} from "./services/todo.service";
         InstrumentListComponent,
         ChartOverviewComponent,
         ReportComponent,
-        StatusComponent
+        StatusComponent,
+        DialogComponent,
+        DialogAnchorDirective
     ],
     imports: [
         BrowserModule,

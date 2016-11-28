@@ -3,7 +3,7 @@ import App from "../../_app";
 module.exports = (app: App, socket:any) => {
 
     socket.on('system:clear-cache', (data, cb) => {
-        app.controllers.system.clearCache(null, null, null, null)
+        app.controllers.system.clearCache()
             .then(() => cb(null))
             .catch(cb)
     });
@@ -17,7 +17,7 @@ module.exports = (app: App, socket:any) => {
     });
 
     socket.on('system:set-config', (data, cb) => {
-        app.controllers.system.clearCache(null, null, null, null)
+        app.controllers.system.clearCache()
             .then(() => cb(null))
             .catch(cb)
     });
