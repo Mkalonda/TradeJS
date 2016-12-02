@@ -1,6 +1,6 @@
 {
   "name": "TradeJS",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Javascript Trading Client",
   "main": "server/app.js",
   "license": "Apache License 2.0",
@@ -8,6 +8,16 @@
     "type": "git",
     "url": "https://github.com/DutchKevv/TradeJS.git"
   },
+  "keywords": [
+    "TradeJS",
+    "Stock",
+    "Forex",
+    "Trade",
+    "Trading",
+    "Node",
+    "Trading",
+    "NodeJS"
+  ],
   "scripts": {
     "client:dev": "ng serve",
     "client:prod": "ng build --prod --output-path=dist/client",

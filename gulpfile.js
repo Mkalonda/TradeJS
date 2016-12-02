@@ -7,7 +7,7 @@ const
     debug = require('debug')('TradeJS:Gulp'),
     es = require("event-stream");
 
-const PATH_APP_INIT_FILE = 'dist/server/bin/www.js';
+const PATH_APP_INIT_FILE = 'dist/server/app';
 
 let node = null;
 /***************************************************************

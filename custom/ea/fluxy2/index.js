@@ -6,8 +6,7 @@ class MyEA extends EA {
         await super.init();
 
         this.addIndicator('MA', {
-            color: 'blue',
-            period: 2
+            color: 'blue'
         });
     }
 
