@@ -2,7 +2,7 @@ declare var ace:any;
 declare var $:any;
 
 import {Component, AfterViewInit, ElementRef, ViewChild} from '@angular/core';
-import {SocketService} from '../../services/socket.service';
+import SocketService from '../../services/socket.service';
 
 @Component({
     selector: 'js-editor',

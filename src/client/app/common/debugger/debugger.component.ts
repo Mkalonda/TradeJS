@@ -1,6 +1,6 @@
 declare var $:any;
 
-import {SocketService} from "../../services/socket.service";
+import SocketService from "../../services/socket.service";
 import {Component, AfterViewInit, ElementRef} from '@angular/core';
 import 'jquery-resizable-dom';
 

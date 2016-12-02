@@ -4,7 +4,7 @@ declare var $:any;
 import {Component, OnInit, OnDestroy, ElementRef, Input, Output, EventEmitter, ChangeDetectionStrategy, ViewChild} from '@angular/core';
 import * as moment          from 'moment/moment';
 import * as _               from 'lodash';
-import {SocketService}      from "../../services/socket.service";
+import SocketService      from "../../services/socket.service";
 
 import ChartOverviewService from "../../services/chart-overview.service";
 

@@ -2,6 +2,7 @@ const
     gulp = require('gulp'),
     sourcemaps = require('gulp-sourcemaps'),
     fork = require('child_process').fork,
+    spawn = require('child_process').spawn,
     runSequence = require('run-sequence'),
     ts = require('gulp-typescript'),
     debug = require('debug')('TradeJS:Gulp'),
@@ -87,7 +88,30 @@ gulp.task('copy-shared-assets', function() {
 //         .pipe(gulp.dest(`./dist/shared`))
 // });
 
+/***************************************************************
+*
+* CLIENT CLIENT CLIENT CLIENT CLIENT CLIENT CLIENT
+*
+**************************************************************/
 
+gulp.task('client:prod', function(callback) {
+    runSequence('client:build:prod', 'copy-client-assets', callback);
+});
+
+gulp.task('client:build:prod', function(callback) {
+    const buildNode = spawn('./node_modules/.bin/ng', ['build', '--prod', '--aot', '--output-path=dist/client'], {
+        stdio: ['pipe', process.stdout, process.stderr, 'ipc'],
+    });
+
+    buildNode.on('exit', () => {
+        callback();
+    })
+});
+
+gulp.task('copy-client-assets', function() {
+    gulp.src(['./src/client/**/*.html', '!**/index.html'])
+        .pipe(gulp.dest('./dist/client'));
+});
 /***************************************************************
  *
  * FORK FORK FORK FORK FORK FORK FORK

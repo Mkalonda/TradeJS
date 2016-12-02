@@ -1,5 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
-import {SocketService} from "../../services/socket.service";
+import SocketService from "../../services/socket.service";
 import LoginComponent from "../../pages/auth/login/login.component";
 
 @Component({

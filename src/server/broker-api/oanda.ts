@@ -19,17 +19,6 @@ export default class BrokerApi extends Base {
         if (this._client !== null)
             throw new Error('Broker Api is already connected!');
 
-        // console.log(this.options);
-        //
-        // console.log('Oanda', {
-        //     // 'live', 'practice' or 'sandbox'
-        //     environment: this.options.environment,
-        //     // Generate your API access in the 'Manage API Access' section of 'My Account' on OANDA's website
-        //     accessToken: this.options.token,
-        //     // Optional. Required only if environment is 'sandbox'
-        //     username: this.options.username
-        // });
-
         this._client = new OANDAAdapter({
             // 'live', 'practice' or 'sandbox'
             environment: this.options.environment,
@@ -40,14 +29,6 @@ export default class BrokerApi extends Base {
         });
 
         return this.testConnection();
-        // this._client = new OANDAAdapter({
-        //     // 'live', 'practice' or 'sandbox'
-        //     environment: 'practice2',
-        //     // Generate your API access in the 'Manage API Access' section of 'My Account' on OANDA's website
-        //     accessToken: 'bef87533ae49560a4f6314d6bb0aa9c0-58144d6914d2b02f74a86769ffa2f492',
-        //     // Optional. Required only if evironment is 'sandbox'
-        //     //username: 'a837f0927f0b0cd630a0934059c87003-7eb890aff42eb9c985305b309a94e421'
-        // });
     }
 
     async testConnection(): Promise<boolean> {

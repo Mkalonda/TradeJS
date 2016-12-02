@@ -37,8 +37,8 @@ const
     debug = require('debug')('TradeJS:App'),
 
     DEFAULT_TIMEZONE = 'America/New_York',
-    PATH_PUBLIC_DEV = path.join(__dirname, '../assets'),
-    PATH_PUBLIC_PROD = path.join(__dirname, './assets');
+    PATH_PUBLIC_DEV = path.join(__dirname, '../client'),
+    PATH_PUBLIC_PROD = path.join(__dirname, '../client');
 
 /**
  * @class App
@@ -68,7 +68,7 @@ export default class App extends Base {
 
     async init() {
         // the config controller is needed as first, as it gets the settings for other controllers
-        this.controllers.config = new ConfigController({}, this);
+        this.controllers.config = new ConfigController(this.opt, this);
 
         // Set merged config as settings
         this.settings = await this.controllers.config.set(this.opt);
@@ -124,7 +124,7 @@ export default class App extends Base {
             this._io        = io.listen(this._http);
 
             this._httpApi.use(cors({origin: 'http://localhost:4200'}));
-
+            console.log(PATH_PUBLIC_PROD);
             this._httpApi.use(express.static(process.env.NODE_ENV === 'production' ? PATH_PUBLIC_PROD : PATH_PUBLIC_DEV));
 
             this._httpApi.use(json());
@@ -132,6 +132,12 @@ export default class App extends Base {
 
             // Authentication routes
             this._httpApi.use('/', require('./api/http/auth')(this));
+
+            this._httpApi.get('/', (req, res) => {
+                console.log(path.join(__dirname, '../client/index.html'));
+
+               res.sendFile(path.join(__dirname, '../client/index.html'));
+            });
 
             // Application routes
             this._io.on('connection', socket => {

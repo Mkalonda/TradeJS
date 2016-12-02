@@ -1,5 +1,5 @@
 import {Component, OnInit, OnDestroy, Output, EventEmitter} from '@angular/core';
-import {SocketService} from "../../services/socket.service";
+import SocketService from "../../services/socket.service";
 import {} from "../../../../../node_modules/@angular/core/src/metadata/directives";
 import ChartOverviewService from "../../services/chart-overview.service";
 

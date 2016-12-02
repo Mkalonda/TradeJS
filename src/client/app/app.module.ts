@@ -26,7 +26,7 @@ import JSEditorComponent  from './common/jseditor/jseditor.component';
 import {ChartComponent}  from './common/chart/chart.component';
 
 // Providers
-import {SocketService} from './services/socket.service';
+import SocketService from './services/socket.service';
 import {CookieService} from 'angular2-cookie/services/cookies.service';
 import {NgForm, FormsModule, ReactiveFormsModule} from "@angular/forms";
 
@@ -93,14 +93,14 @@ import {DialogAnchorDirective} from "./directives/dialoganchor.directive";
         Ng2Bs3ModalModule
     ],
     providers: [
-        SocketService,
         CookieService,
         UserService,
         SystemService,
         ChartOverviewService,
         TodoService,
         LoggedInGuard,
-        ConstantsService
+        ConstantsService,
+        SocketService
     ],
     bootstrap: [
         AppComponent

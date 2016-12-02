@@ -30,7 +30,7 @@ export default class Cache extends WorkerChild {
 
     async init() {
         await super.init();
-
+        console.log('this.settings.path.cache', this.settings.path.cache);
         // Ensure cache dir exists
         mkdirp.sync(this.settings.path.cache);
 

@@ -1,15 +1,25 @@
 import * as path    from 'path';
 import * as fs      from 'fs';
+import * as mkdirp  from 'mkdirp';
 
 const merge = require('deepmerge');
 
 export default class ConfigController {
 
-    private _configPath: string = path.join(__dirname, '../../../config/');
-    private _configDefaultPath: string = path.join(this._configPath, 'tradejs.config.default.json');
-    private _configCurrentPath: string = path.join(this._configPath, 'tradejs.config.json');
+    private _configPath: string;
+    private _configDefaultPath: string;
+    private _configCurrentPath: string;
 
-    constructor(protected opt, protected app) {}
+    constructor(protected opt, protected app) {
+        console.log('opt', 'opt', 'opt', 'opt', opt);
+
+        this._configPath = opt.path.config;
+        this._configDefaultPath = '../../../config/tradejs.config.default.json';
+        this._configCurrentPath = path.join(this._configPath, 'tradejs.config.json');
+
+        // Ensure cache dir exists
+        mkdirp.sync(this._configPath);
+    }
 
     get() {
         return new Promise((resolve, reject) => {

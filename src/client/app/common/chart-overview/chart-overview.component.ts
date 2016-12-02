@@ -1,6 +1,6 @@
 import * as _               from 'lodash';
 import {Component, OnInit}  from '@angular/core';
-import {SocketService}      from "../../services/socket.service";
+import SocketService      from "../../services/socket.service";
 import {InstrumentSettings} from "../../../../shared/interfaces/InstrumentSettings";
 import ChartOverviewService from "../../services/chart-overview.service";
 

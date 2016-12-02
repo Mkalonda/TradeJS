@@ -2,7 +2,7 @@ import {SystemState} from "../../../shared/interfaces/SystemState";
 
 import { Injectable } from '@angular/core';
 import LoginModel from "../pages/auth/login/login.model";
-import {SocketService} from "./socket.service";
+import SocketService from "./socket.service";
 import {ConstantsService} from "./constants.service";
 
 @Injectable()

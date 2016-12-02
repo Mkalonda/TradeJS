@@ -8,7 +8,8 @@
   },
   "path": {
     "cache": "",
-    "custom": ""
+    "custom": "",
+    "config": ""
   },
   "system": {
     "port": 3000,

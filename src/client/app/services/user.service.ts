@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 import { Http, Headers } from '@angular/http';
 import LoginModel from "../pages/auth/login/login.model";
 import {CookieService} from 'angular2-cookie/core';
-import {SocketService} from "./socket.service";
+import SocketService from "./socket.service";
 
 @Injectable()
 export class UserService {
