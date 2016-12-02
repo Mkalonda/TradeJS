@@ -67,7 +67,7 @@ export default class InstrumentController {
             });
     }
 
-    getData(params) {
+    getIndicatorData(params) {
         if (!this._instruments[params.id])
             return Promise.reject(`Reject: Instrument '${params.id}' does not exist`);
 
@@ -104,7 +104,7 @@ export default class InstrumentController {
             });
 
         if (params.readCount) {
-            data = await this.getData({
+            data = await this.getIndicatorData({
                 id: params.id,
                 name: params.name,
                 count: params.readCount

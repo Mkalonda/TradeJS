@@ -30,20 +30,44 @@ export default {
         inputEnabled: false
     },
 
-    xAxis: {
-        labels: {
-            step: 1, // Disable label rotating when there is not enough space
-            style: {
-                fontSize: '8px',
-                rotation: 0
+    plotOptions: {
+        series: {
+            gapSize: 10,
+            lineWidth: 1,
+            marker: {
+                lineColor: null,
+                states: {
+                    hover: {
+                        radius: 3
+                    }
+                }
+            },
+            states: {
+                hover: {
+                    lineWidth: 1,
+                    halo: !1
+                }
             }
-        },
-        lineColor: '#707073',
-        gridLineWidth: 1,
-        gridLineDashStyle: 'ShortDash',
-        gridZIndex: -1,
-        tickPixelInterval: 40
+        }
     },
+
+    xAxis: [
+        {
+            labels: {
+                step: 1, // Disable label rotating when there is not enough space
+                style: {
+                    fontSize: '8px',
+                    rotation: 0
+                }
+            },
+            lineColor: '#707073',
+            gridLineWidth: 1,
+            gridLineDashStyle: 'ShortDash',
+            gridZIndex: -1,
+            tickPixelInterval: 60,
+            ordinal: false
+        }
+    ],
 
     yAxis: [
         {
@@ -64,8 +88,6 @@ export default {
                 {
                     color: 'red', // Color value
                     dashStyle: 'longdashdot', // Style of the plot line. Default to solid
-                    // value: 3, // Value of where the line will appear
-                    // width: 2 // Width of the line
                 }
             ]
         },
@@ -84,15 +106,15 @@ export default {
             lineWidth: 1,
             style: {
                 fontSize: '10px'
-            }
-
+            },
+            ordinal: false
         }
     ],
 
     series: [
         {
             data: [],
-            minPointLength: 1,
+            //minPointLength: 1,
             dataGrouping: {
                 enabled: false
             }
@@ -101,7 +123,7 @@ export default {
             type: 'column',
             name: 'Volume',
             data: [],
-            minPointLength: 1,
+            //minPointLength: 1,
             yAxis: 1,
             dataGrouping: {
                 enabled: false

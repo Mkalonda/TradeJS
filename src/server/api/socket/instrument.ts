@@ -1,11 +1,9 @@
 module.exports = (app, socket) => {
 
-    let instrumentController = app.controllers.instrument;
-
     // Create
     socket.on('instrument:create', (data, cb) => {
 
-        instrumentController
+        app.controllers.instrument
             .create(data.instrument, data.timeFrame, data.start)
             .then(instrument => cb(null, {
                 id: instrument.id
@@ -19,7 +17,7 @@ module.exports = (app, socket) => {
     // Destroy
     socket.on('instrument:destroy', (data, cb) => {
 
-        instrumentController
+        app.controllers.instrument
             .destroy(data.id)
             .then(() => cb(null))
             .catch(error => {
@@ -32,7 +30,7 @@ module.exports = (app, socket) => {
     // Read bars
     socket.on('instrument:read', (data, cb) => {
 
-        instrumentController
+        app.controllers.instrument
             .read(data.id, data.from, data.until, data.count, data.offset)
             .then(candles => cb(Array.from(candles)))
             .catch(console.error);
@@ -41,7 +39,7 @@ module.exports = (app, socket) => {
     // Read data (indicators etc)
     socket.on('instrument:get-data', async (data, cb) => {
         try {
-            cb(null, await instrumentController.getData(data))
+            cb(null, await app.controllers.instrument.getIndicatorData(data))
         } catch (err) {
             console.log(err);
             cb(err)
@@ -50,21 +48,22 @@ module.exports = (app, socket) => {
 
     // Update
     socket.on('instrument:update', data => {
-        instrumentController.update(data)
+        app.controllers.instrument.update(data)
     });
 
     // Delete
     socket.on('instrument:delete', data => {
-        instrumentController.remove(data.id)
+        app.controllers.instrument.remove(data.id)
     });
 
     socket.on('instrument:chart-list', (data, cb) => {
 
-        let list = [],
+        let instruments = app.controllers.instrument._instruments,
+            list = [],
             instrument, key;
 
-        for (key in instrumentController.instruments) {
-            instrument = instrumentController.instruments[key];
+        for (key in instruments) {
+            instrument = instruments[key];
 
             list.push({
                 id: instrument.id,

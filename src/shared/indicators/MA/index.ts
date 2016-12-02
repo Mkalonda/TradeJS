@@ -1,8 +1,9 @@
 import Indicator from "../Indicator";
-
+var count = 0;
 export default class MA extends Indicator {
 
     async init() {
+
         this.addDrawBuffer({
             id: 'MA',
             type: 'line',

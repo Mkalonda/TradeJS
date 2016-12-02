@@ -73,7 +73,6 @@ export default class InstrumentCache extends WorkerChild {
         let chunks = this._map.getMissingChunks(this.instrument, this.timeFrame, from, until),
             pList;
 
-        console.log('chunks77777', chunks);
         if (!chunks.length)
             return Promise.resolve();
 

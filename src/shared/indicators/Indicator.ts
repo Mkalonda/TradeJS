@@ -10,15 +10,15 @@ export default class Indicator {
     options: any = {};
     drawBuffers: Object = {};
 
-    constructor(protected ticks, private _options = <any>{}) {
-        this._setOptions(_options);
+    constructor(protected ticks, private _inputs = <any>{}) {
+        this._setInputs(_inputs);
 
         this.init();
     }
 
-    private _setOptions(_options) {
-        for (let i = 0, len = _options.length; i < len; i++) {
-            this.options[_options[i].name] = _options[i].value;
+    private _setInputs(inputs) {
+        for (let i = 0, len = inputs.length; i < len; i++) {
+            this.options[inputs[i].name] = inputs[i].value;
         }
     }
 

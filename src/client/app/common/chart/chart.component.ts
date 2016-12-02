@@ -136,24 +136,22 @@ export class ChartComponent implements OnInit, OnDestroy {
 
     async addIndicator(name) {
         let length = this.chart.series[0].data.length,
-            indicatorModel = await this.getIndicatorOptions(name),
-            confirmed = await this.showIndicatorOptionsMenu(indicatorModel);
+            indicatorModel = await this.getIndicatorOptions(name);
 
-        if (confirmed)
+        if (await this.showIndicatorOptionsMenu(indicatorModel))
 
             this.socket.emit('instrument:indicator:add', {id: this.id, name: name, options: indicatorModel.inputs, readCount: length, shift: 0}, (err, data) => {
                 this.updateIndicators(data.data);
-                console.log('dfsfirwereuruururur', this.chart.series);
             });
     }
 
     updateIndicators(indicators) {
-
+        console.log('INDICATORS INDICADSFAFD', indicators);
         for (let id in indicators) {
+            for (let drawBufferName in indicators[id]) {
+                let drawBuffer = indicators[id][drawBufferName];
 
-            for (let drawBuffer in indicators[id]) {
-
-                let unique = id + '_' + indicators[id][drawBuffer].id;
+                let unique = id + '_' + drawBuffer.id;
 
                 // New series
                 let series = this.chart.get(unique);
@@ -171,8 +169,8 @@ export class ChartComponent implements OnInit, OnDestroy {
                         type: 'line',
                         name : id,
                         //id: unique,
-                        data : indicators[id][drawBuffer].data,
-                        color: 'red',
+                        data : drawBuffer.data,
+                        color: drawBuffer.style.color,
                         yAxis: 0
                     });
                 }

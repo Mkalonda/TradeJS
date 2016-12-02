@@ -5,7 +5,10 @@ class MyEA extends EA {
     async init() {
         await super.init();
 
-        this.setIndicator('MA', [10, 20, 30, 40, 50]);
+        this.addIndicator('MA', {
+            color: 'blue',
+            period: 2
+        });
     }
 
     onTick() {
