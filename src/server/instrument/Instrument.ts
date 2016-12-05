@@ -2,7 +2,7 @@ import * as path        from 'path';
 import InstrumentCache  from './InstrumentCache';
 import Indicator        from "../../shared/indicators/Indicator";
 
-const PATH_INDICATORS = path.join(__dirname, '../../../dist/shared/indicators/');
+const PATH_INDICATORS = path.join(__dirname, '../../../dist/shared/indicators');
 
 export default class Instrument extends InstrumentCache {
 

@@ -22,12 +22,12 @@ import * as freePort        from 'freeport';
 import Base                 from './classes/Base';
 import IPC                  from './classes/ipc/IPC';
 
-import CacheController from './controllers/CacheController';
-import SystemController from './controllers/SystemController';
+import CacheController      from './controllers/CacheController';
+import SystemController     from './controllers/SystemController';
 import InstrumentController from './controllers/InstrumentController';
-import EditorController from './controllers/EditorController';
-import ConfigController from './controllers/ConfigController';
-import BrokerController from "./controllers/BrokerController";
+import EditorController     from './controllers/EditorController';
+import ConfigController     from './controllers/ConfigController';
+import BrokerController     from "./controllers/BrokerController";
 
 
 const morgan = require('morgan');
@@ -54,31 +54,29 @@ export default class App extends Base {
         instrument: InstrumentController
     } = <any>{};
 
-    public settings: any;
-
-    electron = {
+    private _electron = {
         init: false,
         path: null
     };
 
-    _ipc: IPC = new IPC({id: 'main'});
-    _http: any = null;
-    _io: any = null;
-    _httpApi: any = null;
+    private _ipc: IPC = new IPC({id: 'main'});
+    private _http: any = null;
+    private _io: any = null;
+    private _httpApi: any = null;
 
     async init() {
-        // the config controller is needed as first, as it gets the settings for other controllers
+        // Config controller
         this.controllers.config = new ConfigController(this.opt, this);
+        await this.controllers.config.init();
 
-        // Set merged config as settings
-        this.settings = await this.controllers.config.set(this.opt);
+        let config = await this.controllers.config.set(this.opt);
 
-        await this._setTimezone(this.opt.timezone);
+        console.log('config', config);
+
+        await this._setTimezone(config.system.timezone);
         await this._initAPI();
         await this._initIPC();
         await this._initControllers();
-
-        this.debug('info', 'Public API started');
 
         this.emit('app:ready');
         process && process.send && process.send('app:ready');
@@ -101,11 +99,11 @@ export default class App extends Base {
     async _initControllers() {
         this.controllers.system = new SystemController({}, this);
         this.controllers.broker = new BrokerController({}, this);
-        this.controllers.cache  = new CacheController({path: this.opt.path.cache}, this);
+        this.controllers.cache = new CacheController({path: this.opt.path.cache}, this);
         this.controllers.editor = new EditorController({path: this.opt.path.custom}, this);
         this.controllers.instrument = new InstrumentController({}, this);
 
-        await Promise.all(_.map(this.controllers, (c:any, name:string) => name !== 'config' && c.init()));
+        await Promise.all(_.map(this.controllers, (c: any, name: string) => name !== 'config' && c.init()));
     }
 
     /**
@@ -114,17 +112,16 @@ export default class App extends Base {
      */
     _initAPI() {
 
-        return new Promise(async (resolve, reject) => {
+        return new Promise(async(resolve, reject) => {
             debug('Starting API');
 
-            this.opt.port   = this.opt.port || await this._getFreePort();
+            let port = this.controllers.config.get().system.port;
 
-            this._httpApi   = express();
-            this._http      = http.createServer(this._httpApi);
-            this._io        = io.listen(this._http);
+            this._httpApi = express();
+            this._http = http.createServer(this._httpApi);
+            this._io = io.listen(this._http);
 
             this._httpApi.use(cors({origin: 'http://localhost:4200'}));
-            console.log(PATH_PUBLIC_PROD);
             this._httpApi.use(express.static(process.env.NODE_ENV === 'production' ? PATH_PUBLIC_PROD : PATH_PUBLIC_DEV));
 
             this._httpApi.use(json());
@@ -136,7 +133,7 @@ export default class App extends Base {
             this._httpApi.get('/', (req, res) => {
                 console.log(path.join(__dirname, '../client/index.html'));
 
-               res.sendFile(path.join(__dirname, '../client/index.html'));
+                res.sendFile(path.join(__dirname, '../client/index.html'));
             });
 
             // Application routes
@@ -153,8 +150,11 @@ export default class App extends Base {
                 this.debug('info', 'Successfully connected to server');
             });
 
-            this._http.listen(this.settings.system.port, () => {
-                console.log(`\n\n\n  API started on localhost:${this.settings.system.port} \n\n\n`);
+            this._http.listen(port, () => {
+                console.log(`\n\n\n  REST API started on localhost:${port} \n\n\n`);
+
+                this.debug('info', 'Public API started');
+
                 resolve();
             });
         });
@@ -162,7 +162,7 @@ export default class App extends Base {
 
     _getFreePort() {
         return new Promise((resolve, reject) => {
-            freePort(function(err, port) {
+            freePort(function (err, port) {
                 if (err) reject(err);
                 resolve(port);
             });
@@ -178,7 +178,7 @@ export default class App extends Base {
     }
 
     _setElectron(electron) {
-        this.electron = electron;
+        this._electron = electron;
     }
 
     debug(type: string, text: string, data?: Object, socket?: Socket) {

@@ -15,7 +15,8 @@ const app = new App({
     },
     path: {
         cache: path.join(__dirname, '../../cache'),
-        custom: path.join(__dirname, '../../custom')
+        custom: path.join(__dirname, '../../custom'),
+        config: path.join(__dirname, '../../config')
     }
 });
 

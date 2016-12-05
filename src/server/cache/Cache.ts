@@ -22,14 +22,13 @@ export default class Cache extends WorkerChild {
     private _fetcher: Fetcher = new Fetcher({mapper: this._mapper, brokerApi: this._brokerApi});
     private _barCalculater: BarCalculator = new BarCalculator();
 
-    private _listeners = {
-
-    };
-
+    private _listeners = {};
     private _db: any;
 
     async init() {
         await super.init();
+        console.log('asdfdsasdfsf', this.opt);
+
         console.log('this.settings.path.cache', this.settings.path.cache);
         // Ensure cache dir exists
         mkdirp.sync(this.settings.path.cache);
@@ -66,7 +65,7 @@ export default class Cache extends WorkerChild {
         return this._write(instrument, timeFrame, candles)
     }
 
-    async fetch (instrument, timeFrame, from, until) {
+    async fetch(instrument, timeFrame, from, until) {
         let data = await this._fetcher.fetch(instrument, timeFrame, from, until);
 
         // Write to database
@@ -87,7 +86,7 @@ export default class Cache extends WorkerChild {
         await this._openDb();
     }
 
-    _read(instrument:string, timeFrame:string, from:number, until:number, bufferOnly?:boolean, completeOnly:boolean = true) {
+    _read(instrument: string, timeFrame: string, from: number, until: number, bufferOnly?: boolean, completeOnly: boolean = true) {
 
         return new Promise((resolve, reject) => {
 
@@ -105,7 +104,7 @@ export default class Cache extends WorkerChild {
                     row, returnArr = new Float64Array(rows.length * columns.length);
 
                 for (; i < len; i++) {
-                    row  = rows[i];
+                    row = rows[i];
                     returnArr.set(columns.map(v => row[v]), 6 * i);
                     //returnArr.set(Object.values(rows[i]), 6 * i); // Not yet supported
                 }
@@ -201,7 +200,7 @@ export default class Cache extends WorkerChild {
                         'complete bool'
                     ];
 
-                this._db.run(`CREATE TABLE IF NOT EXISTS ${tableName} (${fields.join(',')})`, function() {
+                this._db.run(`CREATE TABLE IF NOT EXISTS ${tableName} (${fields.join(',')})`, function () {
                     resolve(tableName);
                 });
             });
@@ -284,7 +283,7 @@ export default class Cache extends WorkerChild {
             cb(null);
         });
 
-        this._ipc.on('settings:update', async (opt, cb) => {
+        this._ipc.on('settings:update', async(opt, cb) => {
             try {
                 cb(null, await this._updateSettings(opt));
             } catch (err) {

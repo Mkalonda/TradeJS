@@ -1,12 +1,11 @@
 {
   "project": {
-    "version": "1.0.0-beta.18",
+    "version": "1.0.0-beta.22",
     "name": "tmp"
   },
   "apps": [
     {
-      "root": "src/client",
-      "outDir": "dist/client",
+      "root": "",
       "assets": [
         "assets",
         "favicon.ico"
@@ -18,11 +17,11 @@
       "prefix": "app",
       "mobile": false,
       "styles": [
-        "../../node_modules/normalize.css/normalize.css",
-        "../../node_modules/font-awesome/css/font-awesome.css",
-        "../../node_modules/bootstrap/dist/css/bootstrap.min.css",
-        "../../node_modules/jstree/dist/themes/default/style.css",
-        "../../node_modules/jstree/dist/themes/default-dark/style.css",
+        "node_modules/normalize.css/normalize.css",
+        "node_modules/font-awesome/css/font-awesome.css",
+        "node_modules/bootstrap/dist/css/bootstrap.min.css",
+        "node_modules/jstree/dist/themes/default/style.css",
+        "node_modules/jstree/dist/themes/default-dark/style.css",
 
         "app/style/variables/_variables.scss",
         "app/style/helpers/spinner.scss",
@@ -32,9 +31,9 @@
         "assets/css/main.css"
       ],
       "scripts": [
-        "../../node_modules/bootstrap/dist/js/bootstrap.min.js",
-        "../../node_modules/jquery-resizable-dom/dist/jquery-resizable",
-        "../../node_modules/jstree/dist/jstree.js",
+        "node_modules/bootstrap/dist/js/bootstrap.min.js",
+        "node_modules/jquery-resizable-dom/dist/jquery-resizable",
+        "node_modules/jstree/dist/jstree.js",
         "assets/js/ace/ace.js",
         "assets/js/ace/ext-language_tools.js",
         "assets/js/ace/theme-tomorrow_night_bright.js",
@@ -42,7 +41,7 @@
         "assets/js/ace/mode-typescript.js"
       ],
       "addons": [
-        "../../node_modules/font-awesome/fonts/*.+(otf|eot|svg|ttf|woff|woff2)"
+        "node_modules/font-awesome/fonts/*.+(otf|eot|svg|ttf|woff|woff2)"
       ],
       "environments": {
         "source": "environments/environment.ts",
@@ -68,7 +67,7 @@
     "prefixInterfaces": false,
     "inline": {
       "style": false,
-      "template": false
+      "template": true
     },
     "spec": {
       "class": false,

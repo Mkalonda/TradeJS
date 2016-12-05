@@ -2,7 +2,7 @@ import BrokerApi from "../broker-api/oanda";
 
 export default class BrokerController {
 
-    private _brokerApi: BrokerApi = new BrokerApi(this.app.settings.account);
+    private _brokerApi: BrokerApi = new BrokerApi(this.app.controllers.config.get().account);
 
     constructor(protected opt, protected app) {}
 
@@ -11,7 +11,7 @@ export default class BrokerController {
     }
 
     get isConnected() {
-        return this._brokerApi.isConnected
+        return this._brokerApi.connected
     }
 
     getInstrumentList() {

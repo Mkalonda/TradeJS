@@ -3,8 +3,7 @@ import * as moment from 'moment/moment';
 import {Injectable} from "@angular/core";
 import SocketService from "./socket.service";
 import {InstrumentSettings} from "../../../shared/interfaces/InstrumentSettings";
-import {Observable} from "../../../../node_modules/rxjs/Observable";
-import {BehaviorSubject} from "../../../../node_modules/rxjs/BehaviorSubject";
+import {BehaviorSubject} from "../../node_modules/rxjs/BehaviorSubject";
 
 @Injectable()
 export default class ChartOverviewService {

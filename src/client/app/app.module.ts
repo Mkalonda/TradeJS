@@ -48,7 +48,9 @@ import {ConstantsService} from "./services/constants.service";
 import ChartOverviewService from "./services/chart-overview.service";
 import {TodoService} from "./services/todo.service";
 import {DialogComponent} from "./common/dialog/dialog.component";
+import {ModalComponent} from "./common/modal/modal.component";
 import {DialogAnchorDirective} from "./directives/dialoganchor.directive";
+import {ModalAnchorDirective} from "./directives/modalanchor.directive";
 
 @NgModule({
     declarations: [
@@ -74,7 +76,9 @@ import {DialogAnchorDirective} from "./directives/dialoganchor.directive";
         ReportComponent,
         StatusComponent,
         DialogComponent,
-        DialogAnchorDirective
+        DialogAnchorDirective,
+        ModalAnchorDirective,
+        ModalComponent,
     ],
     imports: [
         BrowserModule,

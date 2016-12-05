@@ -10,7 +10,7 @@ module.exports = (app: App, socket:any) => {
 
     socket.on('system:get-config', async (data, cb) => {
         try {
-            cb(null, await app.controllers.config.get())
+            cb(null, await app.controllers.config)
         } catch (error) {
             cb(error);
         }

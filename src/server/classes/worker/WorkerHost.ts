@@ -58,24 +58,7 @@ export default class WorkerHost extends Base {
                 env: process.env
             };
 
-        // // TODO: Construct normal json object
-        // childArgv = _.map(childArgv, (val, key) => typeof val != 'undefined' && `--${key}=${val}`);
-        // childArgv.push();
-
-        //this._child = fork(this.opt.path, childArgv, childOpt);
         this._child = spawn('node', ['--harmony-async-await', this.opt.path, ...process.execArgv, `--settings=${childArgv}`], childOpt);
-
-        // this._child.stdout.on('data', data => {
-        //     debug(`${this.id} stdout: ${data}`);
-        //     this.emit('out', data);
-        // });
-        //
-        // this._child.stderr.on('data', data => {
-        //     //console.log(`${this.id} stderr: ${data}`);
-        //     //this.app
-        //     //this.emit('error', data);
-        // });
-
 
         this._child.on('close', code => {
             debug(`${this.id} exited with code ${code}`);

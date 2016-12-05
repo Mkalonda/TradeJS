@@ -1,3 +1,7 @@
+console.log(__dirname);
+
+const constants = require('../../../dist/shared/constants/broker');
+
 var _ = require("underscore"),
     Events = require("./Events"),
     querystring = require("querystring"),
@@ -107,12 +111,25 @@ OandaAdapter.prototype._streamEvents = function () {
     );
 };
 
-OandaAdapter.prototype._onEventsResponse = function (error, body, statusCode) {
+OandaAdapter.prototype._onEventsResponse = function (body) {
     if (statusCode !== 200) {
         if (body && body.disconnect) {
             this.trigger("message", null, "Events streaming API disconnected.\nOanda code " + body.disconnect.code + ": " + body.disconnect.message);
+
+            // ***** CUSTOM *****
+            this.trigger('error', {
+                code: constants.BROKER_ERROR_DISCONNECT,
+                brokerCode: body.disconnect.code,
+                message:  body.disconnect.message
+            });
         } else {
             this.trigger("message", null, "Events streaming API disconnected with status " + statusCode);
+
+            // ***** CUSTOM *****
+            this.trigger('error', {
+                code: constants.BROKER_ERROR_DISCONNECT,
+                httpCode: statusCode
+            })
         }
     }
     clearTimeout(this.eventsTimeout);
@@ -123,7 +140,7 @@ OandaAdapter.prototype._onEventsData = function (data) {
 
     // Single chunks sometimes contain more than one event. Each always end with /r/n. Whole chunk therefore not JSON parsable, so must split.
     // Also, an event may be split accross data chunks, so must buffer.
-    data.split(/\r\n/).forEach(function (line) {
+    data.split(/\r\n/).forEach(line => {
         var update;
         if (line) {
             this._eventsBuffer.push(line);
@@ -134,7 +151,11 @@ OandaAdapter.prototype._onEventsData = function (data) {
                     // Wait for next line.
                     return;
                 }
-                console.error("[ERROR] Unable to parse Oanda events subscription update", this._eventsBuffer.join("\n"), error);
+                this.trigger('error' , {
+                    code: constants.BROKER_ERROR_PARSE,
+                    message: `Unable to parse Oanda events subscription update. \n \n Error: \n ${error}`
+                });
+
                 this._eventsBuffer = [];
                 return;
             }
@@ -160,14 +181,7 @@ OandaAdapter.prototype.getAccounts = function (callback) {
     this._sendRESTRequest({
         method: "GET",
         path: "/v1/accounts" + (this.username ? "?username=" + this.username : "")
-    }, function (error, body, statusCode) {
-        if (error) {
-            if (body && body.message) {
-                console.error("[ERROR] Response from Oanda", statusCode + " Error: " + body.message + " (OANDA error code " + body.code + ")");
-                return callback(body.message);
-            }
-            return callback(error);
-        }
+    }, function (body) {
         if (body.accounts) {
             callback(null, body.accounts);
         } else {
@@ -181,14 +195,7 @@ OandaAdapter.prototype.getAccount = function (accountId, callback) {
     this._sendRESTRequest({
         method: "GET",
         path: "/v1/accounts/" + accountId
-    }, function (error, body, statusCode) {
-        if (error) {
-            if (body && body.message) {
-                console.error("[ERROR] Response from Oanda", statusCode + " Error: " + body.message + " (OANDA error code " + body.code + ")");
-                return callback(body.message);
-            }
-            return callback(error);
-        }
+    }, function (body) {
         if (body) {
             callback(null, body);
         } else {
@@ -203,14 +210,7 @@ OandaAdapter.prototype.getInstruments = function (accountId, callback) {
         method: "GET",
         path: "/v1/instruments?accountId=" + accountId + "&fields=" + ["instrument", "displayName", "pip", "maxTradeUnits", "precision", "maxTrailingStop", "minTrailingStop", "marginRate", "halted"].join("%2C"),
     },
-    function (error, body, statusCode) {
-        if (error) {
-            if (body && body.message) {
-                console.error("[ERROR] Response from Oanda", statusCode + " Error: " + body.message + " (OANDA error code " + body.code + ")");
-                return callback(body.message);
-            }
-            return callback(error);
-        }
+    function (body) {
         if (body.instruments) {
             callback(null, body.instruments);
         } else {
@@ -230,14 +230,7 @@ OandaAdapter.prototype.getPrice = function (symbol, callback) {
     this._sendRESTRequest({
         method: "GET",
         path: "/v1/prices?instruments=" + symbol
-    }, function (error, body, statusCode) {
-        if (error) {
-            if (body && body.message) {
-                console.error("[ERROR] Response from Oanda", statusCode + " Error: " + body.message + " (OANDA error code " + body.code + ")");
-                return callback(body.message);
-            }
-            return callback(error);
-        }
+    }, function (body) {
         if (body && body.prices[0]) {
             callback(null, multiple ? body.prices : body.prices[0]);
         } else {
@@ -315,7 +308,7 @@ OandaAdapter.prototype._streamPrices = function (accountId) {
     );
 };
 
-OandaAdapter.prototype._onPricesResponse = function (accountId, error, body, statusCode) {
+OandaAdapter.prototype._onPricesResponse = function (accountId, body) {
     if (statusCode !== 200) {
         if (body && body.disconnect) {
             this.trigger("message", accountId, "Prices streaming API disconnected.\nOanda code " + body.disconnect.code + ": " + body.disconnect.message);
@@ -342,9 +335,15 @@ OandaAdapter.prototype._onPricesData = function (data) {
                     // Wait for next update.
                     return;
                 }
+
                 // Drop if cannot produce object after 5 updates
-                console.error("[ERROR] Unable to parse Oanda price subscription update", this._pricesBuffer.join("\n"), error);
                 this._pricesBuffer = [];
+
+                this.trigger('error', {
+                    message: "Unable to parse Oanda price subscription update",
+                    code: constants.BROKER_ERROR_PARSE
+                });
+
                 return;
             }
             this._pricesBuffer = [];
@@ -384,14 +383,7 @@ OandaAdapter.prototype.getCandles = function (symbol, start, end, granularity, c
             Authorization: "Bearer " + this.accessToken,
             "X-Accept-Datetime-Format": "UNIX"
         }
-    }, function (error, body, statusCode) {
-        if (error) {
-            if (body && body.message) {
-                console.error("[ERROR] Response from Oanda", statusCode + " Error: " + body.message + " (OANDA error code " + body.code + ")");
-                return callback(body.message);
-            }
-            return callback(error);
-        }
+    }, function (body) {
         if (body && body.candles) {
             callback(null, body.candles);
         } else if (body === "") {
@@ -408,14 +400,7 @@ OandaAdapter.prototype.getOpenPositions = function (accountId, callback) {
     this._sendRESTRequest({
         method: "GET",
         path: "/v1/accounts/" + accountId + "/positions"
-    }, function (error, body, statusCode) {
-        if (error) {
-            if (body && body.message) {
-                console.error("[ERROR] Response from Oanda", statusCode + " Error: " + body.message + " (OANDA error code " + body.code + ")");
-                return callback(body.message);
-            }
-            return callback(error);
-        }
+    }, function (body) {
         if (body && body.positions) {
             callback(null, body.positions);
         } else {
@@ -429,14 +414,7 @@ OandaAdapter.prototype.getOpenTrades = function (accountId, callback) {
     this._sendRESTRequest({
         method: "GET",
         path: "/v1/accounts/" + accountId + "/trades"
-    }, function (error, body, statusCode) {
-        if (error) {
-            if (body && body.message) {
-                console.error("[ERROR] Response from Oanda", statusCode + " Error: " + body.message + " (OANDA error code " + body.code + ")");
-                return callback(body.message);
-            }
-            return callback(error);
-        }
+    }, function (body) {
         if (body && body.trades) {
             callback(null, body.trades);
         } else {
@@ -493,14 +471,8 @@ OandaAdapter.prototype.createOrder = function (accountId, order, callback) {
             Authorization: "Bearer " + this.accessToken,
             "Content-Type": "application/x-www-form-urlencoded"
         },
-    }, function (error, body, statusCode) {
-        if (error) {
-            if (body && body.message) {
-                console.error("[ERROR] Response from Oanda", statusCode + " Error: " + body.message + " (OANDA error code " + body.code + ")");
-                return callback(body.message);
-            }
-            return callback(error);
-        }
+    }, function (body) {
+       
         callback(null, body);
     });
 };
@@ -510,14 +482,7 @@ OandaAdapter.prototype.closeTrade = function (accountId, tradeId, callback) {
     this._sendRESTRequest({
         method: "DELETE",
         path: "/v1/accounts/" + accountId + "/trades/" + tradeId
-    }, function (error, body, statusCode) {
-        if (error) {
-            if (body && body.message) {
-                console.error("[ERROR] Response from Oanda", statusCode + " Error: " + body.message + " (OANDA error code " + body.code + ")");
-                return callback(body.message);
-            }
-            return callback(error);
-        }
+    }, function (body) {
         if (body) {
             callback(null, body);
         } else {
@@ -534,7 +499,31 @@ OandaAdapter.prototype._sendRESTRequest = function (request, callback) {
     };
     request.secure = this.secure;
 
-    httpClient.sendRequest(request, callback);
+    httpClient.sendRequest(request, (error, body, httpCode) => {
+
+        if (!error)
+            return callback(body);
+
+        let errorObject = {
+            code: constants.BROKER_ERROR_UNKNOWN,
+            httpCode:  httpCode
+        };
+
+        if (httpCode !== 200) {
+            switch (httpCode) {
+                case 401:
+                    errorObject.message = body && body.message ? body.message : 'Unauthorized';
+                    errorObject.code = constants.BROKER_ERROR_UNAUTHORIZED;
+                    break;
+
+                default:
+                    errorObject.message = body && body.message ? body.message : 'Unknown error';
+                    errorObject.code =  body && body.code ? body.code : constants.BROKER_ERROR_UNKNOWN;
+            }
+        }
+
+        this.trigger('error' , errorObject);
+    });
 };
 
 OandaAdapter.prototype.kill = function () {

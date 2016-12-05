@@ -1,9 +1,9 @@
 import {Component, ViewChild, AfterViewInit} from '@angular/core';
 import {BacktestSettingsComponent}  from './settings/backtest-settings.component';
 import {BacktestReportsComponent}   from "./reports/backtest-reports.component";
-import SocketService              from "../../services/socket.service";
+import SocketService                from "../../services/socket.service";
 import * as moment                  from 'moment/moment';
-import {ActivatedRoute} from "../../../../../node_modules/@angular/router/src/router_state";
+import {ActivatedRoute} from "../../../node_modules/@angular/router/src/router_state";
 import {Router} from '@angular/router';
 
 @Component({

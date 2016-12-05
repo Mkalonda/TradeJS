@@ -1,6 +1,6 @@
 # config
 /config/*
-!/config/tradejs.config.default.json
+!/config/tradejs.config.default.js
 
 # cache
 /cache/

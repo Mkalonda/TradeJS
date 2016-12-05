@@ -4,28 +4,56 @@ import * as mkdirp  from 'mkdirp';
 
 const merge = require('deepmerge');
 
+interface IAppConfig {
+    system?: {
+        port?: number
+        timezone?: string,
+    },
+    path?: {
+        cache?: string,
+        custom?: string,
+        config?: string
+    }
+}
+
 export default class ConfigController {
 
-    private _configPath: string;
-    private _configDefaultPath: string;
-    private _configCurrentPath: string;
+    private _config: IAppConfig = {};
 
-    constructor(protected opt, protected app) {
-        console.log('opt', 'opt', 'opt', 'opt', opt);
+    private _configCurrentPath: string = path.join(this.opt.path.config, 'tradejs.config.json');
+    private _configDefaultPath: string = '../../../config/tradejs.config.default.js';
 
-        this._configPath = opt.path.config;
-        this._configDefaultPath = '../../../config/tradejs.config.default.json';
-        this._configCurrentPath = path.join(this._configPath, 'tradejs.config.json');
+    constructor(protected opt: IAppConfig, protected app) {}
 
-        // Ensure cache dir exists
-        mkdirp.sync(this._configPath);
+    async init() {
+        return this.set(await this._load());
     }
 
-    get() {
+    get(): IAppConfig {
+        return this._config;
+    }
+
+    set(settings: IAppConfig): Promise<IAppConfig> {
+        return new Promise(async (resolve, reject) => {
+
+            // Write to variable
+            this._config = merge(this._config, settings);
+
+            // Write to file
+            fs.writeFile(this._configCurrentPath, JSON.stringify(this._config, null, 2), err => {
+                if (err)
+                    return reject(err);
+
+                resolve(this._config);
+            });
+        });
+    }
+
+    _load(): Promise<IAppConfig> {
         return new Promise((resolve, reject) => {
 
             let defaultConfig = require(this._configDefaultPath),
-                customConfig = {};
+                customConfig = {}, config;
 
             try {
                 delete require.cache[require.resolve(this._configCurrentPath)];
@@ -34,21 +62,9 @@ export default class ConfigController {
                 console.warn('Config corrupted!');
             }
 
-            resolve(merge.all([defaultConfig, customConfig, this.opt]));
-        });
-    }
+            config = merge.all([defaultConfig, customConfig, this.opt]);
 
-    set(settings) {
-        return new Promise(async (resolve, reject) => {
-
-            let config = merge(await this.get(), settings);
-
-            fs.writeFile(this._configCurrentPath, JSON.stringify(config, null, 2), (err, result) => {
-                if (err)
-                    return reject(err);
-
-                resolve(config);
-            });
+            resolve(config);
         });
     }
 }

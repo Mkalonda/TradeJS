@@ -14,7 +14,7 @@ export default class CacheController {
             ipc: this.app._ipc,
             path: path.join(__dirname, '../cache/Cache.js'),
             classArguments: {
-                settings: this.app.settings
+                settings: this.app.controllers.config.get()
             }
         });
 

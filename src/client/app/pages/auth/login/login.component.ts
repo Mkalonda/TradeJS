@@ -1,6 +1,5 @@
-import {Component, AfterViewInit} from '@angular/core';
-import {ViewChild} from "../../../../../../node_modules/@angular/core/src/metadata/di";
-import {ModalComponent} from "../../../../../../node_modules/ng2-bs3-modal/components/modal";
+import {Component, AfterViewInit, ViewChild} from '@angular/core';
+import {ModalComponent} from "../../../../node_modules/ng2-bs3-modal/components/modal";
 import {UserService} from "../../../services/user.service";
 import LoginModel from "./login.model";
 

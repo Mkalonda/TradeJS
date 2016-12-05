@@ -15,5 +15,8 @@ class MyEA extends EA {
     }
 }
 
+
+
 module.exports = MyEA;
+
 module.exports.default = MyEA;

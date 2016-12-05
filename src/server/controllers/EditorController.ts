@@ -1,6 +1,8 @@
 import * as fs      from 'fs';
 import * as path    from 'path';
 import * as _debug  from 'debug';
+import * as os      from 'os';
+import {spawn}      from 'child_process';
 
 const dirTree   = require('directory-tree');
 const debug     = _debug('TradeJS:EditorController');
@@ -27,18 +29,11 @@ export default class EditorController {
         });
     }
 
-    save(filePath, content) {
-        return new Promise((resolve, reject) => {
-            debug(`Saving ${filePath}`);
+    async save(filePath, content) {
+       await this._writeToFile(filePath, content);
 
-            filePath = this._getFullPath(filePath);
 
-            fs.writeFile(filePath, content, err => {
-                if (err) return reject(err);
-
-                resolve();
-            });
-        });
+       return this._compile();
     }
 
     getDirectoryTree() {
@@ -47,5 +42,41 @@ export default class EditorController {
 
     private _getFullPath(filePath) {
         return path.join(this.pathCustom, '../', filePath);
+    }
+
+    private _writeToFile(filePath: string, content: string) {
+
+        return new Promise((resolve, reject) => {
+            filePath = this._getFullPath(filePath);
+
+            fs.writeFile(filePath, content, err => {
+                if (err) return reject(err);
+
+                resolve();
+            });
+        })
+    }
+
+    private _compile() {
+
+        return new Promise((resolve, reject) => {
+            console.log('COMPILEDSDFSFSd');
+            let inputPath = this.app.controllers.config.get().path.custom,
+                outputPath = path.join(inputPath, '../', 'dist', 'shared'),
+                childOpt = {
+                    stdio: ['pipe', process.stdout, process.stderr, 'ipc'],
+                    //shell: true,
+                    cwd: __dirname,
+                    env: process.env
+                };
+
+            const child = spawn('gulp', ['custom:build', `--input-path=${inputPath}`, `--output-path=${outputPath}`], childOpt);
+
+            child.on('close', code => {
+                console.log('COMPILEDSDFSFSd', code);
+               resolve();
+            });
+        });
+
     }
 }

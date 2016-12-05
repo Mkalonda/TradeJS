@@ -91,7 +91,7 @@ module.exports = {
                 }
 
                 if (statusCode !== 200 && statusCode !== 204 && statusCode !== 206) {
-                    console.error("[ERROR] HTTPS IN ", options.hostname, options.port, options.method, options.path, ":", statusCode, body.length);
+                    // console.error("[ERROR] HTTPS IN ", options.hostname, options.port, options.method, options.path, ":", statusCode, body.length);
                     return callback(true, body, statusCode, body); // TODO added body as second argument anyway (error responses can have a body that describes the error). Get rid of anywhere expecting it as 4th arg
                 }
                 
@@ -105,21 +105,21 @@ module.exports = {
             });
 
             response.once("error", function (error) {
-                console.error("[ERROR] HTTPS IN ", options.hostname, options.port, options.method, options.path, "Response stream errored", error);
+                //console.error("[ERROR] HTTPS IN ", options.hostname, options.port, options.method, options.path, "Response stream errored", error);
             });
 
             request.removeAllListeners();
         });
 
         request.once("error", options.onError || function (error) {
-            console.error("[ERROR] HTTPS IN ", options.hostname, options.port, options.method, options.path, error);
+            //console.error("[ERROR] HTTPS IN ", options.hostname, options.port, options.method, options.path, error);
             callback(error, null, 500);
         });
 
         if (!keepAlive) {
             request.setTimeout(timeout, function () {
                 request.removeAllListeners();
-                console.error("[ERROR] HTTPS IN ", options.hostname, options.port, options.method, options.path, "Timed out after " + (timeout / 1000) + "s");
+                //console.error("[ERROR] HTTPS IN ", options.hostname, options.port, options.method, options.path, "Timed out after " + (timeout / 1000) + "s");
                 callback("timeout", null, 508);
             });
         }

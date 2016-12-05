@@ -51,7 +51,7 @@ export default class SystemController {
         let count = Object.keys(this.app.controllers.instrument.instruments).length;
 
         // Cache
-        // TODO: Check if cache is running;
+        // TODO: Check if cache is really running
         count+= 1;
 
         return count;
