@@ -17,5 +17,5 @@ export default class Base extends EventEmitter {
 
     }
 
-    public async init() {}
+    public async init(): Promise<any> {}
 }

@@ -61,6 +61,7 @@
     "@types/sqlite3": "^2.2.31",
     "backbone-events-standalone": "^0.2.7",
     "body-parser": "~1.15.2",
+    "cli-table": "^0.3.1",
     "codelyzer": "2.0.0-beta.1",
     "compression": "^1.6.2",
     "concurrently": "^3.1.0",
@@ -92,10 +93,12 @@
     "source-map-support": "^0.4.6",
     "sqlite3": "^3.1.8",
     "ts-helpers": "^1.1.1",
+    "ts-loader": "^1.2.2",
     "ts-node": "1.7.0",
     "tslint": "4.0.2",
-    "typescript": "^2.0.10",
+    "typescript": "^2.1.1",
     "underscore": "^1.8.3",
+    "webpack-stream": "^3.2.0",
     "zone.js": "^0.7.2"
   },
   "devDependencies": {

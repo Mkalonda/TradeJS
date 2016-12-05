@@ -25,7 +25,7 @@ module.exports.getDataFilePath = (instrument, timeFrame, year, month) => {
  * @param ranges {Array}
  * @returns {Array}
  */
-module.exports.getGapsInDateRanges = (from:number, until:number, ranges: Array<{}> = []) => {
+module.exports.getGapsInDateRanges = (from:number, until:number, ranges: Array<any> = []) => {
     let chunks = [],
         i = 0, len = ranges.length, range,
         _from = from;

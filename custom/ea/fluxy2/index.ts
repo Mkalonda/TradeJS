@@ -1,6 +1,6 @@
-const EA = require('../../../dist/server/ea/EA').default;
+import EA from '../../../dist/server/ea/EA';
 
-class MyEA extends EA {
+export default class MyEA extends EA {
 
     async init() {
         await super.init();
@@ -15,8 +15,3 @@ class MyEA extends EA {
     }
 }
 
-
-
-module.exports = MyEA;
-
-module.exports.default = MyEA;

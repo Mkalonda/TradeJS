@@ -7,7 +7,8 @@ const
     ts = require('gulp-typescript'),
     debug = require('debug')('TradeJS:Gulp'),
     es = require("event-stream"),
-    argv = require('minimist')(process.argv.slice(2));
+    argv = require('minimist')(process.argv.slice(2)),
+    webpack = require('webpack-stream');
 
 const PATH_APP_INIT_FILE = 'dist/server/app';
 
@@ -61,7 +62,7 @@ gulp.task('server:build:run', function() {
 });
 
 gulp.task('server:watch', [], function() {
-    gulp.watch(['./src/server/**/*.ts', './src/shared/**/*.ts'], ['server:build:run']);
+    gulp.watch(['./src/server/**/*.ts', './src/shared/**/*.ts', '!./src/shared/_builds/**/*'], ['server:build:run']);
 });
 
 /** TEMP NEEDED TO COPY OVER JSON FILES TO DIST FOLDER **/
@@ -83,6 +84,7 @@ gulp.task('client:prod', function(callback) {
 gulp.task('client:build:prod', function(callback) {
     const buildNode = spawn('./node_modules/.bin/ng', ['build', '--prod', '--aot', '--output-path=dist/client'], {
         stdio: ['pipe', process.stdout, process.stderr, 'ipc'],
+        cwd: './src/client'
     });
 
     buildNode.on('exit', () => {
@@ -109,16 +111,36 @@ gulp.task('custom:compile', function() {
     if (!argv['input-path'] || !argv['output-path'])
         throw new Error('Gulp build custom, --input-path and --output-path must be defined');
 
-    let pipes = [argv['input-path']].map(dir => {
-        console.log('dir dir dir', argv['output-path']);
 
-        return gulp.src(`${dir}/**/*.*`)
-            .pipe(ts({
-                allowJs: true,
-                noImplicitAny: true,
-                target: 'es6'
+    let pipes = [argv['input-path']].map(dir => {
+
+        return gulp.src(argv['input-path'])
+            .pipe(webpack({
+                entry: argv['input-path'],
+                resolve: {
+                    // Add `.ts` and `.tsx` as a resolvable extension.
+                    extensions: ['.ts', '.js']
+                },
+                module: {
+                    loaders: [
+                        // all files with a `.ts` or `.tsx` extension will be handled by `ts-loader`
+                        { test: /\.tsx?$/, loader: 'ts-loader' }
+                    ]
+                },
+                alias: {
+
+                }
             }))
             .pipe(gulp.dest(argv['output-path']));
+
+        // return gulp.src(`${dir}/**/*.*`)
+        //     .pipe(ts({
+        //         allowJs: true,
+        //         noImplicitAny: true,
+        //         target: 'es6',
+        //         module: "commonjs"
+        //     }))
+        //     .pipe(gulp.dest(argv['output-path']));
     });
 
     return es.merge(pipes);

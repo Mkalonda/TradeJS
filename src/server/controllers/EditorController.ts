@@ -60,9 +60,9 @@ export default class EditorController {
     private _compile() {
 
         return new Promise((resolve, reject) => {
-            console.log('COMPILEDSDFSFSd');
+
             let inputPath = this.app.controllers.config.get().path.custom,
-                outputPath = path.join(inputPath, '../', 'dist', 'shared'),
+                outputPath = path.join(inputPath, '../', 'dist', 'shared', '_builds'),
                 childOpt = {
                     stdio: ['pipe', process.stdout, process.stderr, 'ipc'],
                     //shell: true,
@@ -73,7 +73,6 @@ export default class EditorController {
             const child = spawn('gulp', ['custom:build', `--input-path=${inputPath}`, `--output-path=${outputPath}`], childOpt);
 
             child.on('close', code => {
-                console.log('COMPILEDSDFSFSd', code);
                resolve();
             });
         });

@@ -71,8 +71,6 @@ export default class App extends Base {
 
         let config = await this.controllers.config.set(this.opt);
 
-        console.log('config', config);
-
         await this._setTimezone(config.system.timezone);
         await this._initAPI();
         await this._initIPC();

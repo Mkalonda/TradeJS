@@ -13,7 +13,9 @@ export default class BrokerApi extends Base {
         super(options);
     }
 
-    public async init() {
+    public async init(): Promise<any> {
+        super.init();
+
         return this.connect();
     }
 
