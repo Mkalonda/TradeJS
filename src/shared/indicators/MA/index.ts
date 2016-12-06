@@ -1,5 +1,5 @@
 import Indicator from "../Indicator";
-var count = 0;
+
 export default class MA extends Indicator {
 
     async init() {

@@ -1,4 +1,7 @@
+'use strict';
+
 const
+    path = require('path'),
     gulp = require('gulp'),
     sourcemaps = require('gulp-sourcemaps'),
     fork = require('child_process').fork,
@@ -78,14 +81,16 @@ gulp.task('copy-shared-assets', function() {
 **************************************************************/
 
 gulp.task('client:prod', function(callback) {
-    runSequence('client:build:prod', 'copy-client-assets', callback);
+    runSequence('client:build:prod', callback);
 });
 
 gulp.task('client:build:prod', function(callback) {
-    const buildNode = spawn('./node_modules/.bin/ng', ['build', '--prod', '--aot', '--output-path=dist/client'], {
-        stdio: ['pipe', process.stdout, process.stderr, 'ipc'],
-        cwd: './src/client'
-    });
+    const
+        outputPath = path.join(__dirname, 'dist', 'client'),
+        buildNode = spawn('./node_modules/.bin/ng', ['build', '--prod', `--output-path=${outputPath}`], {
+            stdio: ['pipe', process.stdout, process.stderr, 'ipc'],
+            cwd: './src/client'
+        });
 
     buildNode.on('exit', () => {
         callback();
@@ -106,17 +111,64 @@ gulp.task('custom:build', function(callback) {
     runSequence('custom:compile', 'custom:copy-assets', callback);
 });
 
+gulp.task('custom:watch', function(callback) {
+
+    const watcher = gulp.watch('custom/**/*');
+    watcher.on('change', function(event) {
+
+        let inputPath = _getCustomAbsoluteRootFolder(event.path),
+            outputPath = _getBuildAbsoluteRootFolder(event.path);
+
+        customBuild(inputPath, outputPath)
+            .on('end', () => {
+
+                // Copy assets
+                gulp.src([inputPath + '/**/*', '!**/.ts'])
+                    .pipe(gulp.dest(outputPath))
+                    .on('end', () => {
+                        console.info('GULP: Custom build complete');
+                    });
+
+            });
+    });
+
+    callback();
+});
+
+function customBuild(inputPath, outputPath) {
+
+    return gulp.src(inputPath)
+        .pipe(webpack({
+            entry: path.join(inputPath, 'index'),
+            resolve: {
+                // Add `.ts` and `.tsx` as a resolvable extension.
+                extensions: ['.ts', '.js']
+            },
+            module: {
+                loaders: [
+                    // all files with a `.ts` or `.tsx` extension will be handled by `ts-loader`
+                    { test: /\.tsx?$/, loader: 'ts-loader' }
+                ]
+            },
+            alias: {
+
+            }
+        }))
+        .pipe(gulp.dest(outputPath));
+}
+
+
 gulp.task('custom:compile', function() {
 
     if (!argv['input-path'] || !argv['output-path'])
         throw new Error('Gulp build custom, --input-path and --output-path must be defined');
 
-
+    console.log('argv argv', argv);
     let pipes = [argv['input-path']].map(dir => {
 
         return gulp.src(argv['input-path'])
             .pipe(webpack({
-                entry: argv['input-path'],
+                entry: dir,
                 resolve: {
                     // Add `.ts` and `.tsx` as a resolvable extension.
                     extensions: ['.ts', '.js']
@@ -178,3 +230,23 @@ process.on('SIGINT', () => {
     process.exit();
 });
 //process.on('SIGHUP', killProcess);
+
+/***************************************************************
+ *
+ * UTIL UTIL UTIL UTIL UTIL UTIL UTIL
+ *
+ **************************************************************/
+
+// TODO: Bit of a hacky way to get root folder
+function _getFileRelativeRootFolder(filePath) {
+    console.log('filePath.split().splice(1, 3).join();', filePath.replace(__dirname, '').split('/').splice(1, 3).join('/'));
+    return filePath.replace(__dirname, '').split('/').splice(1, 3).join('/');
+}
+
+function _getCustomAbsoluteRootFolder(filePath) {
+    return path.join(__dirname, _getFileRelativeRootFolder(filePath));
+}
+
+function _getBuildAbsoluteRootFolder(filePath) {
+    return path.join(__dirname, '_builds', _getFileRelativeRootFolder(filePath));
+}

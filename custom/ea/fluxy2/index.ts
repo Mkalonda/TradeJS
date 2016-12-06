@@ -14,4 +14,3 @@ export default class MyEA extends EA {
         super.onTick();
     }
 }
-

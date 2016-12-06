@@ -4,18 +4,19 @@ import * as _debug  from 'debug';
 import * as os      from 'os';
 import {spawn}      from 'child_process';
 
-const dirTree   = require('directory-tree');
-const debug     = _debug('TradeJS:EditorController');
+const dirTree = require('directory-tree');
+const debug = _debug('TradeJS:EditorController');
 
 export default class EditorController {
 
     private pathCustom = path.join(__dirname, '../../../custom/');
 
-    constructor(protected opt, protected app) {}
+    constructor(protected opt, protected app) {
+    }
 
-    async init() {}
+    public async init() {}
 
-    load(filePath) {
+    public load(filePath) {
         return new Promise((resolve, reject) => {
             debug(`Loading ${filePath}`);
 
@@ -29,14 +30,16 @@ export default class EditorController {
         });
     }
 
-    async save(filePath, content) {
-       await this._writeToFile(filePath, content);
+    public async save(filePath, content) {
+        await this._writeToFile(filePath, content);
 
+        let inputPath = this._getCustomAbsoluteRootFolder(filePath),
+            outputPath = this._getBuildAbsoluteRootFolder(filePath);
 
-       return this._compile();
+        return this._compile(inputPath, outputPath);
     }
 
-    getDirectoryTree() {
+    public getDirectoryTree() {
         return dirTree(this.pathCustom)
     }
 
@@ -57,25 +60,34 @@ export default class EditorController {
         })
     }
 
-    private _compile() {
+    private _compile(inputPath, outputPath) {
 
         return new Promise((resolve, reject) => {
 
-            let inputPath = this.app.controllers.config.get().path.custom,
-                outputPath = path.join(inputPath, '../', 'dist', 'shared', '_builds'),
-                childOpt = {
+            let childOpt = {
                     stdio: ['pipe', process.stdout, process.stderr, 'ipc'],
                     //shell: true,
                     cwd: __dirname,
                     env: process.env
-                };
+                },
+                child = spawn('gulp', ['custom:build', `--input-path=${inputPath}`, `--output-path=${outputPath}`], childOpt);
 
-            const child = spawn('gulp', ['custom:build', `--input-path=${inputPath}`, `--output-path=${outputPath}`], childOpt);
-
-            child.on('close', code => {
-               resolve();
-            });
+            child.on('close', resolve);
         });
+    }
 
+
+    // TODO: Bit of a hacky way to get root folder
+    private _getFileRelativeRootFolder(filePath: string): string {
+        console.log('filePath.split().splice(1, 3).join();', filePath.split('/').splice(1, 2).join('/'));
+        return filePath.split('/').splice(1, 2).join('/');
+    }
+
+    private _getCustomAbsoluteRootFolder(filePath: string): string {
+        return path.join(this.app.controllers.config.get().path.custom, this._getFileRelativeRootFolder(filePath));
+    }
+
+    private _getBuildAbsoluteRootFolder(filePath: string): string {
+        return path.join(this.app.controllers.config.get().path.custom, '..', '_builds', this._getFileRelativeRootFolder(filePath));
     }
 }

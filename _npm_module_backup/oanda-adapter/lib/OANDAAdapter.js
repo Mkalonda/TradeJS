@@ -510,15 +510,21 @@ OandaAdapter.prototype._sendRESTRequest = function (request, callback) {
         };
 
         if (httpCode !== 200) {
-            switch (httpCode) {
-                case 401:
-                    errorObject.message = body && body.message ? body.message : 'Unauthorized';
-                    errorObject.code = constants.BROKER_ERROR_UNAUTHORIZED;
-                    break;
 
-                default:
-                    errorObject.message = body && body.message ? body.message : 'Unknown error';
-                    errorObject.code =  body && body.code ? body.code : constants.BROKER_ERROR_UNKNOWN;
+            if (body && body.disconnect) {
+                errorObject.message = body && body.message ? body.message : 'Disconnected';
+                errorObject.code = constants.BROKER_ERROR_DISCONNECT;
+            } else {
+                switch (httpCode) {
+                    case 401:
+                        errorObject.message = body && body.message ? body.message : 'Unauthorized';
+                        errorObject.code = constants.BROKER_ERROR_UNAUTHORIZED;
+                        break;
+
+                    default:
+                        errorObject.message = body && body.message ? body.message : 'Unknown error';
+                        errorObject.code =  body && body.code ? body.code : constants.BROKER_ERROR_UNKNOWN;
+                }
             }
         }
 
