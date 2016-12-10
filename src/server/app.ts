@@ -4,7 +4,7 @@ import App              from './_app';
 
 const argv: any = minimist(process.argv.slice(2));
 
-if (argv.electron) {
+if (!argv.web) {
     require('../../electron')();
 }
 

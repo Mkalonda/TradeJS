@@ -30,3 +30,5 @@ testem.log
 #System Files
 .DS_Store
 Thumbs.db
+
+electron-packager ~/Projects/TradeJS TradeJS --platform=darwin --out=~/Desktop --overwrite

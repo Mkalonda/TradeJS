@@ -1,5 +1,11 @@
 'use strict';
 
+process.on('uncaughtException', function (err) {
+    console.error((new Date).toUTCString() + ' uncaughtException:', err.message)
+    console.error(err.stack)
+    process.exit(1)
+})
+
 const
     path = require('path'),
     gulp = require('gulp'),
@@ -34,10 +40,10 @@ gulp.task('server:kill', killProcess);
 
 gulp.task('server:run', function(callback) {
 
-    node = fork(PATH_APP_INIT_FILE, [], {
+    node = fork(PATH_APP_INIT_FILE, [...process.argv], {
         detached: true,
         env: process.env,
-        stdio: ['pipe', process.stdout, process.stderr, 'ipc'],
+        stdio: ['pipe', process.stdout, process.stderr, 'ipc']
     });
 
     callback();

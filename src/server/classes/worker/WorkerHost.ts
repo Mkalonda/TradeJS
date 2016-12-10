@@ -24,17 +24,11 @@ export default class WorkerHost extends Base {
         this._ipc = this.opt.ipc;
     }
 
-    /**
-     *
-     * @private
-     */
     async init() {
         await super.init();
 
         await this._fork();
     }
-
-
 
     send(...params) {
         return this._ipc.send(this.id, ...params);
@@ -57,6 +51,7 @@ export default class WorkerHost extends Base {
                 cwd: __dirname,
                 env: process.env
             };
+        console.log('this.opt.path', this.opt.path);
 
         this._child = spawn('node', ['--harmony-async-await', this.opt.path, ...process.execArgv, `--settings=${childArgv}`], childOpt);
 

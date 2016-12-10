@@ -8,6 +8,7 @@ export default class CacheController {
     constructor(protected opt, protected app) {}
 
     init() {
+        console.log('asdsadsasdsdasdasd', path.join(__dirname, '../cache/Cache.js'));
 
         this._cache = new WorkerHost({
             id: 'cache',

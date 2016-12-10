@@ -98,8 +98,8 @@ export default class App extends Base {
         this.controllers.system = new SystemController({}, this);
         this.controllers.broker = new BrokerController({}, this);
         this.controllers.cache = new CacheController({path: this.opt.path.cache}, this);
-        this.controllers.editor = new EditorController({path: this.opt.path.custom}, this);
         this.controllers.instrument = new InstrumentController({}, this);
+        this.controllers.editor = new EditorController({path: this.opt.path.custom}, this);
 
         await Promise.all(_.map(this.controllers, (c: any, name: string) => name !== 'config' && c.init()));
     }

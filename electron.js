@@ -12,14 +12,14 @@ module.exports = () => {
 
     function createWindow () {
         // Create the browser window.
-        win = new BrowserWindow({backgroundColor: '##2d2d2d'});
+        win = new BrowserWindow({backgroundColor: '#2d2d2d'});
         win.setFullScreen(true);
 
       // and load the index.html of the app.
         if (process.env.NODE_ENV === 'production') {
           win.loadURL('http://localhost:5000');
         } else {
-            win.loadURL('http://localhost:4200');
+            win.loadURL('http://localhost:3000');
             // win.loadURL(url.format({
             //     pathname: path.join(__dirname, 'dist/client/index.html'),
             //     protocol: 'file:',
@@ -28,7 +28,7 @@ module.exports = () => {
         }
 
         // Open the DevTools.
-        //win.webContents.openDevTools();
+        win.webContents.openDevTools();
 
         // Emitted when the window is closed.
         win.on('closed', () => {
