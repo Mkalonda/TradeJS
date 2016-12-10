@@ -51,9 +51,8 @@ export default class WorkerHost extends Base {
                 cwd: __dirname,
                 env: process.env
             };
-        console.log('this.opt.path', this.opt.path);
 
-        this._child = spawn('node', ['--harmony-async-await', this.opt.path, ...process.execArgv, `--settings=${childArgv}`], childOpt);
+        this._child = fork(this.opt.path, ['--harmony-async-await', ...process.execArgv, `--settings=${childArgv}`], childOpt);
 
         this._child.on('close', code => {
             debug(`${this.id} exited with code ${code}`);

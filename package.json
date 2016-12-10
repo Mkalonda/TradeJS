@@ -19,6 +19,7 @@
     "NodeJS"
   ],
   "scripts": {
+    "postinstall": "electron-rebuild",
     "dist": "build",
     "client:dev": "cd ./src/client && npm run dev",
     "client:prod": "gulp client:prod",
@@ -118,7 +119,6 @@
     "protractor": "4.0.11",
     "write-file-webpack-plugin": "^3.4.2"
   },
-  "temp": [],
   "directories": {
     "app": "./",
     "out": "/Users/kewinbrandsma/Desktop",
