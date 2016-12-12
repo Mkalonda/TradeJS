@@ -1,14 +1,26 @@
 import { Injectable } from '@angular/core';
-import * as io from "socket.io-client";
+import {ModalAnchorDirective} from "../directives/modalanchor.directive";
+
+interface IModal {
+    showClose?: boolean,
+    model?: any;
+}
 
 @Injectable()
-export default class SocketService {
+export default class ModalService {
 
-    socket: any;
+    public directive: ModalAnchorDirective = null;
+
+
     //
     constructor() {}
+
     //
     init() {
-        this.socket = io('localhost:3000');
+
+    }
+
+    create(Component: any, options?:any) {
+        return this.directive.createModal(Component, options);
     }
 }

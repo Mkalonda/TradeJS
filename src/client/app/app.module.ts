@@ -39,7 +39,7 @@ import ChartOverviewComponent from "./common/chart-overview/chart-overview.compo
 import ReportComponent from "./common/report/report.component";
 import {LoggedInGuard} from "./guards/loggedin.guard";
 import {UserService} from "./services/user.service";
-import LoginComponent from "./pages/auth/login/login.component";
+import LoginComponent from "./common/login/login.component";
 
 import {Ng2Bs3ModalModule} from 'ng2-bs3-modal/ng2-bs3-modal';
 import StatusComponent from "./common/footer/status/status.component";
@@ -51,6 +51,7 @@ import {DialogComponent} from "./common/dialog/dialog.component";
 import {ModalComponent} from "./common/modal/modal.component";
 import {DialogAnchorDirective} from "./directives/dialoganchor.directive";
 import {ModalAnchorDirective} from "./directives/modalanchor.directive";
+import ModalService from "./services/modal.service";
 
 @NgModule({
     declarations: [
@@ -77,8 +78,8 @@ import {ModalAnchorDirective} from "./directives/modalanchor.directive";
         StatusComponent,
         DialogComponent,
         DialogAnchorDirective,
-        ModalAnchorDirective,
         ModalComponent,
+        ModalAnchorDirective,
     ],
     imports: [
         BrowserModule,
@@ -104,7 +105,8 @@ import {ModalAnchorDirective} from "./directives/modalanchor.directive";
         TodoService,
         LoggedInGuard,
         ConstantsService,
-        SocketService
+        SocketService,
+        ModalService
     ],
     bootstrap: [
         AppComponent

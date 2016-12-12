@@ -1,7 +1,7 @@
-import {Component, OnInit}  from '@angular/core';
+import {Component}  from '@angular/core';
 import {SystemService}      from "../../../services/system.service";
-import * as SYSTEM          from '../../../../../shared/constants/system';
 import {ConstantsService}   from "../../../services/constants.service";
+import {UserService} from "../../../services/user.service";
 
 @Component({
     selector: 'status',
@@ -15,6 +15,11 @@ export default class StatusComponent {
 
     constructor(
         protected systemService: SystemService,
+        protected userService: UserService,
         protected constantsService: ConstantsService
     ) {}
+
+    onClickLogin() {
+        this.userService.login();
+    }
 }

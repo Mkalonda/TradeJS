@@ -1,0 +1,17 @@
+@import '../../style/variables/variables';
+
+label {
+    font-size: 12px;
+}
+
+.form-control {
+    max-width: 200px; float:left;
+}
+
+.modal-content {
+    background: $background-light;
+}
+
+.modal .close span {
+    color: $font-color-light;
+}

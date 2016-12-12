@@ -2,31 +2,70 @@ declare var $:any;
 
 import { Injectable } from '@angular/core';
 import { Http, Headers } from '@angular/http';
-import LoginModel from "../pages/auth/login/login.model";
+import LoginModel from "../common/login/login.model";
+import LoginComponent from "../common/login/login.component";
 import {CookieService} from 'angular2-cookie/core';
 import SocketService from "./socket.service";
+import ModalService from "./modal.service";
 
 @Injectable()
 export class UserService {
+
     private loggedIn = false;
 
-    constructor(private http: Http, private _cookieService:CookieService, private socketService: SocketService) {
+    constructor(
+        private http: Http,
+        private _cookieService:CookieService,
+        private _modalService: ModalService) {
+
         this.loggedIn = !!localStorage.getItem('auth_token');
     }
 
-    login(loginModel: LoginModel) {
+    login() {
         return new Promise((resolve, reject) => {
-            $.post('http://localhost:3000/login', loginModel, function(response, status) {
-                if (status === 'success') {
-                    resolve({
-                        status: 'success'
-                    });
-                } else {
-                    alert('error!');
-                    reject();
+
+            let loginComponentRef = this._modalService.create(LoginComponent, {
+                showCloseButton: false,
+                buttons: [
+                    {value: 'login', text: 'Login', type: 'primary'},
+                    {text: 'Stay offline', type: 'default'}
+                ],
+                onClickButton(value) {
+                    if (value === 'login') {
+
+                        $.post('http://localhost:3000/login', loginComponentRef.instance.model, function(response, status) {
+                            if (status === 'success') {
+                                resolve({
+                                    status: 'success'
+                                });
+                            } else {
+                                alert('error!');
+                                reject();
+                            }
+                        });
+
+                        resolve(true);
+                    } else
+                        resolve(false)
                 }
             });
+
         });
+
+
+
+        // return new Promise((resolve, reject) => {
+        //     $.post('http://localhost:3000/login', loginModel, function(response, status) {
+        //         if (status === 'success') {
+        //             resolve({
+        //                 status: 'success'
+        //             });
+        //         } else {
+        //             alert('error!');
+        //             reject();
+        //         }
+        //     });
+        // });
     }
 
     logout() {

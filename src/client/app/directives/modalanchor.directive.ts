@@ -2,34 +2,42 @@ import {Directive, ComponentFactoryResolver, ComponentFactory, ComponentRef} fro
 
 import {ViewContainerRef} from '@angular/core';
 import {ModalComponent} from '../common/modal/modal.component';
+import ModalService from "../services/modal.service";
+
+declare var $: any;
 
 @Directive({
     selector: '[modalAnchor]'
 })
+
 export class ModalAnchorDirective {
 
     constructor(
         private viewContainer: ViewContainerRef,
-        private componentFactoryResolver: ComponentFactoryResolver
-    ) {}
+        private componentFactoryResolver: ComponentFactoryResolver,
+        private _modalService: ModalService
+    ) {
+        _modalService.directive = this;
+    }
 
-    createDialog(modalComponent: { new(): ModalComponent }, options = <any>{}): ComponentRef<ModalComponent> {
+    createModal(modalComponent: any, options = <any>{}): ComponentRef<ModalComponent> {
         this.viewContainer.clear();
 
-        let dialogComponentFactory = this.componentFactoryResolver.resolveComponentFactory(modalComponent);
-        let dialogComponentRef = this.viewContainer.createComponent(dialogComponentFactory);
+        let modalComponentFactory = this.componentFactoryResolver.resolveComponentFactory(modalComponent);
+        let modalComponentRef = <any>this.viewContainer.createComponent(modalComponentFactory);
 
-        console.log('dialogComponentRef', dialogComponentRef, options);
+        console.log('modalComponentRef', modalComponentRef, options);
 
-        dialogComponentRef.instance.options = options;
-        dialogComponentRef.instance.model = options.model;
+        modalComponentRef.instance.options = options;
 
-        dialogComponentRef.changeDetectorRef.detectChanges();
+        modalComponentRef.changeDetectorRef.detectChanges();
+        console.log('asfasdsdfsdfd', modalComponentRef._nativeElement);
+        $(modalComponentRef._nativeElement.firstElementChild).modal('show');
 
-        dialogComponentRef.instance.close.subscribe(() => {
-            dialogComponentRef.destroy();
-        });
+        // modalComponentRef.instance.close.subscribe(() => {
+        //     modalComponentRef.destroy();
+        // });
 
-        return dialogComponentRef;
+        return modalComponentRef;
     }
 }

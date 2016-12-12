@@ -6,11 +6,11 @@
     <div *ngIf="systemService.systemState.state === constantsService.constants.SYSTEM_STATE_WARNING" class="circle warning"></div>
     <div *ngIf="systemService.systemState.state === constantsService.constants.SYSTEM_STATE_ERROR" class="circle error"></div>
 
-    <a *ngIf="systemService.systemState.code === constantsService.constants.SYSTEM_STATE_CODE_LOGIN" [routerLink]="['/login']">
+    <a *ngIf="systemService.systemState.code === constantsService.constants.SYSTEM_STATE_CODE_LOGIN" (click)="onClickLogin()">
         You are offline, please login
     </a>
 
-    <span *ngIf="systemService.systemState.code === constantsService.constants.SYSTEM_STATE_CODE_NO_SERVER_CONNECTION" [routerLink]="['/login']">
+    <span *ngIf="systemService.systemState.code === constantsService.constants.SYSTEM_STATE_CODE_NO_SERVER_CONNECTION">
         Connection to system lost
     </span>
 </div>

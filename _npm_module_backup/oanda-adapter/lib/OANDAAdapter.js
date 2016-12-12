@@ -309,13 +309,6 @@ OandaAdapter.prototype._streamPrices = function (accountId) {
 };
 
 OandaAdapter.prototype._onPricesResponse = function (accountId, body) {
-    if (statusCode !== 200) {
-        if (body && body.disconnect) {
-            this.trigger("message", accountId, "Prices streaming API disconnected.\nOanda code " + body.disconnect.code + ": " + body.disconnect.message);
-        } else {
-            this.trigger("message", accountId, "Prices streaming API disconnected with status " + statusCode);
-        }
-    }
     clearTimeout(this.pricesTimeout);
     this.pricesTimeout = setTimeout(this._pricesHeartbeatTimeout.bind(this), 10000);
 };

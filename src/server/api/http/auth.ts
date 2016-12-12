@@ -6,13 +6,14 @@ module.exports = app => {
 
     router.post('/login', async (req, res) => {
         try {
-            await app.controllers.system.loginBroker(req.body);
+            let result = await app.controllers.system.loginBroker(req.body);
+            console.log(result);
+            res.sendStatus(200);
         } catch (err) {
             console.error(err);
+            res.sendStatus(401);
             //app.debug({})
         }
-
-        res.send('Birds home page')
     });
 
 // define the about route
