@@ -1,8 +1,8 @@
-import EA from '../../../dist/server/ea/EA';
+import EA from 'tradejs/ea';
 
 export default class MyEA extends EA {
 
-    async init() {
+    async init(): Promise<any> {
         await super.init();
 
         this.addIndicator('MA', {
@@ -11,6 +11,7 @@ export default class MyEA extends EA {
     }
 
     onTick() {
-        super.onTick();
+        super.onTick2222();
     }
+    
 }

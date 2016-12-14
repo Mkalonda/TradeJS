@@ -45,7 +45,7 @@ export default class BackTest extends EventEmitter {
     }
 
     async run() {
-        let EAPath = path.join(__dirname, '../../shared/_builds/ea/fluxy2/index');
+        let EAPath = path.join(__dirname, '../../../_builds/ea/fluxy2/index');
 
         this.startTime = Date.now();
 

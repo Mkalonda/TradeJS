@@ -76,6 +76,8 @@ export default class App extends Base {
         await this._initIPC();
         await this._initControllers();
 
+        await this.controllers.broker.connect(this.controllers.config.get().account);
+
         this.emit('app:ready');
         process && process.send && process.send('app:ready');
     }

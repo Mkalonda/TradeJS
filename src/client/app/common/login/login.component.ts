@@ -14,8 +14,6 @@ export default class LoginComponent implements AfterViewInit {
 
     protected options: any = {};
 
-    protected model = new LoginModel();
-
     constructor() {}
 
     ngAfterViewInit() {}

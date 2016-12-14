@@ -8,16 +8,14 @@ const debug     = require('debug')('TradeJS:Fetcher');
 export default class Fetcher {
 
     mapper: Mapper;
-    brokerApi: BrokerApi;
 
     constructor(opt) {
         this.mapper = opt.mapper;
-        this.brokerApi = opt.brokerApi
     }
 
     async init() {}
 
-    fetch(instrument, timeFrame, from, until) {
+    fetch(brokerApi, instrument, timeFrame, from, until) {
 
         let chunks = this.mapper.getMissingChunks(instrument, timeFrame, from, until),
             chunksLimit = [], pList;
@@ -29,7 +27,7 @@ export default class Fetcher {
         pList = chunksLimit.map(chunk => {
             debug(`Fetching ${instrument} on ${timeFrame} from ${new Date(chunk.from)} until ${new Date(chunk.until)}`);
 
-            return this.brokerApi.getCandles(instrument, timeFrame, chunk.from, chunk.until);
+            return brokerApi.getCandles(instrument, timeFrame, chunk.from, chunk.until);
         });
 
         return Promise.all(pList).then(data => {

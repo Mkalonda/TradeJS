@@ -1,5 +1,3 @@
-declare var $:any;
-
 import { Injectable } from '@angular/core';
 import { Http, Headers } from '@angular/http';
 import LoginModel from "../common/login/login.model";
@@ -7,18 +5,27 @@ import LoginComponent from "../common/login/login.component";
 import {CookieService} from 'angular2-cookie/core';
 import SocketService from "./socket.service";
 import ModalService from "./modal.service";
+import {UserModel} from "../models/user.model";
+
+declare var $:any;
 
 @Injectable()
 export class UserService {
 
-    private loggedIn = false;
+    public model: UserModel = new UserModel();
 
     constructor(
         private http: Http,
         private _cookieService:CookieService,
         private _modalService: ModalService) {
 
-        this.loggedIn = !!localStorage.getItem('auth_token');
+        setInterval(() => {
+            console.log(this.model.loggedIn);
+        }, 1500);
+    }
+
+    get loggedIn() {
+        return this.model.loggedIn
     }
 
     login() {
@@ -26,6 +33,7 @@ export class UserService {
 
             let loginComponentRef = this._modalService.create(LoginComponent, {
                 showCloseButton: false,
+                model: this.model,
                 buttons: [
                     {value: 'login', text: 'Login', type: 'primary'},
                     {text: 'Stay offline', type: 'default'}
@@ -33,13 +41,16 @@ export class UserService {
                 onClickButton(value) {
                     if (value === 'login') {
 
-                        $.post('http://localhost:3000/login', loginComponentRef.instance.model, function(response, status) {
+                        $.post('http://localhost:3000/login', this.model, (response, status) => {
+
                             if (status === 'success') {
-                                resolve({
-                                    status: 'success'
-                                });
+                                this.model.loggedIn = true;
+
+                                resolve();
+
                             } else {
-                                alert('error!');
+
+                                alert('error! ' + status);
                                 reject();
                             }
                         });
@@ -49,36 +60,26 @@ export class UserService {
                         resolve(false)
                 }
             });
-
         });
-
-
-
-        // return new Promise((resolve, reject) => {
-        //     $.post('http://localhost:3000/login', loginModel, function(response, status) {
-        //         if (status === 'success') {
-        //             resolve({
-        //                 status: 'success'
-        //             });
-        //         } else {
-        //             alert('error!');
-        //             reject();
-        //         }
-        //     });
-        // });
     }
 
     logout() {
-        localStorage.removeItem('auth_token');
-        this.loggedIn = false;
-    }
+        return new Promise((resolve, reject) => {
 
-    isLoggedIn() {
-        return this.loggedIn;
-    }
+            $.get('http://localhost:3000/logout', (response, status) => {
+                if (status === 'success') {
 
-    loadSession() {
+                    this.model.loggedIn = false;
 
+                    resolve({
+                        status: 'success'
+                    });
+                } else {
+                    alert('error!');
+                    reject();
+                }
+            });
+        });
     }
 
     storeSession(): Object | null {

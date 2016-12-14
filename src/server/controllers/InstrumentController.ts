@@ -114,7 +114,7 @@ export default class InstrumentController {
         return {id, data};
     }
 
-    removeIndicator() {
+    remove() {
 
     }
 

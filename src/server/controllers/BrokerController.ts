@@ -2,7 +2,7 @@ import BrokerApi from "../broker-api/oanda";
 
 export default class BrokerController {
 
-    private _brokerApi: BrokerApi = new BrokerApi(this.app.controllers.config.get().account);
+    private _brokerApi: BrokerApi = new BrokerApi();
 
     constructor(protected opt, protected app) {}
 
@@ -14,7 +14,41 @@ export default class BrokerController {
         return this._brokerApi.connected
     }
 
-    getInstrumentList() {
+    async connect(accountSettings): Promise<boolean> {
+        let connected = false;
+
+        console.log('accountSettings', 'accountSettings', accountSettings);
+        try {
+
+            this.app.controllers.config.set({account: accountSettings});
+
+            connected = await this._brokerApi.connect(accountSettings);
+        } catch (err) {
+            console.error(err);
+        }
+
+        return connected;
+    }
+
+    async disconnect(): Promise<boolean> {
+        let disconnected = false;
+
+        try {
+            await this._brokerApi.kill();
+            disconnected = true;
+        } catch (error) {
+            console.log(error);
+        } finally {
+            await this.app.controllers.config.set({account: {}});
+        }
+
+        return disconnected;
+    }
+
+    async getInstrumentList(): Promise<any> {
+        if (!this.isConnected)
+            return Promise.resolve([]);
+
         return this._brokerApi.getInstruments();
     }
 }

@@ -181,12 +181,11 @@ OandaAdapter.prototype.getAccounts = function (callback) {
     this._sendRESTRequest({
         method: "GET",
         path: "/v1/accounts" + (this.username ? "?username=" + this.username : "")
-    }, function (body) {
-        if (body.accounts) {
-            callback(null, body.accounts);
-        } else {
-            callback("Unexpected accounts response");
-        }
+    }, function (err, body) {
+        if (err)
+            return callback(err);
+
+        callback(null, body.accounts);
     });
 };
 
@@ -195,12 +194,11 @@ OandaAdapter.prototype.getAccount = function (accountId, callback) {
     this._sendRESTRequest({
         method: "GET",
         path: "/v1/accounts/" + accountId
-    }, function (body) {
-        if (body) {
-            callback(null, body);
-        } else {
-            callback("Unexpected account response");
-        }
+    }, function (err, body) {
+        if (err)
+            return callback(err);
+
+        callback(null, body);
     });
 };
 
@@ -210,12 +208,11 @@ OandaAdapter.prototype.getInstruments = function (accountId, callback) {
         method: "GET",
         path: "/v1/instruments?accountId=" + accountId + "&fields=" + ["instrument", "displayName", "pip", "maxTradeUnits", "precision", "maxTrailingStop", "minTrailingStop", "marginRate", "halted"].join("%2C"),
     },
-    function (body) {
-        if (body.instruments) {
-            callback(null, body.instruments);
-        } else {
-            callback("Unexpected instruments response");
-        }
+    function (err, body) {
+        if (err)
+            return callback(err);
+
+        callback(null, body.instruments);
     });
 };
 
@@ -376,7 +373,7 @@ OandaAdapter.prototype.getCandles = function (symbol, start, end, granularity, c
             Authorization: "Bearer " + this.accessToken,
             "X-Accept-Datetime-Format": "UNIX"
         }
-    }, function (body) {
+    }, function (err, body) {
         if (body && body.candles) {
             callback(null, body.candles);
         } else if (body === "") {
@@ -393,7 +390,10 @@ OandaAdapter.prototype.getOpenPositions = function (accountId, callback) {
     this._sendRESTRequest({
         method: "GET",
         path: "/v1/accounts/" + accountId + "/positions"
-    }, function (body) {
+    }, function (err, body) {
+        if (err)
+            return callback(err);
+
         if (body && body.positions) {
             callback(null, body.positions);
         } else {
@@ -407,7 +407,10 @@ OandaAdapter.prototype.getOpenTrades = function (accountId, callback) {
     this._sendRESTRequest({
         method: "GET",
         path: "/v1/accounts/" + accountId + "/trades"
-    }, function (body) {
+    }, function (err, body) {
+        if (err)
+            return callback(err);
+
         if (body && body.trades) {
             callback(null, body.trades);
         } else {
@@ -495,9 +498,10 @@ OandaAdapter.prototype._sendRESTRequest = function (request, callback) {
     httpClient.sendRequest(request, (error, body, httpCode) => {
 
         if (!error)
-            return callback(body);
+            return callback(null, body);
 
         let errorObject = {
+            originalRequest: request.path,
             code: constants.BROKER_ERROR_UNKNOWN,
             httpCode:  httpCode
         };
@@ -522,6 +526,8 @@ OandaAdapter.prototype._sendRESTRequest = function (request, callback) {
         }
 
         this.trigger('error' , errorObject);
+
+        callback(errorObject);
     });
 };
 

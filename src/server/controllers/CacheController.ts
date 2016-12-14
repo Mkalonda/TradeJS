@@ -8,8 +8,6 @@ export default class CacheController {
     constructor(protected opt, protected app) {}
 
     init() {
-        console.log('asdsadsasdsdasdasd', path.join(__dirname, '../cache/Cache.js'));
-
         this._cache = new WorkerHost({
             id: 'cache',
             ipc: this.app._ipc,
@@ -39,10 +37,6 @@ export default class CacheController {
             });
     }
 
-    write() {
-
-    }
-
     fetch(instrument, timeFrame, from, until) {
         return this
             ._cache
@@ -60,7 +54,7 @@ export default class CacheController {
             .send('@reset');
     }
 
-    updateSettings(settings) {
-        this._cache.send('settings:update', settings);
+    async updateSettings(settings) {
+        this._cache.send('broker:settings', settings);
     }
 }

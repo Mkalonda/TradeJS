@@ -40,7 +40,7 @@ export default class JSEditorComponent implements AfterViewInit {
 
         this.editor = ace.edit(this.editorEl);
         this.editor.setTheme("ace/theme/tomorrow_night_bright");
-        this.editor.getSession().setMode("ace/mode/javascript");
+        this.editor.getSession().setMode("ace/mode/typescript");
 
         this.editor.commands.addCommand({
             name: 'saveFile',

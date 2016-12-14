@@ -2,10 +2,9 @@ import * as SYSTEM from "../../shared/constants/system";
 import {SystemState} from "../../shared/interfaces/SystemState";
 
 const merge = require('deepmerge');
+const cpus = require('os').cpus().length;
 
 export default class SystemController {
-
-    _state: SystemState;
 
     constructor(protected opt, protected app) {}
 
@@ -17,9 +16,12 @@ export default class SystemController {
         return this.app.controllers.cache.reset(null, null, null, null);
     }
 
-    loginBroker(settings) {
+    async loginBroker(settings) {
         this.app.controllers.config.set({account: settings});
-        this.app.controllers.cache.updateSettings(settings);
+
+        await this.app.controllers.cache.updateSettings(settings);
+
+
     }
 
     updateState(changes): SystemState {
@@ -27,23 +29,27 @@ export default class SystemController {
     }
 
     get state(): SystemState {
+        let state = {
+            workers: this.getTotalWorkers(),
+            cpu: cpus
+        };
+
         if (this.app.controllers.broker.isConnected === false) {
-            return {
+
+            Object.assign(state, {
                 state: SYSTEM.SYSTEM_STATE_ERROR,
-                code: SYSTEM.SYSTEM_STATE_CODE_LOGIN,
-                message: '',
-                workers: this.getTotalWorkers(),
-                cpu: require('os').cpus().length
-            }
+                code: SYSTEM.SYSTEM_STATE_CODE_LOGIN
+            });
+
+        } else {
+
+            Object.assign(state, {
+                state: SYSTEM.SYSTEM_STATE_OK,
+                code: SYSTEM.SYSTEM_STATE_CODE_OK,
+            })
         }
 
-        return {
-            state: SYSTEM.SYSTEM_STATE_OK,
-            code: SYSTEM.SYSTEM_STATE_CODE_OK,
-            message: '',
-            workers: this.getTotalWorkers(),
-            cpu: require('os').cpus().length
-        }
+        return <SystemState>state;
     }
 
     getTotalWorkers(): number {

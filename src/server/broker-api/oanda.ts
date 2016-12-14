@@ -6,69 +6,63 @@ const OANDAAdapter = require('../../../_npm_module_backup/oanda-adapter/index');
 
 export default class BrokerApi extends Base {
 
+    private _settings: AccountSettings = <AccountSettings>{};
     private _client = null;
     private _connected = false;
 
-    constructor(protected options: AccountSettings = <AccountSettings>{}) {
-        super(options);
-    }
-
-    public async init(): Promise<any> {
-        super.init();
-
-        return this.connect();
+    constructor() {
+        super()
     }
 
     public get connected() {
-        return this._connected;
+        return this._connected
     }
 
-    public async connect(): Promise<boolean> {
+    public async connect(accountSettings: AccountSettings): Promise<boolean> {
+
         if (this._client !== null)
-            throw new Error('Broker Api is already connected!');
+            await this.kill();
+
+        this._settings = accountSettings;
 
         this._client = new OANDAAdapter({
             // 'live', 'practice' or 'sandbox'
-            environment: this.options.environment,
+            environment: accountSettings.environment,
             // Generate your API access in the 'Manage API Access' section of 'My Account' on OANDA's website
-            accessToken: this.options.token,
+            accessToken: accountSettings.token,
             // Optional. Required only if environment is 'sandbox'
-            username: this.options.username
+            username: accountSettings.username
         });
 
         this._client.on('error', err => {
             if (err.code === constants.BROKER_ERROR_UNAUTHORIZED) {
                 this._connected = false;
-
                 return;
             }
 
             console.log('Broker error: ', err);
-
-            this._connected = false;
-
-            this.emit('disconnect', err);
             //this.emit('error', err);
         });
 
-        await this.testConnection();
+        this._connected = await this.testConnection();
 
-        this.emit('connected');
+        if (this._connected) {
 
-        return true;
+            setTimeout(() => {
+                this.emit('connected');
+            }, 0);
+        }
+
+        return this._connected;
     }
 
     public async testConnection(): Promise<boolean> {
-        // TODO: Also check heartbeat
+        // TODO: Stupid way to check, and should also check heartbeat
         try {
             await this.getAccounts();
-            this._connected = true;
 
             return true;
         } catch (error) {
-            console.log(error);
-            this._connected = false;
-
             return false;
         }
     }
@@ -100,7 +94,7 @@ export default class BrokerApi extends Base {
     }
 
     public subscribePriceStream(instrument) {
-        this._client.subscribePrice(this.options.accountId, instrument.toUpperCase(), tick => {
+        this._client.subscribePrice(this._settings.accountId, instrument.toUpperCase(), tick => {
             this.emit('tick', tick);
         }, this);
     }
@@ -111,7 +105,7 @@ export default class BrokerApi extends Base {
 
     public getInstruments() {
         return new Promise((resolve, reject) => {
-            this._client.getInstruments(this.options.accountId, (err, instruments) => {
+            this._client.getInstruments(this._settings.accountId, (err, instruments) => {
                 if (err)
                     return reject(err);
 
@@ -140,14 +134,6 @@ export default class BrokerApi extends Base {
                 resolve(candles);
             });
         });
-    }
-
-    public async updateSettings(settings) {
-        await this.kill();
-
-        this.updateOptions(settings);
-
-        return this.connect()
     }
 
     public async kill(): Promise<void> {

@@ -1,6 +1,12 @@
 {
   "compilerOptions": {
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "target": "es6",
+    "lib": ["es6", "dom"],
+    "sourceMap": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
     "baseUrl": ".",
     "paths": {
       "tradejs/ea": ["../src/server/ea/EA"],
@@ -9,3 +15,4 @@
     }
   }
 }
+

@@ -16,11 +16,12 @@ export default class Cache extends WorkerChild {
 
     public settings: {account: AccountSettings, path: any} = this.opt.settings;
 
+    private _brokerApi: BrokerApi = null;
+
     private _pathDb: string = path.join(this.settings.path.cache, 'database.db');
-    private _brokerApi: BrokerApi = new BrokerApi(this.settings.account);
     private _mapper: Mapper = new Mapper({path: this.settings.path.cache});
     private _fetcher: Fetcher = new Fetcher({mapper: this._mapper, brokerApi: this._brokerApi});
-    private _barCalculater: BarCalculator = new BarCalculator();
+    private _barCalculator: BarCalculator = new BarCalculator();
 
     private _listeners = {};
     private _db: any;
@@ -32,7 +33,6 @@ export default class Cache extends WorkerChild {
         mkdirp.sync(this.settings.path.cache);
 
         await this._openDb();
-        await this._brokerApi.init();
         await this._mapper.init();
         await this._fetcher.init();
 
@@ -43,13 +43,29 @@ export default class Cache extends WorkerChild {
     }
 
     async _setBrokerApi() {
-        this._setBrokerApiEvents();
 
-        let instruments = await <any>this._brokerApi.getInstruments();
+        // Can also be third party broker API (in near future)
+        try {
+            this._brokerApi = new BrokerApi();
 
-        instruments.forEach(instrument => {
-            this._brokerApi.subscribePriceStream(instrument.instrument);
-        });
+            await this._brokerApi.init();
+
+            this._brokerApi.connect(this.settings.account);
+
+            this._brokerApi.once('connected', async () => {
+
+                this._setBrokerApiEvents();
+
+                let instruments = await <any>this._brokerApi.getInstruments();
+
+                instruments.forEach(instrument => {
+                    this._brokerApi.subscribePriceStream(instrument.instrument);
+                });
+            });
+
+        } catch (error) {
+
+        }
     }
 
     async read(instrument, timeFrame, from, until, bufferOnly) {
@@ -64,7 +80,7 @@ export default class Cache extends WorkerChild {
     }
 
     async fetch(instrument, timeFrame, from, until) {
-        let data = await this._fetcher.fetch(instrument, timeFrame, from, until);
+        let data = await this._fetcher.fetch(this._brokerApi, instrument, timeFrame, from, until);
 
         // Write to database
         await this.write(instrument, timeFrame, data.candles);
@@ -228,7 +244,7 @@ export default class Cache extends WorkerChild {
     _broadCastTick(tick) {
         let connections = this._ipc.sockets,
             tickInstrument = tick.instrument,
-            bars = this._barCalculater.onTick(tick);
+            bars = this._barCalculator.onTick(tick);
 
         this._ipc.send('main', 'tick', tick, false);
 
@@ -281,9 +297,9 @@ export default class Cache extends WorkerChild {
             cb(null);
         });
 
-        this._ipc.on('settings:update', async(opt, cb) => {
+        this._ipc.on('broker:settings', async(opt, cb) => {
             try {
-                cb(null, await this._updateSettings(opt));
+                cb(null, await this._brokerApi.connect(opt));
             } catch (err) {
                 console.error(err);
             }
@@ -298,9 +314,5 @@ export default class Cache extends WorkerChild {
 
     _closeDb() {
         this._db.close();
-    }
-
-    _updateSettings(settings) {
-        this._brokerApi.updateSettings(settings);
     }
 }

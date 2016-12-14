@@ -108,28 +108,56 @@ gulp.task('copy-client-assets', function() {
  *
  **************************************************************/
 gulp.task('custom:build', function(callback) {
-    runSequence('custom:compile', 'custom:copy-assets', callback);
+    callback();
+    //runSequence('custom:compile', 'custom:copy-assets', callback);
 });
 
 gulp.task('custom:watch', function(callback) {
 
     const watcher = gulp.watch('custom/**/*');
+    console.log('WATCH WATCH!');
     watcher.on('change', function(event) {
 
-        let inputPath = _getCustomAbsoluteRootFolder(event.path),
-            outputPath = _getBuildAbsoluteRootFolder(event.path);
+        let inputPath = _getInputAbsoluteRootFolder(event.path),
+            outputPath = _getOutputAbsoluteRootFolder(event.path);
 
-        customBuild(inputPath, outputPath)
-            .on('end', () => {
+        console.log('outputPath', 'outputPath', 'outputPath', 'outputPath', 'outputPath', inputPath);
 
-                // Copy assets
-                gulp.src([inputPath + '/**/*', '!**/.ts'])
-                    .pipe(gulp.dest(outputPath))
-                    .on('end', () => {
-                        console.info('GULP: Custom build complete');
-                    });
+        let tsProject   = ts.createProject(`./custom/tsconfig.json`),
+            tsResult = gulp.src(`${inputPath}/**/*.ts`)
+            .pipe(sourcemaps.init()) // This means sourcemaps will be generated
+            .pipe(tsProject());
 
-            });
+        return tsResult.js
+            .pipe(sourcemaps.write()) // Now the sourcemaps are added to the .js file
+            .pipe(gulp.dest(outputPath));
+
+
+        // gulp.src('src/**/*.ts')
+        //     .pipe(ts({
+        //         noImplicitAny: true,
+        //         out: 'output.js'
+        //     }))
+        //     .pipe(gulp.dest('built/local'));
+        //
+        // let tsProject   = ts.createProject(`./custom/tsconfig.json`),
+        //     tsResult    = tsProject.src()
+        //         .pipe(sourcemaps.init())
+        //         .pipe(tsProject());
+        //
+        // tsResult.js
+        //     .pipe(sourcemaps.write('./'))
+        //     .pipe(gulp.dest(`./dist/${dir}`))
+        //     .on('end', () => {
+        //
+        //         // Copy assets
+        //         gulp.src([inputPath + '/**/*', '!**/.ts'])
+        //             .pipe(gulp.dest(outputPath))
+        //             .on('end', () => {
+        //                 console.info('GULP: Custom build complete');
+        //             });
+        //
+        //     })
     });
 
     callback();
@@ -142,7 +170,7 @@ function customBuild(inputPath, outputPath) {
             entry: path.join(inputPath, 'index'),
             resolve: {
                 // Add `.ts` and `.tsx` as a resolvable extension.
-                extensions: ['.ts', '.js']
+                extensions: ['.ts']
             },
             module: {
                 loaders: [
@@ -164,6 +192,7 @@ gulp.task('custom:compile', function() {
         throw new Error('Gulp build custom, --input-path and --output-path must be defined');
 
     console.log('argv argv', argv);
+
     let pipes = [argv['input-path']].map(dir => {
 
         return gulp.src(argv['input-path'])
@@ -239,14 +268,14 @@ process.on('SIGINT', () => {
 
 // TODO: Bit of a hacky way to get root folder
 function _getFileRelativeRootFolder(filePath) {
-    console.log('filePath.split().splice(1, 3).join();', filePath.replace(__dirname, '').split('/').splice(1, 3).join('/'));
-    return filePath.replace(__dirname, '').split('/').splice(1, 3).join('/');
+    console.log('filePath.split().splice(1, 3).join();', filePath.replace(__dirname, '').split('/')[2]);
+    return filePath.replace(__dirname, '').split('/')[2];
 }
 
-function _getCustomAbsoluteRootFolder(filePath) {
-    return path.join(__dirname, _getFileRelativeRootFolder(filePath));
+function _getInputAbsoluteRootFolder(filePath) {
+    return path.join(__dirname, 'custom', _getFileRelativeRootFolder(filePath));
 }
 
-function _getBuildAbsoluteRootFolder(filePath) {
+function _getOutputAbsoluteRootFolder(filePath) {
     return path.join(__dirname, '_builds', _getFileRelativeRootFolder(filePath));
 }

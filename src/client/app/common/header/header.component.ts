@@ -14,13 +14,12 @@ export default class HeaderComponent{
     @ViewChild(LoginComponent) login: LoginComponent;
 
     constructor(
-        private socketService: SocketService,
-        private _userService: UserService
+        protected socketService: SocketService,
+        protected userService: UserService
     ) {}
 
     onClickLogin() {
-        //this.login.modal.open();
-        this._userService.login();
+        this.userService.login();
     }
 
     clearCache() {

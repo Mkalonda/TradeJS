@@ -31,4 +31,6 @@ testem.log
 .DS_Store
 Thumbs.db
 
-electron-packager ~/Projects/TradeJS TradeJS --platform=darwin --out=~/Desktop --overwrite
+#electron builds
+TradeJS-darwin-x64
+

@@ -87,7 +87,7 @@ module.exports = (app, socket) => {
     });
 
     socket.on('instrument:indicator:remove', async (data, cb) => {
-        cb(null, await app.controllers.broker.getInstrumentList(data));
+        cb(null, await app.controllers.instrument.remove(data));
     });
 
 };

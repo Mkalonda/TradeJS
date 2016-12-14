@@ -13,7 +13,8 @@ interface IAppConfig {
         cache?: string,
         custom?: string,
         config?: string
-    }
+    },
+    account?: any
 }
 
 export default class ConfigController {
