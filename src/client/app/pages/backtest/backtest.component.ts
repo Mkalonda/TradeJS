@@ -8,8 +8,8 @@ import {Router} from '@angular/router';
 
 @Component({
     selector: 'page-backtest',
-    templateUrl: 'backtest.component.html',
-    styleUrls: ['backtest.component.css']
+    templateUrl: './backtest.component.html',
+    styleUrls: ['./backtest.component.css']
 })
 
 export class BacktestComponent implements AfterViewInit {

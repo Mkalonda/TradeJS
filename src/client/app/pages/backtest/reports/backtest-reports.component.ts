@@ -2,8 +2,8 @@ import {Component, AfterViewInit, ElementRef, Input} from '@angular/core';
 
 @Component({
     selector: 'backtest-reports',
-    templateUrl: 'backtest-reports.component.html',
-    styleUrls: ['backtest-reports.component.css']
+    templateUrl: './backtest-reports.component.html',
+    styleUrls: ['./backtest-reports.component.css']
 })
 
 export class BacktestReportsComponent implements AfterViewInit {

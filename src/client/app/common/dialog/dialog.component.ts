@@ -2,8 +2,8 @@ import {Component, EventEmitter, Input, OnInit, ChangeDetectionStrategy} from '@
 
 @Component({
     selector: 'dlg',
-    templateUrl: 'dialog.component.html',
-    styleUrls: ['dialog.component.scss']
+    templateUrl: './dialog.component.html',
+    styleUrls: ['./dialog.component.scss']
 })
 
 export class DialogComponent implements OnInit {

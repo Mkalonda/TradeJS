@@ -10,6 +10,9 @@ import WorkerChild  from "../classes/worker/WorkerChild";
 import BrokerApi    from "../broker-api/oanda";
 import BarCalculator from "./util/bar-calculator";
 
+
+const TransactionDatabase = require("sqlite3-transactions").TransactionDatabase;
+
 //const sqlLite     = require('sqlite3').verbose();
 
 export default class Cache extends WorkerChild {
@@ -150,10 +153,9 @@ export default class Cache extends WorkerChild {
                     if (!candles.length)
                         return resolve();
 
-                    this._db.serialize(() => {
-                        this._db.run("BEGIN TRANSACTION");
+                    this._db.beginTransaction((err, transaction) => {
 
-                        let stmt = this._db.prepare(`INSERT OR REPLACE INTO ${tableName} VALUES (?,?,?,?,?,?,?,?,?,?,?)`),
+                        let stmt = transaction.prepare(`INSERT OR REPLACE INTO ${tableName} VALUES (?,?,?,?,?,?,?,?,?,?,?)`),
                             i = 0, len = candles.length, candle;
 
                         for (; i < len; i++) {
@@ -180,8 +182,12 @@ export default class Cache extends WorkerChild {
 
                         stmt.finalize();
 
-                        this._db.run("END");
-                        resolve();
+                        transaction.commit(function(err) {
+                            if (err) return reject(err);
+
+                            resolve();
+                        });
+
                     });
                 })
                 .catch(reject);
@@ -307,8 +313,11 @@ export default class Cache extends WorkerChild {
     }
 
     _openDb() {
+        this._db = new TransactionDatabase(
+            new sqLite.Database(this._pathDb)
+        );
         //this._db = new sqlLite.Database('database.db');
-        this._db = new sqLite.Database(this._pathDb);
+        //this._db = new sqLite.Database(this._pathDb);
         //this._db = new sqlLite.Database(':memory:');
     }
 

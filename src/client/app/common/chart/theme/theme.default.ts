@@ -64,8 +64,7 @@ export default {
             gridLineWidth: 1,
             gridLineDashStyle: 'ShortDash',
             gridZIndex: -1,
-            tickPixelInterval: 60,
-            ordinal: false
+            tickPixelInterval: 60
         }
     ],
 
@@ -106,8 +105,7 @@ export default {
             lineWidth: 1,
             style: {
                 fontSize: '10px'
-            },
-            ordinal: false
+            }
         }
     ],
 

@@ -7,7 +7,7 @@ import JSEditorComponent  from '../../common/jseditor/jseditor.component';
 
 @Component({
     selector: 'page-editor',
-    templateUrl: 'editor.component.html',
+    templateUrl: './editor.component.html',
     styleUrls: ['./editor.component.css']
 })
 

@@ -7,8 +7,8 @@ import {BacktestSettingsModel} from "./backtest-settings.model";
 
 @Component({
     selector: 'backtest-settings',
-    templateUrl: 'backtest-settings.component.html',
-    styleUrls: ['backtest-settings.component.css']
+    templateUrl: './backtest-settings.component.html',
+    styleUrls: ['./backtest-settings.component.css']
 })
 
 export class BacktestSettingsComponent implements OnInit, AfterViewInit {

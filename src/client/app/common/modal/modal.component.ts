@@ -2,8 +2,8 @@ import {Component, EventEmitter, Input, OnInit} from '@angular/core';
 
 @Component({
     selector: 'dlg',
-    templateUrl: 'modal.component.html',
-    styleUrls: ['modal.component.scss']
+    templateUrl: './modal.component.html',
+    styleUrls: ['./modal.component.scss']
 })
 
 export class ModalComponent implements OnInit {

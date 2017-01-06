@@ -57,7 +57,9 @@ export default class Instrument extends InstrumentCache {
         this._ipc.on('read', async (data, cb:Function) => {
 
             try {
-                cb(null, await this.get(data.from, data.until));
+                let candles = await this.get(data.from, data.until);
+
+                cb(null, candles);
             } catch (error) {
                 console.log('Error:', error);
                 cb(error);

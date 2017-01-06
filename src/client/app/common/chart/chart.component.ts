@@ -18,8 +18,8 @@ const Highcharts = require('highcharts/highstock');
 
 @Component({
     selector: 'chart',
-    templateUrl: 'chart.component.html',
-    styleUrls: ['chart.component.scss'],
+    templateUrl: './chart.component.html',
+    styleUrls: ['./chart.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     entryComponents: [DialogComponent]
 })
@@ -146,7 +146,6 @@ export class ChartComponent implements OnInit, OnDestroy {
     }
 
     updateIndicators(indicators) {
-        console.log('INDICATORS INDICADSFAFD', indicators);
         for (let id in indicators) {
             for (let drawBufferName in indicators[id]) {
                 let drawBuffer = indicators[id][drawBufferName];

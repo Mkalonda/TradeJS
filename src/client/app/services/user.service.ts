@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {Injectable, OnInit} from '@angular/core';
 import { Http, Headers } from '@angular/http';
 import LoginModel from "../common/login/login.model";
 import LoginComponent from "../common/login/login.component";
@@ -17,19 +17,33 @@ export class UserService {
     constructor(
         private http: Http,
         private _cookieService:CookieService,
-        private _modalService: ModalService) {
+        private _modalService: ModalService,
+        private _socketService: SocketService) {
 
-        setInterval(() => {
-            console.log(this.model.loggedIn);
-        }, 1500);
+        // TODO - HACK Make sure socket is initialized
+        setTimeout(() => {
+            this.init();
+        }, 0);
     }
 
     get loggedIn() {
         return this.model.loggedIn
     }
 
+    init() {
+        this._socketService.socket.on('user-details', () => {
+
+        });
+
+        setInterval(() => {
+            //console.log(this.model.loggedIn);
+        }, 1500);
+    }
+
     login() {
         return new Promise((resolve, reject) => {
+
+            let self = this;
 
             let loginComponentRef = this._modalService.create(LoginComponent, {
                 showCloseButton: false,
@@ -45,6 +59,8 @@ export class UserService {
 
                             if (status === 'success') {
                                 this.model.loggedIn = true;
+
+                                self._modalService.destroy(loginComponentRef);
 
                                 resolve();
 

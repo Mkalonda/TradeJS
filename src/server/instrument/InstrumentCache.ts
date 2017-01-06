@@ -85,7 +85,10 @@ export default class InstrumentCache extends WorkerChild {
                 bufferOnly: true
             }));
 
-        await this.set((<any>[].concat).apply(...await Promise.all(pList)));
+        let resultArr = await Promise.all(pList);
+        let candles = (<any>[].concat).apply(...resultArr);
+
+        await this.set(candles);
     }
 
     /**

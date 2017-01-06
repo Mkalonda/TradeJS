@@ -31,7 +31,7 @@ export class ModalAnchorDirective {
         modalComponentRef.instance.options = options;
 
         modalComponentRef.changeDetectorRef.detectChanges();
-        console.log('asfasdsdfsdfd', modalComponentRef._nativeElement);
+
         $(modalComponentRef._nativeElement.firstElementChild).modal('show');
 
         // modalComponentRef.instance.close.subscribe(() => {
@@ -39,5 +39,9 @@ export class ModalAnchorDirective {
         // });
 
         return modalComponentRef;
+    }
+
+    destroy(modalComponentRef) {
+
     }
 }
