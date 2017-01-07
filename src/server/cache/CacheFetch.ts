@@ -16,6 +16,7 @@ export default class Fetcher {
     async init() {}
 
     fetch(brokerApi: BrokerApi, instrument: string, timeFrame: string, from: number, until: number) {
+        let startTime = Date.now();
 
         let chunks = this.mapper.getMissingChunks(instrument, timeFrame, from, until),
             chunksLimit = [], pList;
@@ -31,6 +32,8 @@ export default class Fetcher {
         });
 
         return Promise.all(pList).then(data => {
+            console.log("END END", ((Date.now() - startTime) / 1000) + ' Seconds');
+
             return {
                 candles: _.flatten(data).reverse(),
                 chunks: chunks

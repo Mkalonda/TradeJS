@@ -32,18 +32,18 @@ export default class BrokerController {
     }
 
     async disconnect(): Promise<boolean> {
-        let disconnected = false;
+        await this.app.controllers.config.set({account: {}});
+        await this.app.controllers.system.update({loggedIn: false});
 
         try {
+            await Promise.all([ this._brokerApi.kill(), this.app.controllers.cache.updateSettings({})])
             await this._brokerApi.kill();
-            disconnected = true;
+
+            return true;
         } catch (error) {
             console.log(error);
-        } finally {
-            await this.app.controllers.config.set({account: {}});
+            return false;
         }
-
-        return disconnected;
     }
 
     async getInstrumentList(): Promise<any> {

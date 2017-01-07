@@ -1,31 +1,42 @@
-import * as _               from 'lodash';
-import {Component, OnInit}  from '@angular/core';
+import {Component, ViewChild, OnInit}  from '@angular/core';
 import SocketService      from "../../services/socket.service";
 import {InstrumentSettings} from "../../../../shared/interfaces/InstrumentSettings";
-import ChartOverviewService from "../../services/chart-overview.service";
+import {ChartsAnchorDirective} from "../../directives/chartsanchor.directive";
+import {ChartComponent} from "../chart/chart.component";
 
 @Component({
     selector: 'chart-overview',
     templateUrl: './chart-overview.component.html',
-    styleUrls: ['./chart-overview.component.css']
+    styleUrls: ['./chart-overview.component.css'],
+    entryComponents: [ChartComponent]
 })
 
-export default class ChartOverviewComponent {
+export default class ChartOverviewComponent implements OnInit {
+    @ViewChild(ChartsAnchorDirective) chartsAnchor: ChartsAnchorDirective;
 
-    public charts: InstrumentSettings[];
+    private _defaultCharts = [{instrument: 'EUR_USD'}, {instrument: 'AUD_CAD'}];
 
-    private _defaultInstrumentSettings: InstrumentSettings = {
-        instrument: null,
-        timeFrame: 'M15'
-    };
+    constructor(private socketService: SocketService) {}
 
-    protected socket: any;
-    protected instruments = [];
-
-    constructor(private socketService: SocketService, protected chartOverviewService: ChartOverviewService) {
-        this.socket = socketService.socket;
-        this.charts = chartOverviewService.charts;
+    ngOnInit() {
+        this.load();
     }
 
-    onCloseChart() {}
+    add(instrumentSettings: InstrumentSettings) {
+        this.chartsAnchor.add(instrumentSettings);
+    }
+
+    load() {
+
+        this.socketService.socket.emit('instrument:chart-list', {}, (err, list: InstrumentSettings[]) => {
+
+            if (err)
+                return console.error(err);
+
+            if (!list || !list.length)
+                list = this._defaultCharts;
+
+            list.forEach((instrumentSettings: InstrumentSettings) => this.add(instrumentSettings));
+        });
+    }
 }

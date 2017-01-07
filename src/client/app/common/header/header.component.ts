@@ -2,6 +2,7 @@ import {Component, ViewChild} from '@angular/core';
 import SocketService from "../../services/socket.service";
 import LoginComponent from "../../common/login/login.component";
 import {UserService} from "../../services/user.service";
+import {SystemService} from "../../services/system.service";
 
 @Component({
     selector: 'app-header',
@@ -15,7 +16,8 @@ export default class HeaderComponent{
 
     constructor(
         protected socketService: SocketService,
-        protected userService: UserService
+        protected userService: UserService,
+        protected systemService: SystemService,
     ) {}
 
     onClickLogin() {

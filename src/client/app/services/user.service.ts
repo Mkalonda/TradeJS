@@ -41,41 +41,32 @@ export class UserService {
     }
 
     login() {
-        return new Promise((resolve, reject) => {
+        let self = this;
 
-            let self = this;
+        let loginComponentRef = this._modalService.create(LoginComponent, {
+            showCloseButton: false,
+            model: this.model,
+            buttons: [
+                {value: 'login', text: 'Login', type: 'primary'},
+                {text: 'Stay offline', type: 'default'}
+            ],
+            onClickButton(value) {
+                if (value === 'login') {
 
-            let loginComponentRef = this._modalService.create(LoginComponent, {
-                showCloseButton: false,
-                model: this.model,
-                buttons: [
-                    {value: 'login', text: 'Login', type: 'primary'},
-                    {text: 'Stay offline', type: 'default'}
-                ],
-                onClickButton(value) {
-                    if (value === 'login') {
+                    $.post('http://localhost:3000/login', this.model, (response, status) => {
 
-                        $.post('http://localhost:3000/login', this.model, (response, status) => {
+                        if (status === 'success') {
+                            this.model.loggedIn = true;
 
-                            if (status === 'success') {
-                                this.model.loggedIn = true;
+                            self._modalService.destroy(loginComponentRef);
 
-                                self._modalService.destroy(loginComponentRef);
+                        } else {
 
-                                resolve();
-
-                            } else {
-
-                                alert('error! ' + status);
-                                reject();
-                            }
-                        });
-
-                        resolve(true);
-                    } else
-                        resolve(false)
+                            alert('error! ' + status);
+                        }
+                    });
                 }
-            });
+            }
         });
     }
 

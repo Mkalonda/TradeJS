@@ -24,6 +24,28 @@
     margin-right: 10px;
 }
 
+.chart-content {
+    position: relative;
+}
+
+.chart-loading-overlay {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background: #000;
+
+    display: flex;
+    justify-content: center; /* align horizontal */
+    align-items: center; /* align vertical */
+
+    h1 {
+        margin-top: -20px;
+    }
+}
+
 .highcharts-loading {
      color: $font-color-dark;
 }

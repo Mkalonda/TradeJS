@@ -31,8 +31,8 @@
                         <li><a>Preferences</a></li>
                         <li role="separator" class="divider"></li>
                         <li class="dropdown-header">User</li>
-                        <li *ngIf="userService.loggedIn === true"><a (click)="userService.logout()">Logout</a></li>
-                        <li *ngIf="userService.loggedIn === false"><a (click)="userService.login()">Login</a></li>
+                        <li *ngIf="systemService.systemState.loggedIn === true"><a (click)="userService.logout()">Logout broker</a></li>
+                        <li *ngIf="systemService.systemState.loggedIn === false"><a (click)="userService.login()">Login broker</a></li>
                         <li role="separator" class="divider"></li>
                         <li class="dropdown-header">System</li>
                         <li (click)="clearCache()" data-action="clearCache"><a>Clear cache</a></li>

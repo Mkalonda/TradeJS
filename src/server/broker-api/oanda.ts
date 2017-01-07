@@ -139,7 +139,8 @@ export default class BrokerApi extends Base {
     public async kill(): Promise<void> {
         this._connected = false;
 
-        await this._client.kill();
+        if (this._client)
+            await this._client.kill();
 
         this._client = null;
     }

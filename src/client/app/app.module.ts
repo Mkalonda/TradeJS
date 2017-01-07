@@ -45,13 +45,13 @@ import {Ng2Bs3ModalModule} from 'ng2-bs3-modal/ng2-bs3-modal';
 import StatusComponent from "./common/footer/status/status.component";
 import {SystemService} from "./services/system.service";
 import {ConstantsService} from "./services/constants.service";
-import ChartOverviewService from "./services/chart-overview.service";
 import {TodoService} from "./services/todo.service";
 import {DialogComponent} from "./common/dialog/dialog.component";
 import {ModalComponent} from "./common/modal/modal.component";
 import {DialogAnchorDirective} from "./directives/dialoganchor.directive";
 import {ModalAnchorDirective} from "./directives/modalanchor.directive";
 import ModalService from "./services/modal.service";
+import {ChartsAnchorDirective} from "./directives/chartsanchor.directive";
 
 @NgModule({
     declarations: [
@@ -78,6 +78,7 @@ import ModalService from "./services/modal.service";
         StatusComponent,
         DialogComponent,
         DialogAnchorDirective,
+        ChartsAnchorDirective,
         ModalComponent,
         ModalAnchorDirective,
     ],
@@ -101,7 +102,6 @@ import ModalService from "./services/modal.service";
         CookieService,
         UserService,
         SystemService,
-        ChartOverviewService,
         TodoService,
         LoggedInGuard,
         ConstantsService,

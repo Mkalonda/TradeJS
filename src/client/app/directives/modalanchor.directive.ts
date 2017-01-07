@@ -1,4 +1,4 @@
-import {Directive, ComponentFactoryResolver, ComponentFactory, ComponentRef} from '@angular/core';
+import {Directive, ComponentFactoryResolver, ComponentRef} from '@angular/core';
 
 import {ViewContainerRef} from '@angular/core';
 import {ModalComponent} from '../common/modal/modal.component';

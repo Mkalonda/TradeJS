@@ -1,20 +1,22 @@
 import {DialogAnchorDirective} from "../../directives/dialoganchor.directive";
-declare var $:any;
-
-import {Component, OnInit, OnDestroy, ElementRef, Input, Output, EventEmitter, ChangeDetectionStrategy, ViewChild} from '@angular/core';
+import {
+    Component, OnDestroy, ElementRef, Input, Output, EventEmitter, ChangeDetectionStrategy, ViewChild,
+    OnInit, AfterViewInit
+} from '@angular/core';
 import * as moment          from 'moment/moment';
 import * as _               from 'lodash';
 import SocketService      from "../../services/socket.service";
-
-import ChartOverviewService from "../../services/chart-overview.service";
 
 // Load themes
 import ThemeDefault from './theme/theme.default';
 import './theme/theme.dark';
 import {DialogComponent} from "../dialog/dialog.component";
 import IndicatorModel from "../../models/indicator";
+import {InstrumentSettings} from "../../../../shared/interfaces/InstrumentSettings";
 
-const Highcharts = require('highcharts/highstock');
+const HighStock = require('highcharts/highstock');
+
+declare var $:any;
 
 @Component({
     selector: 'chart',
@@ -24,43 +26,50 @@ const Highcharts = require('highcharts/highstock');
     entryComponents: [DialogComponent]
 })
 
-export class ChartComponent implements OnInit, OnDestroy {
-    @ViewChild(DialogAnchorDirective) dialogAnchor: DialogAnchorDirective;
+export class ChartComponent implements OnDestroy, AfterViewInit {
+    @ViewChild(DialogAnchorDirective) private _dialogAnchor: DialogAnchorDirective;
 
-    @Input() options = <any>{};
+    @Input() public options = <any>{};
 
-    @Output() close = new EventEmitter();
+    @Output() public close = new EventEmitter();
 
-    id: any;
+    private _defaults: InstrumentSettings = {
+        instrument: null,
+        timeFrame: 'M15'
+    };
+
     socket: any;
-    nativeEl: HTMLElement;
     $el: any;
     $elChart: any;
+    $elLoadingOverlay: any;
 
-    chart: any;
-    timeFrame: string;
+    chart: any = null;
     instrument: string;
-    lazyLoadingChunkSize: number;
+    lazyLoadingChunkSize: number = 100;
 
-    constructor(socketService: SocketService, private chartOverviewService: ChartOverviewService, private el: ElementRef) {
-        this.socket = socketService.socket;
-        this.nativeEl = el.nativeElement;
-        this.$el = $(this.nativeEl);
-    }
+    constructor(
+        private _socketService: SocketService,
+        private _elementRef: ElementRef) {}
 
-    async ngOnInit() {
-        this.id = this.options.id;
+    async ngAfterViewInit() {
+        this.options = Object.assign({until: Date.now()}, this._defaults, this.options);
+
+        this.socket = this._socketService.socket;
+        this.$el = $(this._elementRef.nativeElement);
         this.$elChart = this.$el.find('.chart-container');
+        this.$elLoadingOverlay = this.$el.find('.chart-loading-overlay');
 
-        // Append optional className
-        this.$el.find('.chart').addClass(this.options.className);
+        if (!this.options.id) {
+            this._createOnServer(this.options).then(options => {
+                Object.assign(this.options, options);
 
-        this.chart = null;
-        this.timeFrame = this.options.timeFrame;
-        this.lazyLoadingChunkSize = 100;
+                this.load();
+            });
+        } else {
+            this.load();
+        }
 
         this.create();
-        this.load();
     }
 
     create() {
@@ -68,7 +77,10 @@ export class ChartComponent implements OnInit, OnDestroy {
         let settings = _.cloneDeep(ThemeDefault);
 
         // create the chart
-        this.chart = Highcharts.stockChart(this.$elChart[0], settings);
+        this.chart = HighStock.stockChart(this.$elChart[0], settings);
+
+        // Append optional className
+        this.$el.find('.chart').addClass(this.options.className)
 
         //this._setIntervalUpdate();
     }
@@ -77,16 +89,20 @@ export class ChartComponent implements OnInit, OnDestroy {
         from = moment(new Date()).subtract(7, 'days').valueOf();
         until = Date.now();
 
+        let startTime = Date.now();
+
         this.socket.emit('instrument:read', {
-            id: this.id,
+            id: this.options.id,
             count: 300,
             until: until,
             from: from
         }, data => {
+            console.info(`Loading ${this.options.instrument} took: ${(Date.now() - startTime) / 1000} Seconds`);
+
             this.update(data);
 
             this.socket.emit('instrument:get-data', {
-                id: this.id,
+                id: this.options.id,
                 count: data.length
             }, (err, data) => {
                 if (err)
@@ -98,6 +114,9 @@ export class ChartComponent implements OnInit, OnDestroy {
     }
 
     update(_data:any[] = []) {
+        // Hide loading screen
+        this.$elLoadingOverlay.hide();
+
         if (!_data || !_data.length)
             return;
 
@@ -140,7 +159,7 @@ export class ChartComponent implements OnInit, OnDestroy {
 
         if (await this.showIndicatorOptionsMenu(indicatorModel))
 
-            this.socket.emit('instrument:indicator:add', {id: this.id, name: name, options: indicatorModel.inputs, readCount: length, shift: 0}, (err, data) => {
+            this.socket.emit('instrument:indicator:add', {id: this.options.id, name: name, options: indicatorModel.inputs, readCount: length, shift: 0}, (err, data) => {
                 this.updateIndicators(data.data);
             });
     }
@@ -188,7 +207,7 @@ export class ChartComponent implements OnInit, OnDestroy {
     showIndicatorOptionsMenu(indicatorModel: IndicatorModel): Promise<IndicatorModel> {
         return new Promise((resolve) => {
 
-            this.dialogAnchor.createDialog(DialogComponent, {
+            this._dialogAnchor.createDialog(DialogComponent, {
                 title: indicatorModel.name,
                 model: indicatorModel,
                 buttons: [
@@ -203,10 +222,6 @@ export class ChartComponent implements OnInit, OnDestroy {
                 }
             });
         });
-    }
-
-    setIndicatorOptions() {
-
     }
 
     static prepareData(data:any) {
@@ -226,7 +241,7 @@ export class ChartComponent implements OnInit, OnDestroy {
         };
     }
 
-    _setIntervalUpdate() {
+    _setFakeIntervalUpdate() {
         // set up the updating of the chart each second
         let series = this.chart.series[0].data;
 
@@ -262,13 +277,36 @@ export class ChartComponent implements OnInit, OnDestroy {
         }, 500);
     }
 
-    onClickClose() {
-        this.chartOverviewService.destroy(this.id);
+    private _createOnServer(instrumentSettings): Promise<InstrumentSettings> {
 
-        this.close.emit(this.id);
+        return new Promise((resolve, reject) => {
+
+            this._socketService.socket.emit('instrument:create', {
+                instrument: instrumentSettings.instrument,
+                timeFrame: instrumentSettings.timeFrame,
+                //start: start
+            }, (err, instrumentSettings:InstrumentSettings) => {
+                if (err)
+                    return reject(err);
+
+                resolve(instrumentSettings);
+            });
+        });
     }
 
-    ngOnDestroy() {
+    private _destroyOnServer() {
+        return new Promise((resolve, reject) => {
 
+            this._socketService.socket.emit('instrument:destroy', {id: this.options.id}, err => {
+                if (err)
+                    return reject(err);
+
+                resolve();
+            });
+        });
+    }
+
+    async ngOnDestroy() {
+        await this._destroyOnServer();
     }
 }

@@ -65,7 +65,7 @@
                 </button>
             </div>
             <div class="btn-group">
-                <button (click)="onClickClose($event)" type="button" class="dropdown-toggle text-dark" data-toggle="dropdown" aria-haspopup="true"
+                <button (click)="close.emit(options.id)" type="button" class="dropdown-toggle text-dark" data-toggle="dropdown" aria-haspopup="true"
                         aria-expanded="false">
                     <i class="fa fa-close"></i>
                 </button>
@@ -79,5 +79,10 @@
         </h6>
     </div>
     <div dialogAnchor></div>
-    <div class="chart-container"></div>
+    <div class="chart-content">
+        <div class="chart-loading-overlay">
+            <h1>Loading</h1>
+        </div>
+        <div class="chart-container"></div>
+    </div>
 </div>
