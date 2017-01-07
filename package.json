@@ -1,6 +1,6 @@
 {
   "name": "TradeJS",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "description": "Javascript Trading Client",
   "main": "index.js",
   "license": "Apache License 2.0",
@@ -27,6 +27,7 @@
     "server:build": "gulp server:build",
     "server:prod": "NODE_ENV=production node dist/server/bin/www.js",
     "electron:build": "electron-packager ./ TradeJS --platform=darwin --overwrite --ignore=/e2e --ignore=/src/client",
+    "electron:rebuild": "electron-rebuild ./ TradeJS --platform=darwin --overwrite --ignore=/e2e --ignore=/src/client -f -w sqlite3",
     "electron:dev": "npm run _electron",
     "electron:prod": "npm run build && NODE_ENV=production npm run _electron",
     "start": "ng serve --proxy-config proxy.conf.json & npm run server:dev",

@@ -45,14 +45,14 @@ const
  */
 export default class App extends Base {
 
-    public controllers: {
-        config: ConfigController,
-        system: SystemController,
-        broker: BrokerController,
-        cache: CacheController,
-        editor: EditorController,
-        instrument: InstrumentController
-    } = <any>{};
+    public controllers = {
+        config: new ConfigController(this.opt, this),
+        system: new SystemController({}, this),
+        broker: new BrokerController({}, this),
+        cache: new CacheController({path: this.opt.path.cache}, this),
+        editor: new EditorController({path: this.opt.path.custom}, this),
+        instrument: new InstrumentController({}, this)
+    };
 
     private _electron = {
         init: false,
@@ -65,21 +65,31 @@ export default class App extends Base {
     private _httpApi: any = null;
 
     async init() {
-        // Config controller
-        this.controllers.config = new ConfigController(this.opt, this);
-        await this.controllers.config.init();
+       return this._boot();
+    }
 
-        let config = await this.controllers.config.set(this.opt);
+    async _boot() {
+        let config;
+
+        // First initialize config controller and set current config
+        await this.controllers.config.init();
+        config = await this.controllers.config.set(this.opt);
 
         await this._setTimezone(config.system.timezone);
         await this._initAPI();
         await this._initIPC();
-        await this._initControllers();
 
-        await this.controllers.broker.connect(this.controllers.config.get().account);
+        // Initialize all controllers (config is already initialized)
+        await Promise.all(_.map(this.controllers, (c: any, name: string) => name !== 'config' && c.init()));
+
+        // Initial attempt to connect with broker
+        await this.controllers.broker.connect(config.account);
 
         this.emit('app:ready');
+
         process && process.send && process.send('app:ready');
+
+        this.controllers.system.update({booting: false});
     }
 
     /**
@@ -89,21 +99,6 @@ export default class App extends Base {
     async _initIPC() {
         await this._ipc.init();
         await this._ipc.startServer();
-    }
-
-    /**
-     *
-     * @returns {*}
-     * @private
-     */
-    async _initControllers() {
-        this.controllers.system = new SystemController({}, this);
-        this.controllers.broker = new BrokerController({}, this);
-        this.controllers.cache = new CacheController({path: this.opt.path.cache}, this);
-        this.controllers.instrument = new InstrumentController({}, this);
-        this.controllers.editor = new EditorController({path: this.opt.path.custom}, this);
-
-        await Promise.all(_.map(this.controllers, (c: any, name: string) => name !== 'config' && c.init()));
     }
 
     /**
@@ -148,6 +143,12 @@ export default class App extends Base {
                 socket.emit('system:state', this.controllers.system.state);
 
                 this.debug('info', 'Successfully connected to server');
+            });
+
+            //
+            this.controllers.system.on('change', state => {
+                console.log('change change', state);
+                this._io.sockets.emit('system:state', state);
             });
 
             this._http.listen(port, () => {

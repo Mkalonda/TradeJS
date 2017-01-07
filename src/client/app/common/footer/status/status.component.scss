@@ -13,6 +13,10 @@
         &:first-child {
             padding-right: 0;
             border-right: 0;
+
+            span, a {
+                margin-right: 5px;
+            }
         }
 
         //&:first-child {
@@ -60,6 +64,12 @@
     background-image: -moz-radial-gradient(45px 45px 45deg, circle cover, orange 0%, red 100%, darkred 95%);
     background-image: -webkit-radial-gradient(45px 45px, circle cover, red, darkred);
     background-image: radial-gradient(45px 45px 45deg, circle cover, orange 0%, red 100%, darkred 95%);
+}
+
+.circle.booting {
+    background-image: -moz-radial-gradient(45px 45px 45deg, circle cover, purple 0%, purple 100%, purple 95%);
+    background-image: -webkit-radial-gradient(45px 45px, circle cover, purple, purple);
+    background-image: radial-gradient(45px 45px 45deg, circle cover, purple 0%, purple 100%, purple 95%);
 }
 
 .circle.animate {

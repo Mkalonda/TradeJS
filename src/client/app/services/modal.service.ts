@@ -21,10 +21,10 @@ export default class ModalService {
     }
 
     create(Component: any, options?:any) {
-        return this.directive.createModal(Component, options);
+        return this.directive.create(Component, options);
     }
 
     destroy(component) {
-
+        return this.directive.destroy(component);
     }
 }

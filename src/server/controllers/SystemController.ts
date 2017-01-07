@@ -1,65 +1,64 @@
+import * as os      from 'os';
 import * as SYSTEM from "../../shared/constants/system";
-import {SystemState} from "../../shared/interfaces/SystemState";
+import Base from "../classes/Base";
+import {SystemState} from "../../shared/models/SystemState";
 
-const merge = require('deepmerge');
-const cpus = require('os').cpus().length;
+export default class SystemController extends Base {
 
-export default class SystemController {
+    private _state = new SystemState({
+        booting: true,
+        loggedIn: false,
+        state: SYSTEM.SYSTEM_STATE_BOOTING,
+        code: SYSTEM.SYSTEM_STATE_CODE_OK,
+        cpu: os.cpus().length,
+        workers: 1
+    });
 
-    constructor(protected opt, protected app) {}
-
-    init() {
-        return Promise.resolve();
+    constructor(protected opt, protected app) {
+        super(opt);
     }
+
+    async init() {}
 
     clearCache() {
         return this.app.controllers.cache.reset(null, null, null, null);
     }
 
-    async loginBroker(settings) {
-        this.app.controllers.config.set({account: settings});
+    update(changes): SystemState {
+        // Merge state options
+        Object.assign(this._state, changes);
 
-        await this.app.controllers.cache.updateSettings(settings);
+        // Set 'definite' state (okay, warning, error)
+        this._state.state = this.getSimpleState();
 
+        this.emit('change', this._state);
 
-    }
-
-    updateState(changes): SystemState {
-        return Object.assign(this.state, changes);
+        return this._state;
     }
 
     get state(): SystemState {
-        let state = {
-            workers: this.getTotalWorkers(),
-            cpu: cpus
-        };
-
-        if (this.app.controllers.broker.isConnected === false) {
-
-            Object.assign(state, {
-                state: SYSTEM.SYSTEM_STATE_ERROR,
-                code: SYSTEM.SYSTEM_STATE_CODE_LOGIN
-            });
-
-        } else {
-
-            Object.assign(state, {
-                state: SYSTEM.SYSTEM_STATE_OK,
-                code: SYSTEM.SYSTEM_STATE_CODE_OK,
-            })
-        }
-
-        return <SystemState>state;
+        return this._state
     }
 
     getTotalWorkers(): number {
         // Instruments
         let count = Object.keys(this.app.controllers.instrument.instruments).length;
 
+        // Self
+        // TODO: Check if cache is really running
+        count+= 1;
+
         // Cache
         // TODO: Check if cache is really running
         count+= 1;
 
         return count;
+    }
+
+    getSimpleState(): number {
+        if (!this.state.booting && this._state.loggedIn)
+            return SYSTEM.SYSTEM_STATE_OK;
+
+        return SYSTEM.SYSTEM_STATE_ERROR;
     }
 }

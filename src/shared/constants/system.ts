@@ -1,4 +1,5 @@
 export const
+    SYSTEM_STATE_BOOTING                        = -1,
     SYSTEM_STATE_OK                             = 0,
     SYSTEM_STATE_WARNING                        = 1,
     SYSTEM_STATE_ERROR                          = 2,

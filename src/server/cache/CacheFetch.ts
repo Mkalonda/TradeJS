@@ -15,7 +15,7 @@ export default class Fetcher {
 
     async init() {}
 
-    fetch(brokerApi, instrument, timeFrame, from, until) {
+    fetch(brokerApi: BrokerApi, instrument: string, timeFrame: string, from: number, until: number) {
 
         let chunks = this.mapper.getMissingChunks(instrument, timeFrame, from, until),
             chunksLimit = [], pList;

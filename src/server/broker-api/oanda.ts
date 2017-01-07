@@ -19,7 +19,7 @@ export default class BrokerApi extends Base {
     }
 
     public async connect(accountSettings: AccountSettings): Promise<boolean> {
-
+        console.log('accountSettings', accountSettings);
         if (this._client !== null)
             await this.kill();
 

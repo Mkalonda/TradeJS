@@ -20,13 +20,11 @@ export class ModalAnchorDirective {
         _modalService.directive = this;
     }
 
-    createModal(modalComponent: any, options = <any>{}): ComponentRef<ModalComponent> {
+    create(modalComponent: any, options = <any>{}): ComponentRef<ModalComponent> {
         this.viewContainer.clear();
 
         let modalComponentFactory = this.componentFactoryResolver.resolveComponentFactory(modalComponent);
         let modalComponentRef = <any>this.viewContainer.createComponent(modalComponentFactory);
-
-        console.log('modalComponentRef', modalComponentRef, options);
 
         modalComponentRef.instance.options = options;
 
@@ -34,14 +32,14 @@ export class ModalAnchorDirective {
 
         $(modalComponentRef._nativeElement.firstElementChild).modal('show');
 
-        // modalComponentRef.instance.close.subscribe(() => {
-        //     modalComponentRef.destroy();
-        // });
-
         return modalComponentRef;
     }
 
     destroy(modalComponentRef) {
+        let $el = $(modalComponentRef._nativeElement.firstElementChild);
 
+        $el.on('hidden.bs.modal', function() {
+            modalComponentRef.destroy();
+        }).modal('hide');
     }
 }

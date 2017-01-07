@@ -17,7 +17,6 @@ export default class BrokerController {
     async connect(accountSettings): Promise<boolean> {
         let connected = false;
 
-        console.log('accountSettings', 'accountSettings', accountSettings);
         try {
 
             this.app.controllers.config.set({account: accountSettings});
@@ -26,6 +25,8 @@ export default class BrokerController {
         } catch (err) {
             console.error(err);
         }
+
+        this.app.controllers.system.update({loggedIn: connected});
 
         return connected;
     }
@@ -47,7 +48,7 @@ export default class BrokerController {
 
     async getInstrumentList(): Promise<any> {
         if (!this.isConnected)
-            return Promise.resolve([]);
+            return Promise.reject([]);
 
         return this._brokerApi.getInstruments();
     }

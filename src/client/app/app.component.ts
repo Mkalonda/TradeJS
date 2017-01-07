@@ -29,6 +29,7 @@ export class AppComponent implements AfterViewInit {
                 private constantsService: ConstantsService,
                 private socketService: SocketService,
                 private systemService: SystemService) {
+
         constantsService.init();
         socketService.init();
         systemService.init();

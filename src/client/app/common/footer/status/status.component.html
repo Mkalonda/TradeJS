@@ -1,18 +1,27 @@
-<div *ngIf="systemService.systemState.state === constantsService.constants.SYSTEM_STATE_OK">
-    <div class="circle ok"></div>
-</div>
+<div>
 
-<div *ngIf="systemService.systemState.state !== constantsService.constants.SYSTEM_STATE_OK">
-    <div *ngIf="systemService.systemState.state === constantsService.constants.SYSTEM_STATE_WARNING" class="circle warning"></div>
-    <div *ngIf="systemService.systemState.state === constantsService.constants.SYSTEM_STATE_ERROR" class="circle error"></div>
+    <!-- OK -->
+    <ng-container *ngIf="systemService.systemState.state === constantsService.constants.SYSTEM_STATE_OK">
+        <div class="circle ok"></div>
+    </ng-container>
 
-    <a *ngIf="systemService.systemState.code === constantsService.constants.SYSTEM_STATE_CODE_LOGIN" (click)="onClickLogin()">
-        You are offline, please login
-    </a>
+    <!-- Errors -->
+    <ng-container *ngIf="systemService.systemState.state !== constantsService.constants.SYSTEM_STATE_OK">
+        <div class="circle error"></div>
 
-    <span *ngIf="systemService.systemState.code === constantsService.constants.SYSTEM_STATE_CODE_NO_SERVER_CONNECTION">
-        Connection to system lost
-    </span>
+        <ng-container *ngIf="systemService.systemState.booting">
+            <span>System is booting up, 1 moment please</span>
+        </ng-container>
+
+        <ng-container *ngIf="!systemService.systemState.loggedIn">
+            <a (click)="onClickLogin()">You are offline, please login</a>
+        </ng-container>
+
+        <ng-container *ngIf="systemService.systemState.code === constantsService.constants.SYSTEM_STATE_CODE_NO_SERVER_CONNECTION">
+            <span>Connection to system lost</span>
+        </ng-container>
+
+    </ng-container>
 </div>
 
 <div>

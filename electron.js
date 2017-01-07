@@ -3,7 +3,7 @@
 const url = require('url');
 const path = require('path');
 
-const {app, BrowserWindow} = require('electron');
+const {app, BrowserWindow, Menu} = require('electron');
 
 module.exports = () => {
     // Keep a global reference of the window object, if you don't, the window will
@@ -15,20 +15,7 @@ module.exports = () => {
         win = new BrowserWindow({backgroundColor: '#2d2d2d'});
         win.setFullScreen(true);
 
-      // and load the index.html of the app.
-        if (process.env.NODE_ENV === 'production') {
-          win.loadURL('http://localhost:5000');
-        } else {
-            win.loadURL('http://localhost:3000');
-            // win.loadURL(url.format({
-            //     pathname: path.join(__dirname, 'dist/client/index.html'),
-            //     protocol: 'file:',
-            //     slashes: true
-            // }))
-        }
-
-        // Open the DevTools.
-        win.webContents.openDevTools();
+        win.loadURL('http://localhost:3000');
 
         // Emitted when the window is closed.
         win.on('closed', () => {
@@ -36,7 +23,205 @@ module.exports = () => {
             // in an array if your app supports multi windows, this is the time
             // when you should delete the corresponding element.
             win = null
-        })
+        });
+
+        win.webContents.on('context-menu', (e, props) => {
+            const Menu = require('menu');
+
+            const InputMenu = Menu.buildFromTemplate([{
+                label: 'Undo',
+                role: 'undo',
+            }, {
+                label: 'Redo',
+                role: 'redo',
+            }, {
+                type: 'separator',
+            }, {
+                label: 'Cut',
+                role: 'cut',
+            }, {
+                label: 'Copy',
+                role: 'copy',
+            }, {
+                label: 'Paste',
+                role: 'paste',
+            }, {
+                type: 'separator',
+            }, {
+                label: 'Select all',
+                role: 'selectall',
+            },
+            ]);
+            const { inputFieldType } = props;
+            if (inputFieldType === 'plainText') {
+                InputMenu.popup(mainWindow);
+            }
+        });
+
+        const template = [
+            {
+                label: 'Edit',
+                submenu: [
+                    {
+                        role: 'undo'
+                    },
+                    {
+                        role: 'redo'
+                    },
+                    {
+                        type: 'separator'
+                    },
+                    {
+                        role: 'cut'
+                    },
+                    {
+                        role: 'copy'
+                    },
+                    {
+                        role: 'paste'
+                    },
+                    {
+                        role: 'pasteandmatchstyle'
+                    },
+                    {
+                        role: 'delete'
+                    },
+                    {
+                        role: 'selectall'
+                    }
+                ]
+            },
+            {
+                label: 'View',
+                submenu: [
+                    {
+                        role: 'reload'
+                    },
+                    {
+                        role: 'toggledevtools'
+                    },
+                    {
+                        type: 'separator'
+                    },
+                    {
+                        role: 'resetzoom'
+                    },
+                    {
+                        role: 'zoomin'
+                    },
+                    {
+                        role: 'zoomout'
+                    },
+                    {
+                        type: 'separator'
+                    },
+                    {
+                        role: 'togglefullscreen'
+                    }
+                ]
+            },
+            {
+                role: 'window',
+                submenu: [
+                    {
+                        role: 'minimize'
+                    },
+                    {
+                        role: 'close'
+                    }
+                ]
+            },
+            {
+                role: 'help',
+                submenu: [
+                    {
+                        label: 'Learn More',
+                        click () { require('electron').shell.openExternal('http://electron.atom.io') }
+                    }
+                ]
+            }
+        ]
+
+        if (process.platform === 'darwin') {
+            template.unshift({
+                label: app.getName(),
+                submenu: [
+                    {
+                        role: 'about'
+                    },
+                    {
+                        type: 'separator'
+                    },
+                    {
+                        role: 'services',
+                        submenu: []
+                    },
+                    {
+                        type: 'separator'
+                    },
+                    {
+                        role: 'hide'
+                    },
+                    {
+                        role: 'hideothers'
+                    },
+                    {
+                        role: 'unhide'
+                    },
+                    {
+                        type: 'separator'
+                    },
+                    {
+                        role: 'quit'
+                    }
+                ]
+            })
+            // Edit menu.
+            template[1].submenu.push(
+                {
+                    type: 'separator'
+                },
+                {
+                    label: 'Speech',
+                    submenu: [
+                        {
+                            role: 'startspeaking'
+                        },
+                        {
+                            role: 'stopspeaking'
+                        }
+                    ]
+                }
+            )
+
+            // Window menu.
+            template[3].submenu = [
+                {
+                    label: 'Close',
+                    accelerator: 'CmdOrCtrl+W',
+                    role: 'close'
+                },
+                {
+                    label: 'Minimize',
+                    accelerator: 'CmdOrCtrl+M',
+                    role: 'minimize'
+                },
+                {
+                    label: 'Zoom',
+                    role: 'zoom'
+                },
+                {
+                    type: 'separator'
+                },
+                {
+                    label: 'Bring All to Front',
+                    role: 'front'
+                }
+            ]
+        }
+
+        const menu = Menu.buildFromTemplate(template)
+        Menu.setApplicationMenu(menu)
     }
 
 // This method will be called when Electron has finished
