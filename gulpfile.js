@@ -35,7 +35,7 @@ gulp.task('server:kill', killProcess);
 gulp.task('server:run', function(callback) {
 
     node = fork(PATH_APP_INIT_FILE, [...process.argv], {
-        detached: true,
+        detached: false,
         env: process.env,
         stdio: ['pipe', process.stdout, process.stderr, 'ipc']
     });
