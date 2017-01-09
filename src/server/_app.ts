@@ -6,7 +6,7 @@ require('source-map-support').install({
 
 process.on("unhandledRejection", function (error) {
     console.log("!unhandledRejection");
-    console.error(error);
+    console.error('ERROR', error);
 });
 
 import './util/more-info-console';
@@ -147,7 +147,6 @@ export default class App extends Base {
 
             //
             this.controllers.system.on('change', state => {
-                console.log('change change', state);
                 this._io.sockets.emit('system:state', state);
             });
 

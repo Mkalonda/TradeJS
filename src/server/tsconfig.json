@@ -2,13 +2,12 @@
   "compilerOptions": {
     "declaration": false,
     "experimentalDecorators": true,
-    "lib": ["es6", "dom"],
+    "lib": ["es6"],
     "module": "commonjs",
     "moduleResolution": "node",
     "sourceMap": true,
     "rootDir": "./",
     "target": "es6",
-    "listFiles": true,
     "typeRoots": [
       "../../node_modules/@types"
     ]

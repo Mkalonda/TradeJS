@@ -28,6 +28,7 @@ declare var $:any;
 })
 
 export class ChartComponent implements OnInit, OnDestroy, AfterViewInit {
+
     @ViewChild(DialogAnchorDirective) private _dialogAnchor: DialogAnchorDirective;
 
     @Input() public options = <any>{};
@@ -36,6 +37,8 @@ export class ChartComponent implements OnInit, OnDestroy, AfterViewInit {
     @Output() public focus = new EventEmitter();
     @Output() public resize = new EventEmitter();
 
+    public mode: string = 'windowed';
+    public tiled: boolean = false;
     public focused: boolean = false;
 
     private _defaults: InstrumentSettings = {
@@ -49,7 +52,6 @@ export class ChartComponent implements OnInit, OnDestroy, AfterViewInit {
     $elLoadingOverlay: any;
 
     chart: any = null;
-    instrument: string;
 
     constructor(
         private _socketService: SocketService,
@@ -62,6 +64,8 @@ export class ChartComponent implements OnInit, OnDestroy, AfterViewInit {
         this.$el = $(this._elementRef.nativeElement);
         this.$elChart = this.$el.find('.chart-container');
         this.$elLoadingOverlay = this.$el.find('.chart-loading-overlay');
+
+        this.close.subscribe(() => this._destroyOnServer());
     }
 
     ngAfterViewInit() {
@@ -74,10 +78,9 @@ export class ChartComponent implements OnInit, OnDestroy, AfterViewInit {
         else
             this._load();
 
-        this._setDraggable();
-        this._setResizable();
-
         this._createChart();
+
+        this._setUIHandles();
     }
 
     public setFocused() {
@@ -109,43 +112,31 @@ export class ChartComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public setSize(width?: number|string, height?: number|string) {
-        width = width || 'auto';
-        height = height || 300;
-
         this.$el.width(width);
         this.$el.height(height);
 
-        requestAnimationFrame(() => {
-            this.chart.reflow();
-        });
+        this.chart.reflow();
     }
 
-    public getPosition() {
-        return {
-            top: this.$el.css('top'),
-            left: this.$el.css('left'),
-            transform: this.$el.css('transform'),
-        }
-    }
-
-    public setPosition(top: number|string, left: number|string, transform?: string) {
-        this.$el.css({top: top, left: left, transform: transform});
+    public setPosition(top: number|string, left: number|string) {
+        this._elementRef.nativeElement.style.transform = `translate(${left}px, ${top}px)`;
+        this._elementRef.nativeElement.setAttribute('data-x', left);
+        this._elementRef.nativeElement.setAttribute('data-y', top);
     }
 
     public clearPosition() {
-        this.$el.attr('data-o-style', this.$el[0].cssText);
+        this.$el.attr('data-o-style', this.$el[0].style.cssText);
 
         this.$el.css({top: 0, left: 0, bottom: 0, transform: 'none'});
     }
 
     public restorePosition() {
-        let old = JSON.parse(this.$el.attr('data-o-style'));
+        let old = this.$el.attr('data-o-style');
 
-        if (old) {
-            this.$el[0].cssText = old;
-        } else {
-            this.setPosition(100, 100);
-        }
+        if (old)
+            this.$el[0].style.cssText = old;
+
+        this.chart.reflow();
     }
 
     private _createChart() {
@@ -219,7 +210,7 @@ export class ChartComponent implements OnInit, OnDestroy, AfterViewInit {
 
         this.chart.yAxis[0].addPlotLine({
             value: bar[1],
-            color: '#bcbbbc',
+            color: '#939293',
             width: 1,
             id: 'current-price',
             label: {
@@ -389,7 +380,8 @@ export class ChartComponent implements OnInit, OnDestroy, AfterViewInit {
         });
     }
 
-    private _setDraggable() {
+    private _setUIHandles() {
+
         interact(this.$el[0])
             .draggable({
                 // enable inertial throwing
@@ -397,61 +389,51 @@ export class ChartComponent implements OnInit, OnDestroy, AfterViewInit {
                 // keep the element within the area of it's parent
                 restrict: {
                     restriction: "parent",
-                    endOnly: true,
+                    endOnly: false,
                     elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
                 },
                 // enable autoScroll
-                autoScroll: true,
+                //autoScroll: true,
 
                 // call this function on every dragmove event
-                onmove: dragMoveListener,
-                // call this function on every dragend event
-                onend: function (event) {
-                    var textEl = event.target.querySelector('p');
+                onmove: (event) => {
+                    event.preventDefault();
 
-                    textEl && (textEl.textContent =
-                        'moved a distance of '
-                        + (Math.sqrt(event.dx * event.dx +
-                            event.dy * event.dy)|0) + 'px');
+                    if (this.tiled) {
+                        this.tiled = false;
+                        event.currentTarget.className += ' box-shadow';
+                    }
+
+                    var target = event.target,
+                        // keep the dragged position in the data-x/data-y attributes
+                        x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
+                        y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+
+                    // translate the element
+                    target.style.webkitTransform =
+                        target.style.transform =
+                            'translate(' + x + 'px, ' + y + 'px)';
+
+                    // update the posiion attributes
+                    target.setAttribute('data-x', x);
+                    target.setAttribute('data-y', y);
                 }
-            }).allowFrom(this.$el.find('.chart-header')[0]);
-
-        function dragMoveListener (event) {
-            event.preventDefault();
-
-            var target = event.target,
-                // keep the dragged position in the data-x/data-y attributes
-                x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
-                y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
-
-            // translate the element
-            target.style.webkitTransform =
-                target.style.transform =
-                    'translate(' + x + 'px, ' + y + 'px)';
-
-            // update the posiion attributes
-            target.setAttribute('data-x', x);
-            target.setAttribute('data-y', y);
-        }
-    }
-
-    public _setResizable() {
-
-        interact(this.$el[0])
+            })
             .resizable({
                 preserveAspectRatio: false,
                 edges: { left: true, right: true, bottom: true, top: true },
                 min: 100,
-                onend  :  () => {
-                   this.chart.reflow();
+                onend: () => {
+                    requestAnimationFrame(() => {
+                        this.chart.reflow();
+                    });
                 },
                 restrict: {
                     restriction: "parent"
                 },
             })
-            .allowFrom(this.$el[0])
-
             .on('resizemove', function (event) {
+
                 event.preventDefault();
 
                 var target = event.target,
@@ -474,10 +456,25 @@ export class ChartComponent implements OnInit, OnDestroy, AfterViewInit {
 
                 target.setAttribute('data-x', x);
                 target.setAttribute('data-y', y);
+            })
+            .actionChecker((pointer, event, action, interactable, element) => {
+                // Only listen to left mouse button
+                if (event.button !== 0)
+                    return null;
+
+                if (action.name === 'resize')
+                    return action;
+
+                if (action.name === 'drag') {
+                    if (pointer.srcElement.hasAttribute('data-drag-handle'))
+                        return action;
+
+                    return null
+                }
             });
     }
 
     async ngOnDestroy() {
-        await this._destroyOnServer();
+        //await this._destroyOnServer();
     }
 }

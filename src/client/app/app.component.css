@@ -19,6 +19,6 @@ main {
 
 .r_flex_expand_child {
     flex:auto;
-    overflow-y:scroll;
+    overflow-y: auto;
     position: relative;
 }

@@ -5,21 +5,25 @@ export default {
 
         /** TEMP STYLING **/
         spacingTop: 0,
-        spacingRight: 20,
-        // spacingRight: 60,
-        spacingBottom: 0,
-        // spacingLeft: 0,
+        spacingRight: 10,
+        // // spacingRight: 60,
+        // spacingBottom: 0,
+        // // spacingLeft: 0,
         plotBorderWidth: 0,
-        // marginRight: 0,//-60, //this does move the chart but you'll need to recompute it
+        // // marginRight: 0,//-60, //this does move the chart but you'll need to recompute it
         marginLeft: 0,//-60,  //whenever the page changes width
         marginTop: 0,
-        marginBottom: 0,
+        marginBottom: 20,
 
         /** TURN OFF ALL ANIMATIONS **/
         animation: false
     },
 
     credits: {
+        enabled: false
+    },
+
+    scrollbar: {
         enabled: false
     },
 
@@ -33,6 +37,9 @@ export default {
     },
 
     plotOptions: {
+        bar: {
+            minPointLength: 5
+        },
         series: {
             gapSize: 10,
             lineWidth: 1,

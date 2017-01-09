@@ -30,13 +30,15 @@ Highcharts.theme = {
         }
     },
     chart: {
-        backgroundColor: {
-            linearGradient: { x1: 0, y1: 0, x2: 1, y2: 1 },
-            stops: [
-                [0, '#000'],
-                [1, '#3e3e40']
-            ]
-        },
+        backgroundColor: '#000',
+        // backgroundColor: {
+        //     color: "black",
+        //     linearGradient: { x1: 0, y1: 0, x2: 1, y2: 1 },
+        //     stops: [
+        //         [0, '#000'],
+        //         [1, '#3e3e40']
+        //     ]
+        // },
         style: {
             fontFamily: '\'Unica One\', sans-serif'
         },
@@ -215,6 +217,7 @@ Highcharts.theme = {
     },
 
     scrollbar: {
+        enabled: false,
         barBackgroundColor: '#808083',
         barBorderColor: '#808083',
         buttonArrowColor: '#CCC',

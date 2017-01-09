@@ -45,6 +45,10 @@ export class AppComponent implements AfterViewInit {
         window.setTimeout(() => {
             this.element.nativeElement.previousElementSibling.style.opacity = 0;
             this.element.nativeElement.style.opacity = 1;
+
+            window.setTimeout(() => {
+                this.element.nativeElement.parentElement.removeChild(this.element.nativeElement.previousElementSibling);
+            }, 400);
         }, minDiff);
     }
 }

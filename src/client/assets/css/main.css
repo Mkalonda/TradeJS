@@ -6,6 +6,10 @@ html, body {
 }
 
 html {
+    /*
+    On OSX you can 'tilt' the screen up and down, so you see 'out of page' space
+    To blend in, the backgroudn has to be the same color as the header/footer
+     */
     background: black;
 }
 
@@ -125,6 +129,6 @@ ss-multiselect-dropdown > div > button {
 
 .r_flex_expand_child {
     flex:auto;
-    overflow-y:scroll;
+    overflow-y: auto;
     position: relative;
 }

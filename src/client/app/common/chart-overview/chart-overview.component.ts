@@ -1,11 +1,11 @@
 import * as _ from 'lodash';
-import {Component, ViewChild, OnInit, ElementRef, Output, EventEmitter}  from '@angular/core';
+import {
+    Component, ViewChild, OnInit, ElementRef, Output, EventEmitter, ViewContainerRef,
+    ComponentFactoryResolver, ComponentRef
+}  from '@angular/core';
 import SocketService      from "../../services/socket.service";
 import {InstrumentSettings} from "../../../../shared/interfaces/InstrumentSettings";
-import {ChartsAnchorDirective} from "../../directives/chartsanchor.directive";
 import {ChartComponent} from "../chart/chart.component";
-
-declare var $: any;
 
 @Component({
     selector: 'chart-overview',
@@ -16,114 +16,92 @@ declare var $: any;
 
 export default class ChartOverviewComponent implements OnInit {
 
-    @ViewChild(ChartsAnchorDirective) chartsAnchor: ChartsAnchorDirective;
+    // `ViewContainerRef` from an element in the view
+    @ViewChild('container', {read: ViewContainerRef}) private _container;
 
-    @Output() public focus = new EventEmitter();
+    @Output() public close = new EventEmitter();
 
-    private _defaultCharts = [{instrument: 'EUR_USD'}, {instrument: 'AUD_CAD'}];
+    public charts: Array<ComponentRef<ChartComponent>> = [];
+
     private _mode: string = 'windowed';
-
-    public focusedId: string = null;
+    private _defaults = [{instrument: 'EUR_USD'}, {instrument: 'AUD_CAD'}];
 
     constructor(
-        private socketService: SocketService,
-        private _elementRef: ElementRef
+        private _elementRef: ElementRef,
+        private _componentFactoryResolver: ComponentFactoryResolver,
+        private _socketService: SocketService
     ) {}
 
     ngOnInit() {
-
         this.load();
-
-        this.chartsAnchor.resize.subscribe(params => {
-
-            switch (params.state) {
-                case 'stretched':
-                    this.setStretchedMode(params.id);
-                    break;
-                case 'windowed':
-                    this.setWindowedMode();
-                    break;
-            }
-        });
-
-        this.chartsAnchor.focus.subscribe(params => this.setFocus(params.id));
     }
 
-    add(instrumentSettings: InstrumentSettings) {
-        let posArr = this.geRandomPosition(),
-            chartRef;
-
-        // Insert
-        chartRef = this.chartsAnchor.add(instrumentSettings);
-
-        // Set position
-        chartRef.instance.setPosition(posArr[0], posArr[1]);
-
-        // Set focus
-        this.setFocus(chartRef.instance.options.id);
-    }
-
-    /*
-     Get current instruments running in server
-     */
     load() {
 
-        this.socketService.socket.emit('instrument:chart-list', {}, (err, list: InstrumentSettings[]) => {
+        this._socketService.socket.emit('instrument:chart-list', {}, (err, list: InstrumentSettings[]) => {
 
             if (err)
                 return console.error(err);
 
             if (!list || !list.length)
-                list = this._defaultCharts;
+                list = this._defaults;
 
             list.forEach((instrumentSettings: InstrumentSettings) => this.add(instrumentSettings));
         });
     }
 
-    /*
-    Stretch the chart[id] to fit container,
-    hides all other charts
-     */
-    setStretchedMode(id) {
-        this._mode = 'stretched';
+    add(options = <any>{}): ComponentRef<ChartComponent> {
+        let chartComponentFactory = this._componentFactoryResolver.resolveComponentFactory(ChartComponent),
+            chartComponentRef = this._container.createComponent(chartComponentFactory),
+            chartInstance = chartComponentRef.instance,
+            randomPos = this.geRandomPosition();
 
-        let charts = this.chartsAnchor.charts,
-            i = 0, len = charts.length,
-            chart;
+        this.charts.push(chartComponentRef);
 
-        for (; i < len; i++) {
-            chart = charts[i].instance;
-            if (chart.options.id !== id) {
-                chart.$el.hide();
-                continue;
+        chartInstance.setPosition(randomPos[0], randomPos[1]);
+
+        chartInstance.options = options;
+
+        chartInstance.focus.subscribe(() => this.setFocus(chartComponentRef));
+        chartInstance.resize.subscribe((params) => {
+
+            switch (params.state) {
+                case 'stretched':
+                    this.setModeStretched(params.id);
+                    break;
+                case 'windowed':
+                    this.setModeWindowed();
+                    break;
             }
+        });
 
-            chart.clearPosition();
-            chart.setSize('100%', '100%', true);
-        }
+        chartInstance.close.subscribe(() => {
+
+            chartInstance.resize.unsubscribe();
+            chartInstance.close.unsubscribe();
+            chartInstance.focus.unsubscribe();
+
+            chartComponentRef.destroy();
+
+            this.charts.splice(this.charts.indexOf(chartComponentRef), 1);
+
+            this.setFocus();
+        });
+
+        // Set focus
+        requestAnimationFrame(() => {
+            this.setFocus(chartComponentRef);
+        });
+
+        return chartComponentRef;
     }
 
-    /*
-    Set chart back to windowed mode,
-    Shows all other charts also
-     */
-    setWindowedMode() {
-        this._mode = 'windowed';
-
-        let charts = this.chartsAnchor.charts,
-            i = 0, len = charts.length;
-
-        // First set new size of all
-        for (; i < len; i++)
-            charts[i].instance.setSize(null, null);
-
-        // Then show all
-        for (i = 0; i < len; i++)
-            charts[i].instance.$el.show();
+    clear() {
+        this._container.clear();
     }
 
-    setFocus(id) {
-        let chartRef = this.chartsAnchor.getChartById(id);
+    setFocus(chartRef?: ComponentRef<ChartComponent>) {
+        chartRef = chartRef || this.getByHighestZIndex();
 
         if (!chartRef || chartRef.instance.focused)
             return;
@@ -136,32 +114,105 @@ export default class ChartOverviewComponent implements OnInit {
         }
 
         chartRef.instance.setFocused();
-
-        this.focusedId = id;
     }
 
     setAllBlurred() {
-        this.chartsAnchor.charts.forEach(chart => {
-            chart.instance.setBlurred();
+        this.charts.forEach(chart => chart.instance.setBlurred());
+    }
+
+    setModeStretched(id) {
+        this._mode = 'stretched';
+
+        let charts = this.charts,
+            i = 0, len = charts.length,
+            chart;
+
+        for (; i < len; i++) {
+            chart = charts[i].instance;
+            if (chart.options.id !== id) {
+                chart.$el.hide();
+                continue;
+            }
+
+            chart.mode = 'stretched';
+            chart.clearPosition();
+            chart.setSize('100%', '100%', true);
+        }
+    }
+
+    setModeWindowed() {
+        this._mode = 'windowed';
+
+        let charts = this.charts,
+            i = 0, len = charts.length;
+
+        // First set new size of all
+        for (; i < len; i++) {
+            charts[i].instance.mode = 'windowed';
+            charts[i].instance.restorePosition();
+        }
+
+        // Then show all
+        for (i = 0; i < len; i++)
+            charts[i].instance.$el.show();
+    }
+
+    getById(id): ComponentRef<ChartComponent> {
+        let charts = this.charts,
+            i = 0, len = charts.length;
+
+        for (; i < len; i++)
+            if (charts[i].instance.options.id === id)
+                return charts[i];
+
+        return null;
+    }
+
+    getByHighestZIndex() {
+        let highest = 0,
+            ref = this.charts[0];
+
+        this.charts.forEach(chart => {
+            if (chart.instance.$el[0].style.zIndex > highest)
+                ref = chart;
         });
+
+        return ref;
     }
 
     tileWindows() {
-        let height = this._elementRef.nativeElement.clientHeight,
-            widht = this._elementRef.nativeElement.clientWidth,
-            nrOfCharts = this.chartsAnchor.charts.length;
+        let charts = this.charts,
+            containerH = this._elementRef.nativeElement.clientHeight,
+            containerW = this._elementRef.nativeElement.clientWidth,
+            len = charts.length;
+
+        charts.forEach((chart, i) => {
+            let instance = chart.instance;
+            instance.$el.removeAttr('style').addClass('animate');
+
+            setTimeout(() => {
+                instance.$el.removeClass('animate');
+            }, 400);
+
+            if (len < 4) {
+                let chartW = Math.floor(containerW / len);
+                instance.tiled = true;
+                instance.setSize(chartW, containerH-2);
+                instance.setPosition(0, (i * chartW) + (i * 1));
+                return;
+            }
+
+            let even = len % 2 === 0;
+        });
     }
 
     geRandomPosition() {
+        console.log(this._elementRef.nativeElement);
         let containerH = this._elementRef.nativeElement.clientHeight,
             containerW = this._elementRef.nativeElement.clientWidth,
             chartH = 400,
             chartW = 800;
 
         return [_.random(0, containerH-chartH), _.random(0, containerW-chartW)]
-    }
-
-    ngOnDestroy() {
-
     }
 }

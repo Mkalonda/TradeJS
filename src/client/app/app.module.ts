@@ -51,7 +51,6 @@ import {ModalComponent} from "./common/modal/modal.component";
 import {DialogAnchorDirective} from "./directives/dialoganchor.directive";
 import {ModalAnchorDirective} from "./directives/modalanchor.directive";
 import ModalService from "./services/modal.service";
-import {ChartsAnchorDirective} from "./directives/chartsanchor.directive";
 
 @NgModule({
     declarations: [
@@ -78,7 +77,6 @@ import {ChartsAnchorDirective} from "./directives/chartsanchor.directive";
         StatusComponent,
         DialogComponent,
         DialogAnchorDirective,
-        ChartsAnchorDirective,
         ModalComponent,
         ModalAnchorDirective,
     ],

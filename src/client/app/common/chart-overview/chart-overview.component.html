@@ -1,11 +1,12 @@
-<div class="charts-container" #chartsContainer (focus)="alert('afasfsdfsdf')">
-    <div chartsAnchor></div>
+<div class="charts-container">
+    <ng-container #container></ng-container>
 </div>
 <div class="chart-overview-tabs">
-    <ul style="float: left;">
-        <li
-                *ngFor="let chart of chartsAnchor.charts" (click)="setFocus(chart.instance.options.id)"
-                [ngClass]="{active: focusedId === chart.instance.options.id}">
+    <ul>
+        <li *ngFor="let chart of charts"
+            [ngClass]="{active: chart.instance.focused}"
+            (click)="setFocus(chart)"
+        >
             <a>{{chart.instance.options.instrument}}</a>
         </li>
     </ul>

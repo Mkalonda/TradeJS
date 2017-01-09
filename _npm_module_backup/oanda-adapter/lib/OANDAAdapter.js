@@ -1,5 +1,3 @@
-console.log(__dirname);
-
 const constants = require('../../../dist/shared/constants/broker');
 
 var _ = require("underscore"),

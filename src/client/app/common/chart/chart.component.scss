@@ -4,17 +4,17 @@
     height: 300px;
     width: 500px;
     position: absolute;
+    top: 0;
+    left: 0;
     z-index: 1;
-    border: 1px solid $chart-header-background-blur;
-    border-radius: 5px;
+    border: 1px solid #999999;
     overflow: hidden;
     background: rgba(0,0,0,0.6);
     box-shadow: 7px 13px 7px 0px rgba(0,0,0,0.6);
+}
 
-    &:hover {
-        aborder: 3px solid $chart-header-background-blur;
-    }
-    //background: rgba(45,45,45,0.8);
+:host.animate {
+    transition: transform .3s ease;
 }
 
 :host.stretched {
@@ -53,15 +53,18 @@
     margin-top: 0;
     margin-bottom: 0;
     margin-right: 5px;
+
+    button {
+        padding: 0 2px;
+
+        i {
+            font-size: 10px;
+        }
+    }
 }
 
 .chart-container {
-    height: 100%;
-}
-
-.chart-content {
-    position: relative;
-    height: 100%;
+    height: calc(100% - 30px);
 }
 
 .chart-loading-overlay {

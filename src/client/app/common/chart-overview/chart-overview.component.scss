@@ -10,21 +10,13 @@
     bottom: 22px;
     left: 0;
     right: 0;
-    overflow: auto;
+    overflow: hidden;
 }
 
 .chart-overview-tabs {
 
     ul > li {
         float: left;
-
-        &.active {
-            background: white;
-
-            a {
-                color: #000;
-            }
-        }
 
         > a {
             padding: 3px 7px;
@@ -36,6 +28,11 @@
                 background: white;
                 color: #000;
             }
+        }
+
+        &.active > a {
+            background: $chart-header-background-focus !important;
+            color: #fff !important;
         }
     }
 
