@@ -1,6 +1,4 @@
-import {Component, AfterViewInit, ViewChild} from '@angular/core';
-import LoginModel from "./login.model";
-import {UserService} from "../../services/user.service";
+import {Component, AfterViewInit} from '@angular/core';
 
 @Component({
     selector: 'login',

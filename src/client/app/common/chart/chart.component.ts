@@ -15,6 +15,7 @@ import IndicatorModel from "../../models/indicator";
 import {InstrumentSettings} from "../../../../shared/interfaces/InstrumentSettings";
 
 const HighStock = require('highcharts/highstock');
+const interact = require('interactjs');
 
 declare var $:any;
 
@@ -26,12 +27,16 @@ declare var $:any;
     entryComponents: [DialogComponent]
 })
 
-export class ChartComponent implements OnDestroy, AfterViewInit {
+export class ChartComponent implements OnInit, OnDestroy, AfterViewInit {
     @ViewChild(DialogAnchorDirective) private _dialogAnchor: DialogAnchorDirective;
 
     @Input() public options = <any>{};
 
     @Output() public close = new EventEmitter();
+    @Output() public focus = new EventEmitter();
+    @Output() public resize = new EventEmitter();
+
+    public focused: boolean = false;
 
     private _defaults: InstrumentSettings = {
         instrument: null,
@@ -45,34 +50,105 @@ export class ChartComponent implements OnDestroy, AfterViewInit {
 
     chart: any = null;
     instrument: string;
-    lazyLoadingChunkSize: number = 100;
 
     constructor(
         private _socketService: SocketService,
         private _elementRef: ElementRef) {}
 
-    async ngAfterViewInit() {
+    ngOnInit() {
         this.options = Object.assign({until: Date.now()}, this._defaults, this.options);
 
         this.socket = this._socketService.socket;
         this.$el = $(this._elementRef.nativeElement);
         this.$elChart = this.$el.find('.chart-container');
         this.$elLoadingOverlay = this.$el.find('.chart-loading-overlay');
+    }
 
-        if (!this.options.id) {
+    ngAfterViewInit() {
+        if (!this.options.id)
             this._createOnServer(this.options).then(options => {
                 Object.assign(this.options, options);
 
-                this.load();
+                this._load();
             });
-        } else {
-            this.load();
-        }
+        else
+            this._load();
 
-        this.create();
+        this._setDraggable();
+        this._setResizable();
+
+        this._createChart();
     }
 
-    create() {
+    public setFocused() {
+        this.$el.addClass('focused');
+
+        // Set highest z-index
+        if (!this.focused) {
+            let highest = 1;
+
+            this.$el.siblings().each((key, el) => {
+                let zIndex = parseInt(el.style.zIndex, 10);
+
+                if (zIndex > highest)
+                    highest = zIndex;
+            });
+
+            this.$el.css('z-index', highest + 1);
+        }
+
+        this.focused = true;
+    }
+
+    public setBlurred() {
+        if (!this.focused)
+            return;
+
+        this.focused = false;
+        this.$el.removeClass('focused')
+    }
+
+    public setSize(width?: number|string, height?: number|string) {
+        width = width || 'auto';
+        height = height || 300;
+
+        this.$el.width(width);
+        this.$el.height(height);
+
+        requestAnimationFrame(() => {
+            this.chart.reflow();
+        });
+    }
+
+    public getPosition() {
+        return {
+            top: this.$el.css('top'),
+            left: this.$el.css('left'),
+            transform: this.$el.css('transform'),
+        }
+    }
+
+    public setPosition(top: number|string, left: number|string, transform?: string) {
+        this.$el.css({top: top, left: left, transform: transform});
+    }
+
+    public clearPosition() {
+        this.$el.attr('data-o-style', this.$el[0].cssText);
+
+        this.$el.css({top: 0, left: 0, bottom: 0, transform: 'none'});
+    }
+
+    public restorePosition() {
+        let old = JSON.parse(this.$el.attr('data-o-style'));
+
+        if (old) {
+            this.$el[0].cssText = old;
+        } else {
+            this.setPosition(100, 100);
+        }
+    }
+
+    private _createChart() {
         // Clone a new settings object
         let settings = _.cloneDeep(ThemeDefault);
 
@@ -80,12 +156,15 @@ export class ChartComponent implements OnDestroy, AfterViewInit {
         this.chart = HighStock.stockChart(this.$elChart[0], settings);
 
         // Append optional className
-        this.$el.find('.chart').addClass(this.options.className)
+        this.$el.find('.chart').addClass(this.options.className);
 
-        //this._setIntervalUpdate();
+        // Focused state
+        this.$el.on('mousedown', () => {
+            this.focus.emit({state: true, id: this.options.id});
+        });
     }
 
-    load(from?, until?) {
+    private _load(from?, until?) {
         from = moment(new Date()).subtract(7, 'days').valueOf();
         until = Date.now();
 
@@ -113,9 +192,13 @@ export class ChartComponent implements OnDestroy, AfterViewInit {
         });
     }
 
-    update(_data:any[] = []) {
+    public update(_data:any[] = []) {
         // Hide loading screen
-        this.$elLoadingOverlay.hide();
+        // TODO: Dirty
+        this.$elLoadingOverlay.addClass('fade-out');
+        setTimeout(() => {
+            this.$elLoadingOverlay.remove();
+        }, 400);
 
         if (!_data || !_data.length)
             return;
@@ -131,7 +214,7 @@ export class ChartComponent implements OnDestroy, AfterViewInit {
         this.setCurrentPricePlot(last);
     }
 
-    setCurrentPricePlot(bar) {
+    private setCurrentPricePlot(bar) {
         this.chart.yAxis[0].removePlotLine('current-price');
 
         this.chart.yAxis[0].addPlotLine({
@@ -304,6 +387,94 @@ export class ChartComponent implements OnDestroy, AfterViewInit {
                 resolve();
             });
         });
+    }
+
+    private _setDraggable() {
+        interact(this.$el[0])
+            .draggable({
+                // enable inertial throwing
+                inertia: true,
+                // keep the element within the area of it's parent
+                restrict: {
+                    restriction: "parent",
+                    endOnly: true,
+                    elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
+                },
+                // enable autoScroll
+                autoScroll: true,
+
+                // call this function on every dragmove event
+                onmove: dragMoveListener,
+                // call this function on every dragend event
+                onend: function (event) {
+                    var textEl = event.target.querySelector('p');
+
+                    textEl && (textEl.textContent =
+                        'moved a distance of '
+                        + (Math.sqrt(event.dx * event.dx +
+                            event.dy * event.dy)|0) + 'px');
+                }
+            }).allowFrom(this.$el.find('.chart-header')[0]);
+
+        function dragMoveListener (event) {
+            event.preventDefault();
+
+            var target = event.target,
+                // keep the dragged position in the data-x/data-y attributes
+                x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
+                y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+
+            // translate the element
+            target.style.webkitTransform =
+                target.style.transform =
+                    'translate(' + x + 'px, ' + y + 'px)';
+
+            // update the posiion attributes
+            target.setAttribute('data-x', x);
+            target.setAttribute('data-y', y);
+        }
+    }
+
+    public _setResizable() {
+
+        interact(this.$el[0])
+            .resizable({
+                preserveAspectRatio: false,
+                edges: { left: true, right: true, bottom: true, top: true },
+                min: 100,
+                onend  :  () => {
+                   this.chart.reflow();
+                },
+                restrict: {
+                    restriction: "parent"
+                },
+            })
+            .allowFrom(this.$el[0])
+
+            .on('resizemove', function (event) {
+                event.preventDefault();
+
+                var target = event.target,
+                    x = (parseFloat(target.getAttribute('data-x')) || 0),
+                    y = (parseFloat(target.getAttribute('data-y')) || 0);
+
+                if (event.rect.height < 100 || event.rect.width < 300)
+                    return;
+
+                // update the element's style
+                target.style.width  = event.rect.width + 'px';
+                target.style.height = event.rect.height + 'px';
+
+                // translate when resizing from top or left edges
+                x += event.deltaRect.left;
+                y += event.deltaRect.top;
+
+                target.style.webkitTransform = target.style.transform =
+                    'translate(' + x + 'px,' + y + 'px)';
+
+                target.setAttribute('data-x', x);
+                target.setAttribute('data-y', y);
+            });
     }
 
     async ngOnDestroy() {

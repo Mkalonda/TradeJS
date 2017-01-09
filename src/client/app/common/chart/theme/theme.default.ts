@@ -2,7 +2,6 @@ export default {
 
     chart: {
         type: 'candlestick',
-        height: 300,
 
         /** TEMP STYLING **/
         spacingTop: 0,
@@ -14,7 +13,10 @@ export default {
         // marginRight: 0,//-60, //this does move the chart but you'll need to recompute it
         marginLeft: 0,//-60,  //whenever the page changes width
         marginTop: 0,
-        marginBottom: 0
+        marginBottom: 0,
+
+        /** TURN OFF ALL ANIMATIONS **/
+        animation: false
     },
 
     credits: {

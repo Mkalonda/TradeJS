@@ -1,4 +1,4 @@
-<div class="chart" draggable="true">
+
     <div class="chart-header clearfix">
         <h6 class="chart-title pull-left">{{options.instrument}}</h6>
         <h6 class="chart-options pull-right">
@@ -53,19 +53,22 @@
                 </button>
             </div>
             <div class="btn-group">
-                <button type="button" class="dropdown-toggle text-dark" data-toggle="dropdown" aria-haspopup="true"
+                <button (click)="resize.emit({state: 'windowed', id: options.id})" type="button" class="dropdown-toggle text-dark"
+                        data-toggle="dropdown" aria-haspopup="true"
                         aria-expanded="false">
                     <i class="fa fa-compress"></i>
                 </button>
             </div>
             <div class="btn-group">
-                <button type="button" class="dropdown-toggle text-dark" data-toggle="dropdown" aria-haspopup="true"
+                <button (click)="resize.emit({state: 'stretched', id: options.id})" type="button" class="dropdown-toggle text-dark"
+                        data-toggle="dropdown" aria-haspopup="true"
                         aria-expanded="false">
                     <i class="fa fa-expand"></i>
                 </button>
             </div>
             <div class="btn-group">
-                <button (click)="close.emit(options.id)" type="button" class="dropdown-toggle text-dark" data-toggle="dropdown" aria-haspopup="true"
+                <button (click)="close.emit(options.id)" type="button" class="dropdown-toggle text-dark"
+                        data-toggle="dropdown" aria-haspopup="true"
                         aria-expanded="false">
                     <i class="fa fa-close"></i>
                 </button>
@@ -81,8 +84,10 @@
     <div dialogAnchor></div>
     <div class="chart-content">
         <div class="chart-loading-overlay">
-            <h1>Loading</h1>
+            <div class="spinner absolute">
+                <div class="dot1"></div>
+                <div class="dot2"></div>
+            </div>
         </div>
         <div class="chart-container"></div>
     </div>
-</div>

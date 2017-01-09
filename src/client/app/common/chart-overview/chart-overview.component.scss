@@ -1,0 +1,59 @@
+@import '../../style/variables/variables';
+
+:host {
+    height: 100%;
+}
+
+.charts-container {
+    position: absolute;
+    top: 0;
+    bottom: 22px;
+    left: 0;
+    right: 0;
+    overflow: auto;
+}
+
+.chart-overview-tabs {
+
+    ul > li {
+        float: left;
+
+        &.active {
+            background: white;
+
+            a {
+                color: #000;
+            }
+        }
+
+        > a {
+            padding: 3px 7px;
+            font-size: 10px;
+            display: block;
+            border-right: 1px solid $border-color-grey;
+
+            &:hover {
+                background: white;
+                color: #000;
+            }
+        }
+    }
+
+    border-top: 1px solid $border-color-grey;
+    background: black;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.chart-overview-buttons {
+    float: right;
+
+    i {
+        font-size: 14px;
+        line-height: 20px;
+        padding: 0 10px;
+        cursor: pointer;
+    }
+}

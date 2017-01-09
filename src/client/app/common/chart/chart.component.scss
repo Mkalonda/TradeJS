@@ -1,31 +1,67 @@
 @import '../../style/variables/variables';
 
+:host {
+    height: 300px;
+    width: 500px;
+    position: absolute;
+    z-index: 1;
+    border: 1px solid $chart-header-background-blur;
+    border-radius: 5px;
+    overflow: hidden;
+    background: rgba(0,0,0,0.6);
+    box-shadow: 7px 13px 7px 0px rgba(0,0,0,0.6);
+
+    &:hover {
+        aborder: 3px solid $chart-header-background-blur;
+    }
+    //background: rgba(45,45,45,0.8);
+}
+
+:host.stretched {
+    height: 100%;
+}
+
+:host.windowed {
+
+}
+
 :host table th,
 :host table td {
     padding: 0 !important;
     font-size: 10px !important;
 }
 
+
+:host.focused .chart-header {
+    background: $chart-header-background-focus;
+}
+
 .chart-header {
-    background: $chart-header-background;
-    border-top: 1px solid $border-color-grey;
-    border-bottom: 1px solid $border-color-grey;
+    background: $chart-header-background-blur;
+    padding: 4px 0;
 }
 
 .chart-title {
     color: $font-color-light;
+    line-height: 18px;
+    margin-bottom: 0;
+    margin-top: 0;
     margin-left: 6px;
-    line-height: 6px;
 }
 
 .chart-options {
-    margin-top: 4px;
-    margin-bottom: 4px;
-    margin-right: 10px;
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-right: 5px;
+}
+
+.chart-container {
+    height: 100%;
 }
 
 .chart-content {
     position: relative;
+    height: 100%;
 }
 
 .chart-loading-overlay {
@@ -41,8 +77,10 @@
     justify-content: center; /* align horizontal */
     align-items: center; /* align vertical */
 
-    h1 {
-        margin-top: -20px;
+    transition: opacity .33s ease;
+
+    &.fade-out {
+        opacity: 0;
     }
 }
 

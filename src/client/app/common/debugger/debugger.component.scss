@@ -12,7 +12,7 @@
     top: -6px;
     left: 0;
     right: 0;
-    height: 20px;
+    height: 10px;
     cursor: ns-resize;
     text-align: center;
     font-size: 10px;
@@ -21,8 +21,8 @@
     transition: transform .2s;
 
     &:hover {
-        transform: scale(2);
-        transform-origin: 50% 30%;
+        atransform: scale(2);
+        atransform-origin: 50% 50%;
     }
 }
 

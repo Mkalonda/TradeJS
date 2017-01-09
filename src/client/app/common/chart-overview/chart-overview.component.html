@@ -1,3 +1,19 @@
-<div>
+<div class="charts-container" #chartsContainer (focus)="alert('afasfsdfsdf')">
     <div chartsAnchor></div>
 </div>
+<div class="chart-overview-tabs">
+    <ul style="float: left;">
+        <li
+                *ngFor="let chart of chartsAnchor.charts" (click)="setFocus(chart.instance.options.id)"
+                [ngClass]="{active: focusedId === chart.instance.options.id}">
+            <a>{{chart.instance.options.instrument}}</a>
+        </li>
+    </ul>
+
+    <ul class="chart-overview-buttons">
+        <li>
+            <i class="fa fa-table" (click)="tileWindows()"></i>
+        </li>
+    </ul>
+</div>
+
