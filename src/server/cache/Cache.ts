@@ -67,7 +67,7 @@ export default class Cache extends WorkerChild {
             });
 
         } catch (error) {
-
+            console.error(error);
         }
     }
 

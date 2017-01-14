@@ -1,4 +1,4 @@
-const Highcharts = require('highcharts/highstock');
+var Highcharts = require('highcharts/highstock');
 
 /* global document */
 // Load the fonts

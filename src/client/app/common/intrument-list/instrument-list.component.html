@@ -16,7 +16,10 @@
         <table>
             <tbody>
             <tr *ngFor="let instrument of instruments;">
-                <td (click)="instrumentClicked.emit(instrument)"><i class="fa fa-arrow-{{data[instrument] && data[instrument].direction}}"></i>{{ instrument }}</td>
+                <td (click)="instrumentsService.add({instrument: instrument})">
+                    <i class="fa fa-arrow-{{data[instrument] && data[instrument].direction}}"></i>
+                    {{ instrument }}
+                </td>
                 <td>{{data[instrument] && data[instrument].bid}}</td>
                 <td>{{data[instrument] && data[instrument].ask}}</td>
             </tr>

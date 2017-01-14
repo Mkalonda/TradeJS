@@ -19,7 +19,8 @@
                     <a href="#backtest">Backtest</a>
                 </li>
                 <li [routerLink]="['/editor']" [routerLinkActive]="['active']">
-                    <a href="#editor">Editor</a>
+                <!--<li [routerLink]="['/editor']" [routerLinkActive]="['active']">-->
+                    <a href="#editor" onclick="alert(`${location.href.split('#')[0]}/#/editor`); window.open(`${location.href.split('#')[0]}/#/editor`)">Editor</a>
                 </li>
             </ul>
             <ul class="nav navbar-nav navbar-right">

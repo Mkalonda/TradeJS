@@ -12,23 +12,21 @@
             background: #2d2d2d;
         }
 
+        #loadScreen {
+            margin: 0 auto;
+            transition: opacity .5s ease;
+            position: absolute;
+            top: 40%;
+            left: calc(50% - 60px);
+        }
+
         .spinner {
-            margin: 50px auto;
             width: 40px;
             height: 40px;
             text-align: center;
 
-            transition: opacity .5s ease;
-
             -webkit-animation: sk-rotate 2.0s infinite linear;
             animation: sk-rotate 2.0s infinite linear;
-        }
-
-        .spinner.absolute {
-            margin: 0;
-            position: absolute;
-            top: 40%;
-            left: 50%;
         }
 
         .dot1, .dot2 {
@@ -76,10 +74,14 @@
 </head>
 <body>
 
-<div class="spinner absolute">
-    <div class="dot1"></div>
-    <div class="dot2"></div>
+<div id="loadScreen">
+    <div class="spinner" style="margin: 0 auto;">
+        <div class="dot1"></div>
+        <div class="dot2"></div>
+    </div>
+    <!--<p style="text-align:center; margin-top: 30px;">Getting shit ready...</p>-->
 </div>
+
 
 <app-root class="r_flex_container" style="opacity: 0; transition: opacity 1s ease;"></app-root>
 

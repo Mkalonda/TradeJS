@@ -271,7 +271,6 @@ process.on('SIGINT', () => {
 
 // TODO: Bit of a hacky way to get root folder
 function _getFileRelativeRootFolder(filePath) {
-    console.log('filePath.split().splice(1, 3).join();', filePath.replace(__dirname, '').split('/')[2]);
     return filePath.replace(__dirname, '').split('/')[2];
 }
 

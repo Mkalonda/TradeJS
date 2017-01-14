@@ -20,8 +20,6 @@ import {UserService}    from "./services/user.service";
 })
 
 export class AppComponent implements AfterViewInit {
-    observable$: Observable<{}>;
-
     socket: any;
 
     constructor(private element: ElementRef,
@@ -36,18 +34,17 @@ export class AppComponent implements AfterViewInit {
     }
 
     ngAfterViewInit() {
-        let startTime = (<any>window).tradeJsStartTime,
-            minDiff = 1500,
-            diff = Date.now() - startTime;
+        let minDiff = 1500,
+            elLoadScreen = <any>document.getElementById('loadScreen');
 
         document.body.className = 'animate';
 
         window.setTimeout(() => {
-            this.element.nativeElement.previousElementSibling.style.opacity = 0;
+            elLoadScreen.style.opacity = 1;
             this.element.nativeElement.style.opacity = 1;
 
             window.setTimeout(() => {
-                this.element.nativeElement.parentElement.removeChild(this.element.nativeElement.previousElementSibling);
+                document.body.removeChild(elLoadScreen);
             }, 400);
         }, minDiff);
     }

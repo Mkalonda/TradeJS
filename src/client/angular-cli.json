@@ -38,8 +38,7 @@
         "assets/js/ace/ext-language_tools.js",
         "assets/js/ace/theme-tomorrow_night_bright.js",
         "assets/js/ace/mode-javascript.js",
-        "assets/js/ace/mode-typescript.js",
-        "assets/js/freetile.js"
+        "assets/js/ace/mode-typescript.js"
       ],
       "addons": [
         "node_modules/font-awesome/fonts/*.+(otf|eot|svg|ttf|woff|woff2)"

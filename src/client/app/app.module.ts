@@ -23,7 +23,6 @@ import DebuggerComponent from './common/debugger/debugger.component';
 import FooterComponent  from './common/footer/footer.component';
 import FileTreeComponent  from './common/file-tree/file-tree.component';
 import JSEditorComponent  from './common/jseditor/jseditor.component';
-import {ChartComponent}  from './common/chart/chart.component';
 
 // Providers
 import SocketService from './services/socket.service';
@@ -51,6 +50,11 @@ import {ModalComponent} from "./common/modal/modal.component";
 import {DialogAnchorDirective} from "./directives/dialoganchor.directive";
 import {ModalAnchorDirective} from "./directives/modalanchor.directive";
 import ModalService from "./services/modal.service";
+import InstrumentsService from "./services/instruments.service";
+import {DraggableDirective} from "./directives/draggable.directive";
+import {ResizableDirective} from "./directives/resizable.directive";
+import {ChartBoxComponent} from "./common/chart-box/chart-box.component";
+import {ChartDirective} from "./directives/chart.directive";
 
 @NgModule({
     declarations: [
@@ -70,7 +74,7 @@ import ModalService from "./services/modal.service";
 
         JSEditorComponent,
         FileTreeComponent,
-        ChartComponent,
+        ChartBoxComponent,
         InstrumentListComponent,
         ChartOverviewComponent,
         ReportComponent,
@@ -79,6 +83,9 @@ import ModalService from "./services/modal.service";
         DialogAnchorDirective,
         ModalComponent,
         ModalAnchorDirective,
+        DraggableDirective,
+        ResizableDirective,
+        ChartDirective
     ],
     imports: [
         BrowserModule,
@@ -104,7 +111,8 @@ import ModalService from "./services/modal.service";
         LoggedInGuard,
         ConstantsService,
         SocketService,
-        ModalService
+        ModalService,
+        InstrumentsService
     ],
     bootstrap: [
         AppComponent

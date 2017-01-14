@@ -9,7 +9,7 @@
     z-index: 1;
     border: 1px solid #999999;
     overflow: hidden;
-    background: rgba(0,0,0,0.6);
+    background: rgba(0,0,0,0.7);
     box-shadow: 7px 13px 7px 0px rgba(0,0,0,0.6);
 }
 
@@ -32,8 +32,12 @@
 }
 
 
-:host.focused .chart-header {
-    background: $chart-header-background-focus;
+:host.focused {
+    border-color: #ad8f79;
+
+    .chart-header {
+        background: $chart-header-background-focus;
+    }
 }
 
 .chart-header {
@@ -139,4 +143,9 @@
     -webkit-border-radius: 6px 0 6px 6px;
     -moz-border-radius: 6px 0 6px 6px;
     border-radius: 6px 0 6px 6px;
+}
+
+/** The chart **/
+.chart {
+    height: calc(100% - 30px);
 }

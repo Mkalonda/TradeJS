@@ -4,7 +4,7 @@
     height: 100%;
 }
 
-.charts-container {
+.chart-overview-container {
     position: absolute;
     top: 0;
     bottom: 22px;
@@ -25,7 +25,7 @@
             border-right: 1px solid $border-color-grey;
 
             &:hover {
-                background: white;
+                background: #ad8f79;
                 color: #000;
             }
         }

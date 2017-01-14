@@ -87,7 +87,7 @@ export default class WorkerChild extends Base {
                 const instance = new mainFile(settings.classArguments, settings.workerOptions);
                 await instance.init();
 
-                debug(`Created new [${mainFile.name}] instance`);
+                debug(`Created new [${mainFile.name}] instance with id [${settings.workerOptions.id}]`);
 
                 process.send('__ready');
 

@@ -47,6 +47,7 @@
   "private": false,
   "dependencies": {
     "@angular/core": "2.4.1",
+    "@types/canvasjs": "^1.5.30",
     "backbone-events-standalone": "0.2.7",
     "body-parser": "1.15.2",
     "cli-table": "0.3.1",

@@ -1,5 +1,6 @@
 <div data-drag-handle class="chart-header clearfix">
-    <h6 class="chart-title pull-left">{{options.instrument}}</h6>
+
+    <h6 class="chart-title pull-left">{{model.data.instrument}}</h6>
     <div class="chart-options btn-group pull-right">
         <!-- Single button -->
         <button type="button" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
@@ -44,20 +45,22 @@
             <i class="fa fa-bar-chart"></i>
         </button>
         <button *ngIf="mode === 'stretched'"
-                (click)="resize.emit({state: 'windowed', id: options.id})" type="button"
+                (click)="resize.emit('windowed')"
+                type="button"
                 class="dropdown-toggle text-dark"
                 data-toggle="dropdown" aria-haspopup="true"
                 aria-expanded="false">
             <i class="fa fa-compress"></i>
         </button>
         <button *ngIf="mode === 'windowed'"
-                (click)="resize.emit({state: 'stretched', id: options.id})" type="button"
-                class="dropdown-toggle text-dark"
-                data-toggle="dropdown" aria-haspopup="true"
+                (click)="resize.emit('stretched')"
+
+                type="button" class="dropdown-toggle text-dark" data-toggle="dropdown"
+                aria-haspopup="true"
                 aria-expanded="false">
             <i class="fa fa-expand"></i>
         </button>
-        <button (click)="close.emit(options.id)" type="button" class="dropdown-toggle text-dark"
+        <button (click)="destroy()" type="button" class="dropdown-toggle text-dark"
                 data-toggle="dropdown" aria-haspopup="true"
                 aria-expanded="false">
             <i class="fa fa-close"></i>
@@ -67,11 +70,11 @@
 
 <div dialogAnchor></div>
 
-<div class="chart-loading-overlay">
+<div class="chart-loading-overlay" style="display: none;">
     <div class="spinner absolute">
         <div class="dot1"></div>
         <div class="dot2"></div>
     </div>
 </div>
 
-<div class="chart-container"></div>
+<div chart [model]="model" class="chart"></div>

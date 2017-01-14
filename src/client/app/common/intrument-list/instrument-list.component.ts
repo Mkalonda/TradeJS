@@ -1,6 +1,6 @@
 import {Component, OnInit, OnDestroy, Output, EventEmitter} from '@angular/core';
 import SocketService from "../../services/socket.service";
-import {} from "../../../../../node_modules/@angular/core/src/metadata/directives";
+import InstrumentsService from "../../services/instruments.service";
 
 @Component({
     selector: 'instrument-list',
@@ -11,12 +11,12 @@ import {} from "../../../../../node_modules/@angular/core/src/metadata/directive
 
 export default class InstrumentListComponent implements OnInit, OnDestroy {
 
-    @Output() instrumentClicked = new EventEmitter();
-
     private instruments: Array<string>;
     private data: any = {};
 
-    constructor(private socketService: SocketService,) {}
+    constructor(protected socketService: SocketService,
+                protected instrumentsService: InstrumentsService) {
+    }
 
     ngOnInit() {
         this.onTick = this.onTick.bind(this);
@@ -25,7 +25,8 @@ export default class InstrumentListComponent implements OnInit, OnDestroy {
 
         this.socketService.socket.emit('instrument:list', {}, (err, instrumentList) => {
             this.instruments = instrumentList.map(instrument => instrument.instrument);
-        });this.onTick = this.onTick.bind(this);
+        });
+        this.onTick = this.onTick.bind(this);
     }
 
     onTick(tick) {

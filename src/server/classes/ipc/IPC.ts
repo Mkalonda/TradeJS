@@ -1,8 +1,9 @@
-declare var clearTimeout: any;
-
 import Base from '../Base';
 
 const debug = require('debug')('TradeJS:IPC');
+
+declare var clearTimeout: any;
+declare var window: any;
 
 export default class IPC extends Base {
 

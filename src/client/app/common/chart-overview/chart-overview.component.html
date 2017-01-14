@@ -1,13 +1,21 @@
-<div class="charts-container">
-    <ng-container #container></ng-container>
+<div class="chart-overview-container">
+
+    <chart-box #chartBox
+               *ngFor="let model of _instrumentsService.instruments$ | async"
+               [ngClass]="{focused: chartBox.focus}"
+               [model]="model"
+               draggable
+               resizable (resized)="chartBox.resize.next()"
+               (click)="toggleFocused(chartBox)">
+    </chart-box>
 </div>
 <div class="chart-overview-tabs">
     <ul>
-        <li *ngFor="let chart of charts"
-            [ngClass]="{active: chart.instance.focused}"
-            (click)="setFocus(chart)"
+        <li *ngFor="let chartBox of charts"
+            [ngClass]="{active: chartBox.focus}"
+            (click)="toggleFocused(chartBox)"
         >
-            <a>{{chart.instance.options.instrument}}</a>
+            <a>{{chartBox.model.data.instrument}}</a>
         </li>
     </ul>
 
