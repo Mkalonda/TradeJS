@@ -37,8 +37,8 @@ export default class ChartOverviewComponent implements OnInit {
     }
 
     tileWindows() {
-        let containerH = this._elementRef.nativeElement.clientHeight,
-            containerW = this._elementRef.nativeElement.clientWidth,
+        let containerH = this._elementRef.nativeElement.firstElementChild.clientHeight,
+            containerW = this._elementRef.nativeElement.firstElementChild.clientWidth,
             len = this.charts.length;
 
         this.charts.forEach((chart, i) => {
@@ -52,7 +52,7 @@ export default class ChartOverviewComponent implements OnInit {
 
             if (len < 4) {
                 let chartW = Math.floor(containerW / len);
-                chart.setSize(chartW, containerH - 2);
+                chart.setSize(chartW, containerH);
                 chart.setPosition(0, (i * chartW) + (i * 1));
                 return;
             }

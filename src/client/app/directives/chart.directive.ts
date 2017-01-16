@@ -23,8 +23,8 @@ export class ChartDirective implements OnInit, AfterViewInit {
     public chart: any;
 
     constructor(
-        private _instrumentsService: InstrumentsService,
-        private _elementRef: ElementRef) {
+        public elementRef: ElementRef,
+        private _instrumentsService: InstrumentsService) {
     }
 
     ngOnInit() {
@@ -48,7 +48,20 @@ export class ChartDirective implements OnInit, AfterViewInit {
     public reflow() {
         requestAnimationFrame(() => {
             this.chart.reflow();
-        })
+            this._updateZoom();
+            // requestAnimationFrame(() => this.chart.reflow())
+        });
+    }
+
+    private _updateZoom(redraw = true) {
+        let parentW = this.elementRef.nativeElement.parentNode.clientWidth,
+            data = this.chart.xAxis[0].series[0].data,
+            barW = 12.5,
+            barsToShow = Math.ceil(parentW / barW),
+            firstBar = (data[data.length - barsToShow] || data[0]),
+            lastBar = data[data.length - 1];
+
+        this.chart.xAxis[0].setExtremes(firstBar.x, lastBar.x, redraw, false);
     }
 
     private _createChart(): void {
@@ -56,7 +69,7 @@ export class ChartDirective implements OnInit, AfterViewInit {
         let settings = _.cloneDeep(ThemeDefault);
 
         // create the chart
-        this.chart = HighStock.stockChart(this._elementRef.nativeElement, settings);
+        this.chart = HighStock.stockChart(this.elementRef.nativeElement, settings);
     }
 
     private async _fetch(from?: number, until?: number) {
@@ -66,7 +79,7 @@ export class ChartDirective implements OnInit, AfterViewInit {
         let {bars, indicators} = await this._instrumentsService.fetch(this.model, from, until);
 
         this._updateBars(bars);
-
+        this.updateIndicators(indicators);
     }
 
     private _updateBars(_data:any[] = []) {
@@ -85,10 +98,9 @@ export class ChartDirective implements OnInit, AfterViewInit {
             last = data.candles[data.candles.length-1];
 
         this.chart.series[0].setData(data.candles);
-        this.chart.xAxis[0].setExtremes(data.candles[data.candles.length-100][0], data.candles[data.candles.length-1][0]);
-
         this.chart.series[1].setData(data.volume);
 
+        this._updateZoom();
         this._setCurrentPricePlot(last);
     }
 
@@ -132,6 +144,7 @@ export class ChartDirective implements OnInit, AfterViewInit {
 
                 // Create
                 else {
+                    console.log(indicators);
 
                     this.chart.addSeries({
                         type: 'line',

@@ -5,7 +5,9 @@
                [ngClass]="{focused: chartBox.focus}"
                [model]="model"
                draggable
-               resizable (resized)="chartBox.resize.next()"
+               resizable
+               (onBeforeResize)="chartBox.forceChartInCorner($event)"
+               (onAfterResize)="chartBox.resetChart() && chartBox._chart.reflow()"
                (click)="toggleFocused(chartBox)">
     </chart-box>
 </div>

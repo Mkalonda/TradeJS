@@ -10,6 +10,8 @@ const interact = require('interactjs');
 export class ResizableDirective implements OnInit {
 
     @Output() public resized:EventEmitter<string> = new EventEmitter();
+    @Output() public onBeforeResize:EventEmitter<string> = new EventEmitter();
+    @Output() public onAfterResize:EventEmitter<string> = new EventEmitter();
 
     @Input()
     private _resizeHandle: HTMLElement;
@@ -27,11 +29,12 @@ export class ResizableDirective implements OnInit {
                 preserveAspectRatio: false,
                 edges: { left: true, right: true, bottom: true, top: true },
                 min: 100,
-                onend: () => {
-                    this.resized.next();
-                },
                 restrict: {
                     restriction: "parent"
+                },
+                onstart: (event) => {
+                    console.log(event.interaction.prepared.edges);
+                    this.onBeforeResize.emit(event.interaction.prepared.edges);
                 },
                 onmove: (event) => {
                     event.preventDefault();
@@ -62,8 +65,11 @@ export class ResizableDirective implements OnInit {
 
                     target.setAttribute('data-x', x);
                     target.setAttribute('data-y', y);
-                }
-            })
+                },
+                onend: () => {
+                    this.onAfterResize.next();
+                },
+            });
             //.allowFrom(this._elementRef.nativeElement);
             // .actionChecker((pointer, event, action, interactable, element) => {
             //     // Only listen to left mouse button

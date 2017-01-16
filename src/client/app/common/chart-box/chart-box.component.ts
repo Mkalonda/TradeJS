@@ -71,6 +71,30 @@ export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
         });
     }
 
+    public forceChartInCorner(edges) {
+        let el = this._chart.elementRef.nativeElement;
+
+        el.style.position = 'absolute';
+
+        if (edges.left) {
+            el.style.left = 0;
+            el.style.right = 'auto';
+        }
+
+        if (edges.right) {
+            el.style.left = 'auto';
+            el.style.right = 0;
+        }
+    }
+
+    public resetChart() {
+        let el = this._chart.elementRef.nativeElement;
+
+        el.style.position = 'static';
+
+        this._chart.reflow()
+    }
+
     toggleFocus(state: boolean) {
         if (this.focus === state)
             return;
