@@ -7,7 +7,7 @@ export class InstrumentModel extends BaseModel {
 
     public synced = new EventEmitter();
 
-    data = {
+    public data = {
         instrument: '',
         timeFrame: 'M15',
         id: '',
@@ -15,6 +15,12 @@ export class InstrumentModel extends BaseModel {
         indicators: [],
         bars: []
     };
+
+    constructor(data?: any) {
+        super();
+
+        this.set(data);
+    }
 
 
     updateBars(bars) {

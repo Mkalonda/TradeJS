@@ -1,17 +1,10 @@
-module.exports = (app, socket) => {
+import App from "../../_app";
+
+module.exports = (app: App, socket) => {
 
     // Create
-    socket.on('instrument:create', (data, cb) => {
-
-        app.controllers.instrument
-            .create(data.instrument, data.timeFrame, data.start)
-            .then(instrument => cb(null, {
-                id: instrument.id
-            }))
-            .catch(error => {
-                console.log(error);
-                cb('Could not create instrument');
-            });
+    socket.on('instrument:create', data => {
+        app.controllers.instrument.create(data.instrument, data.timeFrame, data.start).catch(() => {});
     });
 
     // Destroy
@@ -46,19 +39,9 @@ module.exports = (app, socket) => {
         }
     });
 
-    // Update
-    socket.on('instrument:update', data => {
-        app.controllers.instrument.update(data)
-    });
-
-    // Delete
-    socket.on('instrument:delete', data => {
-        app.controllers.instrument.remove(data.id)
-    });
-
     socket.on('instrument:chart-list', (data, cb) => {
 
-        let instruments = app.controllers.instrument._instruments,
+        let instruments = app.controllers.instrument.instruments,
             list = [],
             instrument, key;
 
@@ -71,6 +54,7 @@ module.exports = (app, socket) => {
                 instrument: instrument.instrument
             });
         }
+
         cb(null, list);
     });
 
@@ -87,7 +71,7 @@ module.exports = (app, socket) => {
     });
 
     socket.on('instrument:indicator:remove', async (data, cb) => {
-        cb(null, await app.controllers.instrument.remove(data));
+
     });
 
 };

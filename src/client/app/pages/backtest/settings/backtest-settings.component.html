@@ -1,91 +1,84 @@
-<div class="panel panel-default no-horizontal-border">
-    <div class="panel-heading">
-        <h3 class="panel-title">Settings</h3>
+<form role="form" class="form-horizontal" id="backtest-settings-form" [formGroup]="form" (ngSubmit)="onSubmit($event)">
+    <div class="form-input-block">
+        <label>EA Test</label>
+        <select class="form-control" name="ea">
+            <option value="default">DEFAULT</option>
+            <option value="default">DEFAULT</option>
+            <option value="default">DEFAULT</option>
+        </select>
     </div>
-    <div class="panel-body">
-        <div class="container-fluid">
-            <form role="form" class="form-horizontal" id="backtest-settings-form" [formGroup]="form" (ngSubmit)="onSubmit($event)">
-                <div class="form-group">
-                    <div class="col-sm-2">
-                        <label>EA Test</label>
-                        <select class="form-control" name="ea">
-                            <option value="default">DEFAULT</option>
-                            <option value="default">DEFAULT</option>
-                            <option value="default">DEFAULT</option>
-                        </select>
-                    </div>
-                    <div class="col-sm-2">
-                        <label>Instruments</label>
-                        <ss-multiselect-dropdown [options]="multiSelectOptions" (change)="onChange($event)" formControlName="instruments" [(ngModel)]="selectedOptions"></ss-multiselect-dropdown>
-                    </div>
-                    <div class="col-sm-2">
-                        <label>Time frame *</label>
-                        <select class="form-control" name="timeFrame" formControlName="timeFrame">
-                            <option value="M1">M1</option>
-                            <option value="M5">M5</option>
-                            <option value="M15">M15</option>
-                            <option value="M30">M30</option>
-                            <option value="H1">H1</option>
-                            <option value="H4">H4</option>
-                            <option value="D1">D1</option>
-                        </select>
-                    </div>
-                    <div class="col-sm-2">
-                        <label for="backtest-settings-from">From</label>
-                        <div class='input-group date'>
-                            <input id="backtest-settings-from"
-                                   type='date'
-                                   class="form-control"
-                                   name="from" data-date-picker
-                                   formControlName="from"
-                            />
-                            <span class="input-group-addon">
-                                                <span class="glyphicon glyphicon-calendar"></span>
-                                            </span>
-                        </div>
-                    </div>
-                    <div class="col-sm-2">
-                        <label for="backtest-settings-until">Until</label>
-                        <div class='input-group date'>
-                            <input id="backtest-settings-until"
-                                   type='date' class="form-control"
-                                   name="until"
-                                   data-date-picker
-                                   formControlName="until"
-                            />
-                            <span class="input-group-addon">
-                                                <span class="glyphicon glyphicon-calendar"></span>
-                                            </span>
-                        </div>
-                    </div>
-                    <div class="col-sm-2">
-                        <label>Starting Equality</label>
-                        <input type="number" class="form-control"
-                               formControlName="equality" name="equality"/>
-                    </div>
-                    <div class="col-sm-2">
-                        <label>Currency</label>
-                        <select class="form-control" name="currency" formControlName="currency">
-                            <option value="euro">EUR</option>
-                            <option value="dollar">DOLLAR</option>
-                        </select>
-                    </div>
-                    <div class="col-sm-2">
-                        <label>pips **</label>
-                        <select class="form-control" name="pips">
-                            <option value="1">1</option>
-                        </select>
-                    </div>
-                    <div class="col-sm-2 form-check" style="text-align: left;">
-                        <label class="form-check-label"></label>
-                        <input class="form-check-input" type="checkbox" value="">
-                        <span>Blow up the moon</span>
-                    </div>
-                    <div class="col-sm-2 pull-right">
-                        <button class="btn btn-primary pull-right" id="startBackTest" style="margin: 20px auto">Start</button>
-                    </div>
-                </div>
-            </form>
+    <div class="form-input-block">
+        <label>Instruments</label>
+        <ss-multiselect-dropdown
+                [options]="multiSelectOptions"
+                (change)="onChange($event)"
+                formControlName="instruments"
+                [(ngModel)]="_selectedOptions"></ss-multiselect-dropdown>
+    </div>
+    <div class="form-input-block">
+        <label>Time frame *</label>
+        <select class="form-control" name="timeFrame" formControlName="timeFrame">
+            <option value="M1">M1</option>
+            <option value="M5">M5</option>
+            <option value="M15">M15</option>
+            <option value="M30">M30</option>
+            <option value="H1">H1</option>
+            <option value="H4">H4</option>
+            <option value="D1">D1</option>
+        </select>
+    </div>
+    <div class="form-input-block">
+        <label for="backtest-settings-from">From</label>
+        <div class='input-group date'>
+            <input id="backtest-settings-from"
+                   type='date'
+                   class="form-control"
+                   name="from" data-date-picker
+                   formControlName="from"
+            />
+            <span class="input-group-addon">
+                <span class="glyphicon glyphicon-calendar"></span>
+            </span>
         </div>
     </div>
-</div>
+    <div class="form-input-block">
+        <label for="backtest-settings-until">Until</label>
+        <div class='input-group date'>
+            <input id="backtest-settings-until"
+                   type='date' class="form-control"
+                   name="until"
+                   data-date-picker
+                   formControlName="until"
+            />
+            <span class="input-group-addon">
+                                                <span class="glyphicon glyphicon-calendar"></span>
+                                            </span>
+        </div>
+    </div>
+    <div class="form-input-block">
+        <label>Starting Equality</label>
+        <input type="number" class="form-control"
+               formControlName="equality" name="equality"/>
+    </div>
+    <div class="form-input-block">
+        <label>Currency</label>
+        <select class="form-control" name="currency" formControlName="currency">
+            <option value="euro">EUR</option>
+            <option value="dollar">DOLLAR</option>
+        </select>
+    </div>
+    <div class="form-input-block">
+        <label>pips **</label>
+        <select class="form-control" name="pips">
+            <option value="1">1</option>
+        </select>
+    </div>
+    <div class="form-input-block form-check" style="text-align: left;">
+        <label class="form-check-label"></label>
+        <input class="form-check-input" type="checkbox" value="">
+        <span>Blow up the moon</span>
+    </div>
+    <div class="form-input-block pull-right">
+        <button class="btn btn-primary pull-right" id="startBackTest" style="margin: 20px auto">Start</button>
+    </div>
+</form>

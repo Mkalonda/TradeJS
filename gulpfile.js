@@ -239,18 +239,20 @@ gulp.task('custom:copy-assets', function(callback) {
  *
  **************************************************************/
 function killProcess(callback) {
-    if (node && node.pid) {
-        node.on('close', () => {
-            debug("Child closed");
-            typeof callback == 'function' && callback && callback();
-        });
+    try {
+        if (node && node.pid) {
+            node.on('close', () => {
+                debug("Child closed");
+                typeof callback == 'function' && callback && callback();
+            });
 
-        process.kill(-node.pid, 'SIGTERM');
+            process.kill();
 
-        node = null;
-    } else {
-        typeof callback == 'function' && callback();
-    }
+            node = null;
+        } else {
+            typeof callback == 'function' && callback();
+        }
+    } catch (error) {}
 }
 
 process.on('exit', () => {

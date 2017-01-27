@@ -1,5 +1,5 @@
 import * as _               from 'lodash';
-import {Directive, ElementRef, OnInit, Input, AfterViewInit} from '@angular/core';
+import {Directive, ElementRef, OnInit, Input, AfterViewInit, Output} from '@angular/core';
 import {InstrumentModel} from "../models/instrument.model";
 import * as moment          from 'moment/moment';
 
@@ -17,9 +17,9 @@ const HighStock = require('highcharts/highstock');
 
 export class ChartDirective implements OnInit, AfterViewInit {
 
-    @Input()
-    public model: InstrumentModel;
+    @Input() model: InstrumentModel;
 
+    public loading: boolean = true;
     public chart: any;
 
     constructor(
@@ -27,9 +27,7 @@ export class ChartDirective implements OnInit, AfterViewInit {
         private _instrumentsService: InstrumentsService) {
     }
 
-    ngOnInit() {
-
-    }
+    ngOnInit() {}
 
     ngAfterViewInit() {
         this._createChart();
@@ -76,6 +74,8 @@ export class ChartDirective implements OnInit, AfterViewInit {
         from = moment(new Date()).subtract(7, 'days').valueOf();
         until = Date.now();
 
+        this.loading = true;
+
         let {bars, indicators} = await this._instrumentsService.fetch(this.model, from, until);
 
         this._updateBars(bars);
@@ -102,6 +102,8 @@ export class ChartDirective implements OnInit, AfterViewInit {
 
         this._updateZoom();
         this._setCurrentPricePlot(last);
+
+        this.loading = false;
     }
 
     private _setCurrentPricePlot(bar) {
@@ -144,7 +146,6 @@ export class ChartDirective implements OnInit, AfterViewInit {
 
                 // Create
                 else {
-                    console.log(indicators);
 
                     this.chart.addSeries({
                         type: 'line',

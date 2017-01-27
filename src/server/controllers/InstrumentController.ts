@@ -1,19 +1,17 @@
-import * as fs      from 'fs';
 import * as path    from 'path';
 import WorkerHost   from '../classes/worker/WorkerHost';
+import Base         from "../classes/Base";
 
 const PATH_INSTRUMENT = path.join(__dirname, '../instrument/Instrument');
 
 
-export default class InstrumentController {
-
-    opt: Object;
+export default class InstrumentController extends Base {
 
     private _unique = 0;
     private _instruments = {};
 
     constructor(opt, protected app) {
-        this.opt = opt;
+        super(opt);
     }
 
     async init() {}
@@ -23,6 +21,16 @@ export default class InstrumentController {
     }
 
     async create(instrument:string, timeFrame:string, filePath:string = PATH_INSTRUMENT) {
+
+        if (!instrument) {
+            this.app.debug('error', 'InstrumentController:create - illegal instrument given');
+            return Promise.reject('InstrumentController:create - illegal instrument given');
+        }
+
+        if (!timeFrame) {
+            this.app.debug('error', 'InstrumentController:create - illegal timeFrame given');
+            return Promise.reject('InstrumentController:create - illegal timeFrame given');
+        }
 
         instrument  = instrument.toUpperCase();
         timeFrame   = timeFrame.toUpperCase();
@@ -48,6 +56,8 @@ export default class InstrumentController {
             up: true,
             worker: worker
         };
+
+        this.emit('created', this._instruments[id]);
 
         return this._instruments[id];
     }
@@ -114,10 +124,6 @@ export default class InstrumentController {
         return {id, data};
     }
 
-    remove() {
-
-    }
-
     async destroy(id:string) {
 
         if (this._instruments[id]) {
@@ -125,7 +131,7 @@ export default class InstrumentController {
             this._instruments[id] = null;
             delete this._instruments[id];
 
-            this.app.debug('info', 'Destroy - Successfully destroyed ' + id);
+            this.app.debug('info', 'Destroyed ' + id);
 
         } else {
             this.app.debug('error', 'Destroy - Could not find instrument ' + id);

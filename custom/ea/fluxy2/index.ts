@@ -8,10 +8,13 @@ export default class MyEA extends EA {
         this.addIndicator('MA', {
             color: 'blue'
         });
+        
+        
     }
 
-    onTick() {
-        super.onTick2222();
+    onTick(): Promise<any> {
+        super.onTick();
+        
+      
     }
-    
 }

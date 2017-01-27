@@ -4,6 +4,7 @@
                *ngFor="let model of _instrumentsService.instruments$ | async"
                [ngClass]="{focused: chartBox.focus}"
                [model]="model"
+               [startRandomized]="true"
                draggable
                resizable
                (onBeforeResize)="chartBox.forceChartInCorner($event)"

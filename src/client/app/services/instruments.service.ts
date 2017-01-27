@@ -24,49 +24,40 @@ export default class InstrumentsService {
     }
 
     init(): void {
-        this.loadRunningInstruments();
+        this._socketService.socket.on('instrument:created', (instrumentSettings:InstrumentSettings) =>
+           this.add(new InstrumentModel(instrumentSettings))
+        );
+
+        this._loadRunningInstruments();
     }
 
-    loadRunningInstruments() {
-        this._socketService.socket.emit('instrument:chart-list', {}, (err, list: InstrumentSettings[]) => {
+    public create(options: InstrumentSettings): void {
+        let model = new InstrumentModel(options);
 
-            if (err)
-                return console.error(err);
-
-            if (!list || !list.length)
-                list = this._defaults;
-
-            list.forEach((instrumentSettings: InstrumentSettings) => this.add(instrumentSettings));
+        this._socketService.socket.emit('instrument:create', {
+            instrument: model.data.instrument,
+            timeFrame: model.data.timeFrame,
+            //start: start
         });
     }
 
-    add(options) {
-        let model = new InstrumentModel();
-        model.set(options);
-
-        this._instruments.push(model);
+    public add(instrumentModel: InstrumentModel): void {
+        this._instruments.push(instrumentModel);
         this.instruments$.next(this._instruments);
 
-        if (!model.data.id)
-            this._createOnServer(model.data).then(options => {
-                model.set(options);
-
-                model.synced.emit(true);
-            });
+        // if (!model.data.id)
+        //     this._createOnServer(model.data).then(options => {
+        //         model.set(options);
+        //
+        //         model.synced.emit(true);
+        //     });
     }
 
-    remove(model: InstrumentModel) {
+    public remove(model: InstrumentModel) {
         this._instruments.splice(this._instruments.indexOf(model), 1);
         this.instruments$.next(this._instruments);
 
         return this._destroyOnServer(model);
-    }
-
-    set(model: InstrumentModel, index: number) {
-    }
-
-    findByIndex(index: number): InstrumentModel {
-        return this._instruments[index];
     }
 
     public fetch(model: InstrumentModel, from?: number, until?: number): Promise<any> {
@@ -104,23 +95,6 @@ export default class InstrumentsService {
         });
     }
 
-    private _createOnServer(instrumentSettings): Promise<InstrumentSettings> {
-
-        return new Promise((resolve, reject) => {
-
-            this._socketService.socket.emit('instrument:create', {
-                instrument: instrumentSettings.instrument,
-                timeFrame: instrumentSettings.timeFrame,
-                //start: start
-            }, (err, instrumentSettings: InstrumentSettings) => {
-                if (err)
-                    return reject(err);
-
-                resolve(instrumentSettings);
-            });
-        });
-    }
-
     private _destroyOnServer(model: InstrumentModel) {
         return new Promise((resolve, reject) => {
 
@@ -130,6 +104,23 @@ export default class InstrumentsService {
 
                 resolve();
             });
+        });
+    }
+
+    private _loadRunningInstruments() {
+        this._socketService.socket.emit('instrument:chart-list', {}, (err, list: InstrumentSettings[]) => {
+
+            if (err)
+                return console.error(err);
+
+            // Show server running instruments
+            if (list && list.length)
+                list.forEach((instrumentSettings: InstrumentSettings) => this.add(new InstrumentModel(instrumentSettings)));
+
+            // // Load some default instruments
+            // // TODO: Should be done by the server
+            // else
+            //     this._defaults.forEach(instrument => this.create(instrument));
         });
     }
 }

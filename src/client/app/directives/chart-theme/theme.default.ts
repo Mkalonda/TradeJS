@@ -36,6 +36,27 @@ export default {
         inputEnabled: false
     },
 
+    /**
+     * Supposed to fix cropping of bars on resize.
+     * But keep getting error 'Cannot read property 'dataGrouping' of undefined'
+     */
+    responsive2: {
+        rules: [{
+            chartOptions: {
+                plotOptions: {
+                    series: {
+                        dataGrouping: {
+                            groupPixelWidth: 30
+                        }
+                    }
+                }
+            },
+            condition: {
+                minWidth: 300
+            }
+        }]
+    },
+
     plotOptions: {
         bar: {
             minPointLength: 5

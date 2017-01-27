@@ -22,13 +22,13 @@ export default class Indicator {
         }
     }
 
-    async init() {}
+    async init(): Promise<any> {}
 
-    add(id, time, data) {
+    add(id, time, data): void {
         this.drawBuffers[id].data.push([time, data]);
     }
 
-    addDrawBuffer(settings: IDrawBufferSettings) {
+    addDrawBuffer(settings: IDrawBufferSettings): void {
         if (this.drawBuffers[settings.id])
             throw new Error(`Buffer with name [${settings.id}] already set!`);
 
@@ -36,7 +36,7 @@ export default class Indicator {
         this.drawBuffers[settings.id] = settings;
     }
 
-    getDrawBuffersData(count:number = 0, shift:number = 0) {
+    getDrawBuffersData(count:number = 0, shift:number = 0): {} {
         let data = {},
             buffLength, drawBuffer;
 
@@ -56,7 +56,7 @@ export default class Indicator {
         return data;
     }
 
-    _doCatchUp() {
+    _doCatchUp(): void {
         let len = this.ticks.length,
             i = 0;
 
@@ -65,5 +65,7 @@ export default class Indicator {
         }
     }
 
-    onTick(shift?: number){}
+    onTick(shift?: number): Promise<any> | void {
+
+    }
 }

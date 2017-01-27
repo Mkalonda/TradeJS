@@ -11,6 +11,8 @@ module.exports = (app, socket) => {
             data.instruments = data.instruments.split(',');
         }
 
+        console.log('INSDFDSF', data.instruments);
+
         // Ensure instruments are uppercase
         data.instruments = data.instruments.map(instr => instr.toUpperCase());
 

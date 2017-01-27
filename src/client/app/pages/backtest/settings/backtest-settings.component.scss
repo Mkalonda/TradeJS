@@ -28,6 +28,36 @@
     text-align: center;
 }
 
+.form-control {
+    height: 24px;
+}
+
+.form-input-block {
+    width: 150px;
+    margin: 10px;
+    float: left;
+    height: 50px;
+
+    .date {
+
+        input {
+            width: 130px;
+        }
+
+        .input-group-addon {
+            padding: 3px;
+        }
+    }
+
+    button.dropdown-toggle {
+        padding: 1px;
+    }
+}
+
+:host /deep/ ss-multiselect-dropdown .btn {
+    padding: 1px !important;
+}
+
 label {
     width: 100%;
 }

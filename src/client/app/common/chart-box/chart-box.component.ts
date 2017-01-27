@@ -1,6 +1,7 @@
+import * as _ from "lodash";
 import {DialogAnchorDirective} from "../../directives/dialoganchor.directive";
 import {
-    Component, OnDestroy, ElementRef, Input, Output, EventEmitter, ChangeDetectionStrategy, ViewChild,
+    Component, OnDestroy, ElementRef, Input, Output, EventEmitter, ViewChild,
     OnInit, AfterViewInit
 } from '@angular/core';
 
@@ -26,11 +27,12 @@ declare var $:any;
 export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
 
     @ViewChild(DialogAnchorDirective) private _dialogAnchor: DialogAnchorDirective;
-    @ViewChild(ChartDirective) private _chart: ChartDirective;
+    @ViewChild(ChartDirective) public chart: ChartDirective;
 
     @Input() model: InstrumentModel;
     @Input() focus: boolean = true;
     @Input() mode: string = 'windowed';
+    @Input() startRandomized: boolean = true;
 
     @Output() closed = new EventEmitter();
     @Output() focused = new EventEmitter();
@@ -50,11 +52,6 @@ export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
         this.$el = $(this._elementRef.nativeElement);
         this.$elLoadingOverlay = this.$el.find('.chart-loading-overlay');
 
-        // this.focus.subscribe(() => {
-        //     this._instrumentsService.toggleFocused(this.model);
-        //     this.putOnTop();
-        // });
-
         this.resize.subscribe(mode => {
             this.mode = mode || this.mode;
 
@@ -66,13 +63,34 @@ export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.restorePosition();
             }
             else {
-                this._chart.reflow();
+                this.chart.reflow();
             }
         });
+
+        if (this.startRandomized)
+            this.setRandomPosition();
+
+        this.putOnTop();
+    }
+
+    ngAfterViewInit() {
+        this.model.changed.subscribe(() => {});
+    }
+
+    public setRandomPosition() {
+        let pos = this._getRandomPosition();
+
+        this.setPosition(pos[0], pos[1]);
+    }
+
+    public setAsHighestPosition() {
+        let pos = this._getRandomPosition();
+
+        this.setPosition(pos[0], pos[1]);
     }
 
     public forceChartInCorner(edges) {
-        let el = this._chart.elementRef.nativeElement;
+        let el = this.chart.elementRef.nativeElement;
 
         el.style.position = 'absolute';
 
@@ -88,11 +106,11 @@ export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public resetChart() {
-        let el = this._chart.elementRef.nativeElement;
+        let el = this.chart.elementRef.nativeElement;
 
         el.style.position = 'static';
 
-        this._chart.reflow()
+        this.chart.reflow()
     }
 
     toggleFocus(state: boolean) {
@@ -103,16 +121,9 @@ export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
 
         if (state === true) {
             this.putOnTop();
-            this.focused.next()
         }
-    }
 
-    setBlurred() {
-        this.focus = false;
-    }
-
-    ngAfterViewInit() {
-        this.model.changed.subscribe(() => {});
+        //this.focused.next()
     }
 
     public putOnTop() {
@@ -120,20 +131,19 @@ export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
             highestIndex = selfIndex;
 
         this.$el.siblings().each((key, el) => {
-            let zIndex = parseInt(el.style.zIndex, 10);
+            let zIndex = parseInt(el.style.zIndex, 10) || 1;
 
             if (zIndex > highestIndex)
                 highestIndex = zIndex;
         });
 
-        if (selfIndex <= highestIndex)
-            this.$el.css('z-index', highestIndex + 1);
+        this.$el.css('z-index', selfIndex <= highestIndex ? highestIndex + 1 : highestIndex);
     }
 
     public setSize(width: number|string, height: number|string): void {
         this.$el.width(width).height(height);
 
-        this._chart.reflow();
+        this.chart.reflow();
     }
 
     public setPosition(top: number|string, left: number|string): void {
@@ -158,18 +168,18 @@ export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
         if (old)
             this.$el[0].style.cssText = old;
 
-        this._chart.reflow();
+        this.chart.reflow();
     }
 
 
     async addIndicator(name) {
-        let length = this._chart.chart.series[0].data.length,
+        let length = this.chart.chart.series[0].data.length,
             indicatorModel = await this.getIndicatorOptions(name);
 
         if (await this.showIndicatorOptionsMenu(indicatorModel))
 
             this.socket.emit('instrument:indicator:add', {id: this.model.data.id, name: name, options: indicatorModel.inputs, readCount: length, shift: 0}, (err, data) => {
-                this._chart.updateIndicators(data.data);
+                this.chart.updateIndicators(data.data);
             });
     }
 
@@ -181,7 +191,17 @@ export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
         });
     }
 
-    showIndicatorOptionsMenu(indicatorModel: IndicatorModel): Promise<IndicatorModel> {
+    private _getRandomPosition() {
+        let el = this._elementRef.nativeElement,
+            containerH = el.parentNode.clientHeight,
+            containerW = el.parentNode.clientWidth,
+            chartH = el.clientHeight,
+            chartW = el.clientWidth;
+
+        return [_.random(0, containerH - chartH), _.random(0, containerW - chartW)]
+    }
+
+    public showIndicatorOptionsMenu(indicatorModel: IndicatorModel): Promise<IndicatorModel> {
         return new Promise((resolve) => {
 
             this._dialogAnchor.createDialog(DialogComponent, {

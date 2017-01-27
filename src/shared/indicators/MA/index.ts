@@ -2,7 +2,7 @@ import Indicator from "../Indicator";
 
 export default class MA extends Indicator {
 
-    async init() {
+    async init(): Promise<any> {
 
         this.addDrawBuffer({
             id: 'MA',
@@ -13,7 +13,7 @@ export default class MA extends Indicator {
         });
     }
 
-    onTick(shift:number = 0) {
+    onTick(shift:number = 0): Promise<any> | void {
         let period = this.options.period,
             ticks = this.ticks.slice((this.ticks.length - shift) - period, this.ticks.length - shift);
 

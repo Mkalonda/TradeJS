@@ -51,11 +51,12 @@ export default class BackTest extends EventEmitter {
 
         await this.fetchAll();
 
+        // Create instrument instances
         this.EAs = await Promise.all(this.instruments.map(instrument => {
             return this.app.controllers.instrument.create(instrument, this.timeFrame, EAPath);
         }));
 
-
+        // Wait until all have finished
         await Promise.all(this.EAs.map(EA => {
 
             return new Promise((resolve, reject) => {
@@ -69,8 +70,10 @@ export default class BackTest extends EventEmitter {
             })
         }));
 
+        // Log finish time
         this.endTime = Date.now();
 
+        //
         this.report = await this.getReport();
 
         this._logReport(this.report);

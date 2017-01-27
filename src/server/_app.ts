@@ -54,11 +54,6 @@ export default class App extends Base {
         instrument: new InstrumentController({}, this)
     };
 
-    private _electron = {
-        init: false,
-        path: null
-    };
-
     private _ipc: IPC = new IPC({id: 'main'});
     private _http: any = null;
     private _io: any = null;
@@ -142,12 +137,7 @@ export default class App extends Base {
 
                 socket.emit('system:state', this.controllers.system.state);
 
-                this.debug('info', 'Successfully connected to server');
-            });
-
-            //
-            this.controllers.system.on('change', state => {
-                this._io.sockets.emit('system:state', state);
+                this.debug('info', 'Connected to server');
             });
 
             this._http.listen(port, () => {
@@ -156,6 +146,21 @@ export default class App extends Base {
                 this.debug('info', 'Public API started');
 
                 resolve();
+            });
+
+            /**
+             * Server events
+             */
+            this.controllers.system.on('change', state => {
+                this._io.sockets.emit('system:state', state);
+            });
+
+            this.controllers.instrument.on('created', instrument => {
+                this._io.sockets.emit('instrument:created', {
+                    id: instrument.id,
+                    timeFrame: instrument.timeFrame,
+                    instrument: instrument.instrument
+                });
             });
         });
     }
@@ -177,12 +182,11 @@ export default class App extends Base {
         });
     }
 
-    _setElectron(electron) {
-        this._electron = electron;
-    }
-
     debug(type: string, text: string, data?: Object, socket?: Socket) {
         let date = new Date();
+
+        if (type === 'error')
+            console.warn('ERROR', text);
 
         (socket || this._io.sockets).emit('debug', {
             time: date.getTime(),
@@ -190,7 +194,7 @@ export default class App extends Base {
             type: type,
             text: text,
             data: data
-        })
+        });
     }
 
     destroy() {

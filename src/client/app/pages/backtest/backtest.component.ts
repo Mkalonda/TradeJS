@@ -24,7 +24,8 @@ export class BacktestComponent implements AfterViewInit {
 
     socket: any;
 
-    constructor(socket: SocketService, private route: ActivatedRoute) {
+    constructor(socket: SocketService,
+                private route: ActivatedRoute) {
         this.socket = socket.socket;
     }
 
@@ -34,7 +35,7 @@ export class BacktestComponent implements AfterViewInit {
         if (params.run === "true")
             this.run();
 
-        this.backtestSettings.onSubmit = (event:Event) => {
+        this.backtestSettings.onSubmit = (event: Event) => {
             event.preventDefault();
 
             this.run();

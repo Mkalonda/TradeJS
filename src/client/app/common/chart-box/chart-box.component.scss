@@ -67,6 +67,11 @@
     }
 }
 
+.chart-content {
+    position: relative;
+    height:100%;
+}
+
 .chart-container {
     height: calc(100% - 30px);
 }

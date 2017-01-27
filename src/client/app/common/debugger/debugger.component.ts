@@ -14,7 +14,8 @@ export default class DebuggerComponent implements AfterViewInit {
 
     private _messages: Array<{
         type: string,
-        text: string
+        text: string,
+        data?: any
     }> = [];
 
     constructor(
@@ -38,8 +39,8 @@ export default class DebuggerComponent implements AfterViewInit {
             onDrag: function (e, $el, newWidth, newHeight) {
                 e.preventDefault();
 
-                if (newHeight > 200)
-                    newHeight = 200;
+                if (newHeight > 400)
+                    newHeight = 400;
                 if (newHeight < 18)
                     newHeight = 18;
 
