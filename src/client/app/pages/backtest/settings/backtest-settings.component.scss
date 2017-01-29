@@ -1,3 +1,5 @@
+@import '../../../style/variables/variables';
+
 #fileListContainer {
     width: 200px;
     border: 1px solid #c3c3c3;
@@ -28,32 +30,6 @@
     text-align: center;
 }
 
-.form-control {
-    height: 24px;
-}
-
-.form-input-block {
-    width: 150px;
-    margin: 10px;
-    float: left;
-    height: 50px;
-
-    .date {
-
-        input {
-            width: 130px;
-        }
-
-        .input-group-addon {
-            padding: 3px;
-        }
-    }
-
-    button.dropdown-toggle {
-        padding: 1px;
-    }
-}
-
 :host /deep/ ss-multiselect-dropdown .btn {
     padding: 1px !important;
 }
@@ -62,6 +38,9 @@ label {
     width: 100%;
 }
 
+.progress-bar {
+    background-color: #163024;
+}
 
 /** >>> .multiselect-native-select .btn-group {*/
     /*width: 100%;*/

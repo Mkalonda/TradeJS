@@ -4,10 +4,12 @@ import LoginComponent from "../../common/login/login.component";
 import {UserService} from "../../services/user.service";
 import {SystemService} from "../../services/system.service";
 
+declare var window: any;
+
 @Component({
     selector: 'app-header',
     templateUrl: './header.component.html',
-    styleUrls: ['./header.component.css']
+    styleUrls: ['./header.component.scss']
 })
 
 export default class HeaderComponent{
@@ -19,6 +21,19 @@ export default class HeaderComponent{
         protected userService: UserService,
         protected systemService: SystemService,
     ) {}
+
+    openEditor() {
+        let url = `${location.href.split('#')[0]}#/editor`,
+            win;
+
+        // Electron
+        if (window.electron) {
+            win = window.electron.openWindow(url);
+        }
+        else {
+            win = window.open(url, 'editor');
+        }
+    }
 
     onClickLogin() {
         this.userService.login();

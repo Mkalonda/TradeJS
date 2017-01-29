@@ -91,5 +91,12 @@
 <!-- Insert this line after script imports -->
 <script>if (window.module) module = window.module;</script>
 
+<script>
+    if (window && window.process && window.process.type) {
+        var el = document.createElement('script');
+        el.setAttribute('src','electron.js');
+        document.head.appendChild(el);
+    }
+</script>
 </body>
 </html>

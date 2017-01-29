@@ -1,0 +1,6 @@
+@import '../../style/variables/variables';
+
+:host {
+    background: #000;
+    border-top: 1px solid $border-color-grey;
+}

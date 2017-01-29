@@ -15,7 +15,7 @@ import {UserService}    from "./services/user.service";
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
-    styleUrls: ['./app.component.css'],
+    styleUrls: ['./app.component.scss'],
     //encapsulation: ViewEncapsulation.Native
 })
 
@@ -23,7 +23,6 @@ export class AppComponent implements AfterViewInit {
     socket: any;
 
     constructor(private element: ElementRef,
-                private user: UserService,
                 private constantsService: ConstantsService,
                 private socketService: SocketService,
                 private systemService: SystemService) {

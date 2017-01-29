@@ -1,9 +1,11 @@
 import * as path    from 'path';
+import * as _       from 'lodash';
 import WorkerHost   from '../classes/worker/WorkerHost';
 import Base         from "../classes/Base";
 
 const PATH_INSTRUMENT = path.join(__dirname, '../instrument/Instrument');
 
+const debug = require('debug')('TradeJS:InstrumentController');
 
 export default class InstrumentController extends Base {
 
@@ -21,6 +23,7 @@ export default class InstrumentController extends Base {
     }
 
     async create(instrument:string, timeFrame:string, filePath:string = PATH_INSTRUMENT) {
+        debug(`Creating instrument ${instrument}`);
 
         if (!instrument) {
             this.app.debug('error', 'InstrumentController:create - illegal instrument given');
@@ -63,6 +66,7 @@ export default class InstrumentController extends Base {
     }
 
     read(id:string, from:number, until:number, count:number, bufferOnly?:boolean) {
+        debug(`Reading instrument ${id}`);
 
         if (!this._instruments[id])
             return Promise.reject(`Reject: Instrument '${id}' does not exist`);
@@ -105,6 +109,7 @@ export default class InstrumentController extends Base {
         });
     }
 
+
     async addIndicator(params) {
         let id, data;
 
@@ -132,9 +137,12 @@ export default class InstrumentController extends Base {
             delete this._instruments[id];
 
             this.app.debug('info', 'Destroyed ' + id);
-
         } else {
             this.app.debug('error', 'Destroy - Could not find instrument ' + id);
         }
+    }
+
+    async destroyAll() {
+        return Promise.all(_.map(this._instruments, (instrument, id) => this.destroy(id)));
     }
 }

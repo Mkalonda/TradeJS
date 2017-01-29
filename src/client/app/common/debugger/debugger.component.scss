@@ -1,7 +1,10 @@
 @import '../../style/variables/variables';
 
+$header-height: 18px;
+$tabs-height: 18px;
+
 :host {
-    height: 18px;
+    height: $header-height;
     border-top: 1px solid $border-color-grey;
     position: relative;
     background: $background-dark;
@@ -26,18 +29,20 @@
     }
 }
 
-.debuggerBlock {
+.debugger-header {
     position: absolute;
-    top: 17px;
+    top: 0;
     left: 0;
     right: 0;
-    bottom: 0;
-    overflow: auto;
+    z-index: 2;
+    background: black;
+    height: $header-height;
+    border-bottom: 1px solid $border-color-grey;
 
-    width: 50%;
-    border-right: 1px solid $border-color-grey;
-
-    background: $background-light;
+    p {
+        font-size: 10px;
+        margin: 0 0 0 2px;
+    }
 }
 
 table {
@@ -56,11 +61,61 @@ table {
         font-size: 10px;
         padding: 0 0 0 5px;
         border-color: $border-color-grey;
+    }
+
+    th {
         color: $font-color-light;
+    }
+
+    td {
+        color: $font-color-light-gray
     }
 
     td:first-child {
         text-align: center;
+    }
+}
+
+.nav-tabs {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border: none;
+    background: black;
+    border-top: 1px solid $border-color-grey;
+
+    > li {
+        margin-bottom: 0;
+
+        &.active a {
+            background: $general-secondary;
+            color: $font-color-light;
+        }
+
+        a {
+            padding: 0 15px;
+            border-radius: 0;
+            margin-right: 0;
+            border: none;
+            line-height: $tabs-height;
+            border-right: 1px solid $border-color-grey;
+        }
+    }
+}
+
+.tabs-container {
+    height: 100%;
+}
+
+.tab-content {
+    height: calc(100% - #{$header-height + 1});
+    padding-top: $header-height;
+    background: $background-light;
+
+    > * {
+        overflow: auto;
+        height: 100%;
     }
 }
 
@@ -70,4 +125,8 @@ table {
 
 .fa-close {
     color: $general-error;
+}
+
+.fa-warning {
+    color: $general-warning;
 }

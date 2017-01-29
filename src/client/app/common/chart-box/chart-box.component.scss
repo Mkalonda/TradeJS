@@ -36,13 +36,13 @@
     border-color: #ad8f79;
 
     .chart-header {
-        background: $chart-header-background-focus;
+        background: $general-primary;
     }
 }
 
 .chart-header {
     background: $chart-header-background-blur;
-    padding: 4px 0;
+    padding: 2px 0;
 }
 
 .chart-title {

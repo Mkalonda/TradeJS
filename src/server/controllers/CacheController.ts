@@ -7,7 +7,7 @@ export default class CacheController {
 
     constructor(protected opt, protected app) {}
 
-    init() {
+    public init() {
         this._cache = new WorkerHost({
             id: 'cache',
             ipc: this.app._ipc,
@@ -24,7 +24,7 @@ export default class CacheController {
         return this._cache.init();
     }
 
-    read(instrument, timeFrame, from, until, bufferOnly) {
+    public read(instrument, timeFrame, from, until, bufferOnly) {
 
         return this
             ._cache
@@ -37,7 +37,7 @@ export default class CacheController {
             });
     }
 
-    fetch(instrument, timeFrame, from, until) {
+    public fetch(instrument, timeFrame, from, until) {
         return this
             ._cache
             .send('fetch', {
@@ -48,13 +48,18 @@ export default class CacheController {
             });
     }
 
-    reset() {
+    public reset() {
         return this
             ._cache
             .send('@reset');
     }
 
-    async updateSettings(settings) {
+    public async updateSettings(settings) {
         this._cache.send('broker:settings', settings);
+    }
+
+    public async destroy() {
+        if (this._cache)
+            return this._cache.kill();
     }
 }

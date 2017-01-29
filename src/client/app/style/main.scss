@@ -1,0 +1,126 @@
+@import 'variables/variables';
+
+html, body {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+}
+
+html {
+    /*
+    On OSX you can 'tilt' the screen up and down, so you see 'out of page' space
+    To blend in, the backgroudn has to be the same color as the header/footer
+     */
+    background: $background-dark;
+}
+
+body {
+    position: relative;
+    background: $background-light;
+    font-size: 12px;
+}
+
+@-webkit-keyframes animation {
+    0%     {background-color:white;}
+    100.0%  {background-color:#454443;}
+}
+
+@keyframes animation {
+    0%     {background-color:white;}
+    100.0%  {background-color:#454443;}
+}
+
+* {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+a, p, li, span, h1, h2, h3, h4, h5, h6, td, th, label {
+    color: white;
+}
+
+button {
+    color: black;
+}
+
+ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    cursor: pointer;
+}
+
+a:hover {
+    text-decoration: none;
+}
+
+ss-multiselect-dropdown > div,
+ss-multiselect-dropdown > div > button {
+    width: 100%;
+}
+
+.text-white {
+    color: #fff;
+}
+
+.text-dark {
+    color: #000
+}
+
+.key-value-list {
+    padding-left: 20px;
+    text-align: left;
+}
+
+.key-value-list li {
+    font-size: 12px;
+}
+
+.key-value-list span {
+    display: inline-block;
+    width: 100px;
+    font-weight: bold;
+}
+
+.key-value-list span:after {
+    content: ":";
+    width: 10px;
+    float: right;
+}
+
+.vertical-divider {
+    border-left:1px solid #38546d;
+    border-right:1px solid #16222c;
+    height:80px;
+    position:absolute;
+    right:249px;
+    top:10px;
+}
+
+.jstree-anchor {
+    color: white !important;
+}
+
+
+.r_flex_container {
+    display:flex;
+    flex-flow: column nowrap;
+
+    height: 100%;
+    flex-direction: column;
+    margin: 0;
+}
+
+.r_flex_fixed_child {
+    flex:none;
+}
+
+.r_flex_expand_child {
+    flex:auto;
+    overflow-y: auto;
+    position: relative;
+}

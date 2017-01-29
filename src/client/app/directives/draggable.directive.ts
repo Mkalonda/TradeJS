@@ -10,6 +10,10 @@ export class DraggableDirective implements OnInit {
     @Input()
     private _dragHandle: HTMLElement;
 
+    @Input() restrict: boolean = true;
+    @Input() direction: string = 'xy';
+    @Input() onDrag: Function = null;
+
     constructor(private _elementRef: ElementRef) {
     }
 
@@ -25,7 +29,7 @@ export class DraggableDirective implements OnInit {
     private _setUIHandles() {
 
         // temp
-        this._dragHandle = this._elementRef.nativeElement.querySelector('[data-drag-handle]');
+        this._dragHandle = this._elementRef.nativeElement.querySelector('[data-drag-handle]') || this._elementRef.nativeElement;
 
         interact(this._dragHandle)
             .draggable({
@@ -33,13 +37,13 @@ export class DraggableDirective implements OnInit {
                 inertia: true,
                 // keep the element within the area of it's parent
                 restrict: {
-                    restriction: this._elementRef.nativeElement.parentNode,
+                    restriction: this.restrict ? this._elementRef.nativeElement.parentNode : false,
                     endOnly: false,
                     elementRect: {top: 0, left: 0, bottom: 1, right: 1}
                 },
 
                 // call this function on every dragmove event
-                onmove: (event) => {
+                onmove:  this.onDrag || ((event) => {
                     event.preventDefault();
 
                     let target = this._elementRef.nativeElement;
@@ -54,7 +58,7 @@ export class DraggableDirective implements OnInit {
                     // update the posiion attributes
                     target.setAttribute('data-x', x);
                     target.setAttribute('data-y', y);
-                }
+                })
             })
     }
 }

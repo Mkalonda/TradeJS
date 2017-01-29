@@ -1,0 +1,18 @@
+header {
+    padding: 1em;
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    margin-top: 50px;
+    display: block;
+}
+
+// Mobile
+@media screen and (max-width: 768px) {
+    .three-column:first-child {
+        left: -100%;
+    }
+
+    .three-column:nth-child(2) {
+        left: 0;
+    }
+}

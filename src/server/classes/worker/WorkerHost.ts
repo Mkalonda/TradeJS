@@ -1,11 +1,9 @@
 declare var clearInterval:any;
 
-import {spawn, fork}    from 'child_process';
-import * as _           from 'lodash';
+import {fork, spawn}           from 'child_process';
 import * as _debug      from 'debug';
 import Base             from '../Base';
 
-const merge = require('deepmerge');
 const debug = _debug('TradeJS:WorkerHost');
 
 export default class WorkerHost extends Base {
@@ -36,6 +34,8 @@ export default class WorkerHost extends Base {
 
     async _fork() {
 
+        debug(`Creating | path=${this.opt.path}] | id=${this.id}`);
+
         // Merge given options
         let childArgv = JSON.stringify({
                 classArguments: this.opt.classArguments || {},
@@ -47,12 +47,13 @@ export default class WorkerHost extends Base {
 
             childOpt = {
                 stdio: ['pipe', process.stdout, process.stderr, 'ipc'],
-                //shell: true,
                 cwd: __dirname,
-                env: process.env
+                env: process.env,
             };
 
-        this._child = fork(this.opt.path, ['--harmony-async-await', ...process.execArgv, `--settings=${childArgv}`], childOpt);
+        // TODO - FUCKING ELECTRON!
+        //this._child = fork(this.opt.path, [...process.execArgv, `--settings=${childArgv}`], childOpt);
+        this._child = spawn('node', [this.opt.path, ...process.execArgv, `--settings=${childArgv}`], childOpt);
 
         this._child.on('close', code => {
             debug(`${this.id} exited with code ${code}`);
@@ -62,9 +63,10 @@ export default class WorkerHost extends Base {
         await new Promise((resolve, reject) => {
 
             this._child.once('message', message => {
-                if (message === '__ready')
-                    return resolve();
-                else {
+                if (message === '__ready') {
+                    debug(`Created | path=${this.opt.path} | id=${this.id} | pid=${this._child.pid}`);
+                    resolve();
+                } else {
                     reject(message);
                 }
             });

@@ -11,6 +11,17 @@
     left: 0;
     right: 0;
     overflow: hidden;
+    background: url('assets/img/charts-overview-background.jpg') repeat;
+}
+
+.chart-no-charts {
+    text-align:center;
+    padding: 20px;
+
+    p {
+        font-size: 20px;
+        color: $font-color-light-gray;
+    }
 }
 
 .chart-overview-tabs {
@@ -25,19 +36,19 @@
             border-right: 1px solid $border-color-grey;
 
             &:hover {
-                background: #ad8f79;
-                color: #000;
+                background: $general-secondary;
+                color: $font-color-dark;
             }
         }
 
         &.active > a {
-            background: $chart-header-background-focus !important;
-            color: #fff !important;
+            background: $general-primary !important;
+            color: $font-color-light !important;
         }
     }
 
     border-top: 1px solid $border-color-grey;
-    background: black;
+    background: $background-dark;
     position: absolute;
     left: 0;
     right: 0;

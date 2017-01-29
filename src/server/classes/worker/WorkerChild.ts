@@ -48,7 +48,6 @@ export default class WorkerChild extends Base {
 
         await this._ipc.init();
         await this._ipc.connectTo(this.workerOptions.parentId);
-
     }
 
     static _initAsWorker() {
@@ -58,12 +57,12 @@ export default class WorkerChild extends Base {
             let mainFile = null,
                 settings = JSON.parse((<any>minimist(process.argv.slice(2))).settings);
 
-            process.on('uncaughtException', err => {
+            process.once('uncaughtException', err => {
                 console.log('uncaughtException!', err);
                 exitHandler();
             });
 
-            process.on('unhandledRejection', err => {
+            process.once('unhandledRejection', err => {
                 console.log('unhandledRejection!', err);
                 exitHandler()
             });
@@ -73,8 +72,8 @@ export default class WorkerChild extends Base {
                 process.exit(code);
             }
 
-            process.on('exit', exitHandler);
-            process.on('SIGINT', exitHandler);
+            process.once('SIGINT', exitHandler);
+            process.once('SIGTERM', exitHandler);
 
             process.nextTick(async () => {
                 mainFile = require(process.mainModule.filename).default;
@@ -82,12 +81,8 @@ export default class WorkerChild extends Base {
                 if (typeof mainFile != 'function')
                     return;
 
-                debug(`Creating new [${mainFile.name}] instance with id [${settings.workerOptions.id}]`);
-
                 const instance = new mainFile(settings.classArguments, settings.workerOptions);
                 await instance.init();
-
-                debug(`Created new [${mainFile.name}] instance with id [${settings.workerOptions.id}]`);
 
                 process.send('__ready');
 

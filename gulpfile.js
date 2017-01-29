@@ -11,37 +11,23 @@ const
     debug = require('debug')('TradeJS:Gulp'),
     es = require("event-stream"),
     argv = require('minimist')(process.argv.slice(2)),
-    webpack = require('webpack-stream');
+    webpack = require('webpack-stream'),
 
-const PATH_APP_INIT_FILE = 'dist/server/app';
+    // TODO: Should not be necessary
+    kill = require('tree-kill'),
 
-let node = null;
+    PATH_APP_INIT_FILE = 'dist/server/app';
 
-gulp.task('server:dev', function(callback) {
-    runSequence('server:build:run', ['server:watch'], callback);
-});
+let child = null;
 
 /***************************************************************
  *
  * SERVER SERVER SERVER SERVER SERVER SERVER SERVER
  *
  **************************************************************/
-gulp.task('server:dev', function(callback) {
-    runSequence('server:build:run', ['server:watch'], callback);
-});
-
-gulp.task('server:kill', killProcess);
-
-gulp.task('server:run', function(callback) {
-
-    node = fork(PATH_APP_INIT_FILE, [...process.argv], {
-        detached: false,
-        env: process.env,
-        stdio: ['pipe', process.stdout, process.stderr, 'ipc']
-    });
-
-    callback();
-});
+gulp.task('server:dev', callback => runSequence('server:build:run', 'server:watch', callback));
+gulp.task('server:kill', killChildProcess);
+gulp.task('server:run', startChildProcess);
 
 gulp.task('server:build', function() {
 
@@ -60,8 +46,8 @@ gulp.task('server:build', function() {
     return es.merge(pipes);
 });
 
-gulp.task('server:build:run', function() {
-    runSequence('server:kill', ['copy-shared-assets', 'server:build'], 'server:run');
+gulp.task('server:build:run', ['server:kill'], function() {
+    runSequence(['copy-shared-assets', 'server:build'], 'server:run');
 });
 
 gulp.task('server:watch', [], function() {
@@ -80,9 +66,7 @@ gulp.task('copy-shared-assets', function() {
 *
 **************************************************************/
 
-gulp.task('client:prod', function(callback) {
-    runSequence('client:build:prod', callback);
-});
+gulp.task('client:prod', callback => runSequence('client:build:prod', callback));
 
 gulp.task('client:build:prod', function(callback) {
     const
@@ -163,29 +147,6 @@ gulp.task('custom:watch', function(callback) {
     callback();
 });
 
-function customBuild(inputPath, outputPath) {
-
-    return gulp.src(inputPath)
-        .pipe(webpack({
-            entry: path.join(inputPath, 'index'),
-            resolve: {
-                // Add `.ts` and `.tsx` as a resolvable extension.
-                extensions: ['.ts']
-            },
-            module: {
-                loaders: [
-                    // all files with a `.ts` or `.tsx` extension will be handled by `ts-loader`
-                    { test: /\.tsx?$/, loader: 'ts-loader' }
-                ]
-            },
-            alias: {
-
-            }
-        }))
-        .pipe(gulp.dest(outputPath));
-}
-
-
 gulp.task('custom:compile', function() {
 
     if (!argv['input-path'] || !argv['output-path'])
@@ -238,32 +199,43 @@ gulp.task('custom:copy-assets', function(callback) {
  * FORK FORK FORK FORK FORK FORK FORK
  *
  **************************************************************/
-function killProcess(callback) {
-    try {
-        if (node && node.pid) {
-            node.on('close', () => {
-                debug("Child closed");
-                typeof callback == 'function' && callback && callback();
-            });
+function startChildProcess(callback) {
+    child = fork(PATH_APP_INIT_FILE, [...process.argv], {
+        env: process.env,
+        stdio: ['pipe', process.stdout, process.stderr, 'ipc']
+    });
 
-            process.kill();
-
-            node = null;
-        } else {
-            typeof callback == 'function' && callback();
-        }
-    } catch (error) {}
+    callback();
 }
 
-process.on('exit', () => {
-    killProcess();
-    process.exit();
-});
-process.on('SIGINT', () => {
-    killProcess();
-    process.exit();
-});
-//process.on('SIGHUP', killProcess);
+function killChildProcess() {
+    return new Promise(resolve => {
+        if (child && child.pid && !child.isClosing) {
+            child.isClosing = true;
+            child.on('exit', () => {
+                child = null;
+                resolve();
+            });
+            child.kill();
+        }
+        else
+            resolve();
+    });
+}
+
+// function killChildProcess() {
+//     return new Promise(resolve => {
+//         if (child && child.pid)
+//             kill(child.pid, 'SIGTERM', err => {
+//                 if (err)
+//                     console.log(err);
+//
+//                 resolve();
+//             });
+//         else
+//             resolve();
+//     });
+// }
 
 /***************************************************************
  *

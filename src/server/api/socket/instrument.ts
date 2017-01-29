@@ -4,12 +4,11 @@ module.exports = (app: App, socket) => {
 
     // Create
     socket.on('instrument:create', data => {
-        app.controllers.instrument.create(data.instrument, data.timeFrame, data.start).catch(() => {});
+        app.controllers.instrument.create(data.instrument, data.timeFrame, data.start).catch(console.error);
     });
 
     // Destroy
     socket.on('instrument:destroy', (data, cb) => {
-
         app.controllers.instrument
             .destroy(data.id)
             .then(() => cb(null))
@@ -40,6 +39,7 @@ module.exports = (app: App, socket) => {
     });
 
     socket.on('instrument:chart-list', (data, cb) => {
+        console.log("asdfasdf", 'instrument:chart-list');
 
         let instruments = app.controllers.instrument.instruments,
             list = [],

@@ -1,0 +1,17 @@
+header {
+    padding: 1em;
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    margin-top: 50px;
+    display: block;
+}
+
+.navbar-nav > li > button {
+    padding: 0 5px;
+
+    i.fa {
+        font-size: 14px;
+        line-height: 20px;
+        display: block;
+    }
+}

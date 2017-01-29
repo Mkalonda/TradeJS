@@ -1,24 +1,32 @@
-$border-color-light               : #eee;
-$border-color-grey                : #8c8a8a;
+// Main colors
+$general-primary                    : #0e474e;
+$general-secondary                  : #825d42;
+$general-info                       : #12e4fa;
+$general-warning                    : #fada05;
+$general-error                      : #fa0014;
 
-$background-dark                  : #000;
-$background-light                 : #2d2d2d;
+// Backgrounds
+$background-dark                    : #000;
+$background-light                   : #222122;
+$background-light2                  : #2d2d2d;
 
-$general-info                     : #12e4fa;
-$general-warning                  : #fada05;
-$general-error                    : #fa0014;
+// Borders
+$border-color-light                 : #eee;
+$border-color-grey                  : #8c8a8a;
 
 // Text
-$font-color-light                 : #fff;
-$font-color-gray                  : #ccc;
-$font-color-dark                  : #000;
+$font-color-light                   : #fff;
+$font-color-light-gray              : #d2d0d0;
+$font-color-gray                    : #ccc;
+$font-color-dark                    : #000;
 
-
+// Form
+$input-color-background             : #6b6b6b;
+$input-color-border                 : #474747;
+$input-color-glyphicon-background   : #888;
 
 // Chart
-$chart-header-background-focus    : #0e474e;
-$chart-header-background-blur     : #6d6d6d;
-
+$chart-header-background-blur       : #6d6d6d;
 
 // Panel
-$panel-heading                    : #12132d;
+$panel-heading                      : #12132d;

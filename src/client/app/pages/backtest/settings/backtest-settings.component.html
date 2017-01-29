@@ -1,7 +1,7 @@
 <form role="form" class="form-horizontal" id="backtest-settings-form" [formGroup]="form" (ngSubmit)="onSubmit($event)">
     <div class="form-input-block">
-        <label>EA Test</label>
-        <select class="form-control" name="ea">
+        <label>EA</label>
+        <select class="form-control" name="ea" required>
             <option value="default">DEFAULT</option>
             <option value="default">DEFAULT</option>
             <option value="default">DEFAULT</option>
@@ -11,13 +11,14 @@
         <label>Instruments</label>
         <ss-multiselect-dropdown
                 [options]="multiSelectOptions"
+                [settings]="multiSelectSettings"
                 (change)="onChange($event)"
                 formControlName="instruments"
                 [(ngModel)]="_selectedOptions"></ss-multiselect-dropdown>
     </div>
     <div class="form-input-block">
         <label>Time frame *</label>
-        <select class="form-control" name="timeFrame" formControlName="timeFrame">
+        <select class="form-control" name="timeFrame" formControlName="timeFrame" required>
             <option value="M1">M1</option>
             <option value="M5">M5</option>
             <option value="M15">M15</option>
@@ -35,6 +36,7 @@
                    class="form-control"
                    name="from" data-date-picker
                    formControlName="from"
+                   required
             />
             <span class="input-group-addon">
                 <span class="glyphicon glyphicon-calendar"></span>
@@ -49,6 +51,7 @@
                    name="until"
                    data-date-picker
                    formControlName="until"
+                   required
             />
             <span class="input-group-addon">
                                                 <span class="glyphicon glyphicon-calendar"></span>
@@ -57,28 +60,37 @@
     </div>
     <div class="form-input-block">
         <label>Starting Equality</label>
-        <input type="number" class="form-control"
-               formControlName="equality" name="equality"/>
+        <input type="number"
+               class="form-control"
+               formControlName="equality"
+               name="equality"
+               required
+        />
     </div>
     <div class="form-input-block">
         <label>Currency</label>
-        <select class="form-control" name="currency" formControlName="currency">
+        <select class="form-control" name="currency" formControlName="currency" required>
             <option value="euro">EUR</option>
             <option value="dollar">DOLLAR</option>
         </select>
     </div>
     <div class="form-input-block">
         <label>pips **</label>
-        <select class="form-control" name="pips">
+        <select class="form-control" name="pips" required>
             <option value="1">1</option>
         </select>
     </div>
-    <div class="form-input-block form-check" style="text-align: left;">
-        <label class="form-check-label"></label>
-        <input class="form-check-input" type="checkbox" value="">
-        <span>Blow up the moon</span>
-    </div>
-    <div class="form-input-block pull-right">
-        <button class="btn btn-primary pull-right" id="startBackTest" style="margin: 20px auto">Start</button>
+
+    <div style="clear: both;">
+        <div class="progress" style="width: calc(100% - 80px); height: 22px; display: inline-block; margin-bottom: 0">
+            <div class="progress-bar" role="progressbar" aria-valuenow="70"
+                 aria-valuemin="0" aria-valuemax="100" style="width:0%">
+                <span class="sr-only">70% Complete</span>
+            </div>
+        </div>
+        <button *ngIf="_isRunning === false" class="btn btn-sm btn-primary pull-right">Start</button>
+        <button *ngIf="_isRunning === true" class="btn btn-sm btn-danger pull-right">Stop</button>
     </div>
 </form>
+
+<backtest-reports [report]="_report"></backtest-reports>

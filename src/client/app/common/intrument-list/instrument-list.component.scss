@@ -1,3 +1,5 @@
+@import '../../style/variables/variables';
+
 :host {
     height: 50%;
     position: absolute;
@@ -55,7 +57,6 @@ table {
 .fa {
     width: 10px;
     height: 10px;
-    margin-right: 4px;
 }
 
 .fa-arrow-up {

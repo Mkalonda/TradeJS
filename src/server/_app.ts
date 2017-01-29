@@ -1,15 +1,7 @@
-import Socket = SocketIO.Socket;
-
-require('source-map-support').install({
-    handleUncaughtExceptions: true
-});
-
-process.on("unhandledRejection", function (error) {
-    console.log("!unhandledRejection");
-    console.error('ERROR', error);
-});
-
+require('source-map-support').install({handleUncaughtExceptions: true});
 import './util/more-info-console';
+
+import Socket = SocketIO.Socket;
 
 import * as _               from 'lodash';
 import * as io              from 'socket.io';
@@ -59,11 +51,32 @@ export default class App extends Base {
     private _io: any = null;
     private _httpApi: any = null;
 
-    async init() {
-       return this._boot();
+    public init(): Promise<any> {
+        this._setProcessListeners();
+        return this._boot();
     }
 
-    async _boot() {
+    public debug(type: string, text: string, data?: Object, socket?: Socket): void {
+        let date = new Date();
+
+        if (type === 'error')
+            console.warn('ERROR', text);
+
+        socket = socket || this._io.sockets;
+
+        if (!socket)
+            return;
+
+        (socket || this._io.sockets).emit('debug', {
+            time: date.getTime(),
+            timePretty: date,
+            type: type,
+            text: text,
+            data: data
+        });
+    }
+
+    private async _boot() {
         let config;
 
         // First initialize config controller and set current config
@@ -76,7 +89,7 @@ export default class App extends Base {
 
         // Initialize all controllers (config is already initialized)
         await Promise.all(_.map(this.controllers, (c: any, name: string) => name !== 'config' && c.init()));
-
+        //
         // Initial attempt to connect with broker
         await this.controllers.broker.connect(config.account);
 
@@ -91,7 +104,7 @@ export default class App extends Base {
      *
      * @private
      */
-    async _initIPC() {
+    private async _initIPC() {
         await this._ipc.init();
         await this._ipc.startServer();
     }
@@ -100,7 +113,7 @@ export default class App extends Base {
      *
      * @private
      */
-    _initAPI() {
+    private _initAPI() {
 
         return new Promise(async(resolve, reject) => {
             debug('Starting API');
@@ -117,14 +130,15 @@ export default class App extends Base {
             this._httpApi.use(json());
             this._httpApi.use(urlencoded({extended: true}));
 
-            // Authentication routes
-            this._httpApi.use('/', require('./api/http/auth')(this));
-
+            // Index root
             this._httpApi.get('/', (req, res) => {
-                console.log(path.join(__dirname, '../client/index.html'));
+                console.log('asdasdasdasd', path.join(__dirname, '../client/index.html'));
 
                 res.sendFile(path.join(__dirname, '../client/index.html'));
             });
+
+            // Authentication routes
+            this._httpApi.use('/', require('./api/http/auth')(this));
 
             // Application routes
             this._io.on('connection', socket => {
@@ -165,7 +179,7 @@ export default class App extends Base {
         });
     }
 
-    _getFreePort() {
+    private _getFreePort() {
         return new Promise((resolve, reject) => {
             freePort(function (err, port) {
                 if (err) reject(err);
@@ -175,32 +189,42 @@ export default class App extends Base {
 
     }
 
-    _setTimezone(timeZone) {
+    private _setTimezone(timeZone) {
         return new Promise((resolve, reject) => {
             process.env.TZ = timeZone || DEFAULT_TIMEZONE;
             resolve();
         });
     }
 
-    debug(type: string, text: string, data?: Object, socket?: Socket) {
-        let date = new Date();
+    private _setProcessListeners() {
 
-        if (type === 'error')
-            console.warn('ERROR', text);
+        const processExitHandler = error => {
+            this.destroy().then(() => process.exit()).catch(console.error)
+        };
 
-        (socket || this._io.sockets).emit('debug', {
-            time: date.getTime(),
-            timePretty: date,
-            type: type,
-            text: text,
-            data: data
+        process.on("SIGTERM", processExitHandler);
+        process.on("SIGINT", processExitHandler);
+        process.on("unhandledRejection", error => {
+            console.log("!unhandledRejection");
+            console.error(error);
         });
     }
 
-    destroy() {
-        this._httpApi.close();
+    private async _killAllChildProcesses() {
+        await this.controllers.instrument.destroyAll();
+        await this.controllers.cache.destroy();
+    }
+
+    async destroy(): Promise<any> {
+        this.debug('warning', 'Shutting down server');
+
+        await this._killAllChildProcesses();
+
+        //this._httpApi.close();
         this._httpApi = null;
         this._http = null;
         this._io = null;
+
+        return;
     }
 }

@@ -18,6 +18,7 @@ const HighStock = require('highcharts/highstock');
 export class ChartDirective implements OnInit, AfterViewInit {
 
     @Input() model: InstrumentModel;
+    @Input() height: number;
 
     public loading: boolean = true;
     public chart: any;
@@ -30,7 +31,13 @@ export class ChartDirective implements OnInit, AfterViewInit {
     ngOnInit() {}
 
     ngAfterViewInit() {
+        if (this.height)
+            this.setHeight(this.height);
+
         this._createChart();
+
+        if (!this.model)
+            return;
 
         if (!this.model.data.id) {
             let subscription = this.model.synced.subscribe(() => {
@@ -41,6 +48,12 @@ export class ChartDirective implements OnInit, AfterViewInit {
         } else {
             this._fetch();
         }
+    }
+
+    public setHeight(height: number): void {
+        height = height || this.elementRef.nativeElement.parentNode.clientHeight;
+
+        this.elementRef.nativeElement.style.height = height + 'px';
     }
 
     public reflow() {

@@ -1,7 +1,7 @@
 import {Component, AfterViewInit, OnInit, ElementRef} from '@angular/core';
 import {CookieService} from 'angular2-cookie/core';
 import {FormBuilder, FormGroup} from "@angular/forms";
-import {IMultiSelectOption} from 'angular-2-dropdown-multiselect/src/multiselect-dropdown';
+import {IMultiSelectOption, IMultiSelectSettings} from 'angular-2-dropdown-multiselect/src/multiselect-dropdown';
 import {BacktestSettingsModel} from "./backtest-settings.model";
 import SocketService from "../../../services/socket.service";
 
@@ -17,6 +17,8 @@ export class BacktestSettingsComponent implements OnInit, AfterViewInit {
     // assign to a public property on our class
     // give it the type for our component
 
+    private _report: any = null;
+    private _isRunning: boolean = false;
     private _selectedOptions: number[];
     private _$el: any;
 
@@ -26,13 +28,19 @@ export class BacktestSettingsComponent implements OnInit, AfterViewInit {
         <any>{ id: 'EUR_USD', name: 'EUR_USD' },
         <any>{ id: 'USD_CAD', name: 'USD_CAD' }
     ];
+
+    private multiSelectSettings: IMultiSelectSettings = {
+        buttonClasses: 'btn btn-multi-select',
+        maxHeight: '200px',
+        showUncheckAll: true
+    };
     
     static defaults = {
         EA: '',
         instruments: [],
         timeFrame: 'M15',
-        from: new Date,
-        until: new Date,
+        from: new Date(),
+        until: new Date(),
         equality: 10000,
         currency: 'euro',
         pips: '10'
@@ -62,6 +70,7 @@ export class BacktestSettingsComponent implements OnInit, AfterViewInit {
     ngAfterViewInit(): void {}
 
     run() {
+        this._isRunning = true;
         this.toggleLoading(true);
 
         let data = Object.assign(this.model);
@@ -71,9 +80,8 @@ export class BacktestSettingsComponent implements OnInit, AfterViewInit {
         data.until = Date.now();
 
         this._socketService.socket.emit('backtest:run', data, (err, report) => {
-            // if (err)
-            //     return this.toggleErrorState(err);
-
+            this._report = report;
+            this._isRunning = false;
             this.toggleLoading(false);
         });
     }

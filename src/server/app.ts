@@ -4,6 +4,8 @@ import App              from './_app';
 
 const argv: any = minimist(process.argv.slice(2));
 
+console.log('APP, APP APP APP AP PP APPP');
+
 if (!argv.web) {
     require('../../electron')();
 }
@@ -22,7 +24,11 @@ const app = new App({
 
 export default app;
 
-app.init().catch(console.error);
+app.init().then(() => {
+    // if (!argv.web) {
+    //     require('../../electron')();
+    // }
+}).catch(console.error);
 
 
 /*

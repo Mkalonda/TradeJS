@@ -23,12 +23,12 @@
         "node_modules/jstree/dist/themes/default/style.css",
         "node_modules/jstree/dist/themes/default-dark/style.css",
 
+        "app/style/main.scss",
         "app/style/variables/_variables.scss",
         "app/style/helpers/spinner.scss",
         "app/style/helpers/spinner-button.scss",
         "app/style/helpers/three-column.scss",
-        "app/style/bootstrap-overwrite.scss",
-        "assets/css/main.css"
+        "app/style/bootstrap-overwrite.scss"
       ],
       "scripts": [
         "node_modules/bootstrap/dist/js/bootstrap.min.js",

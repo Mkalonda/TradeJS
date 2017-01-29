@@ -89,23 +89,18 @@ export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
         this.setPosition(pos[0], pos[1]);
     }
 
-    public forceChartInCorner(edges) {
+    public forceChartInCorner(edges): void {
         let el = this.chart.elementRef.nativeElement;
 
         el.style.position = 'absolute';
 
-        if (edges.left) {
-            el.style.left = 0;
-            el.style.right = 'auto';
-        }
-
-        if (edges.right) {
+        if (edges.right || edges.left) {
             el.style.left = 'auto';
             el.style.right = 0;
         }
     }
 
-    public resetChart() {
+    public unlockChartFromCorner(): void {
         let el = this.chart.elementRef.nativeElement;
 
         el.style.position = 'static';
@@ -113,7 +108,7 @@ export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
         this.chart.reflow()
     }
 
-    toggleFocus(state: boolean) {
+    toggleFocus(state: boolean): void {
         if (this.focus === state)
             return;
 

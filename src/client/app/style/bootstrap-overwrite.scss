@@ -32,7 +32,7 @@
     background: #000;
     border: none;
     border-radius: unset;
-    margin-bottom: 10px;
+    margin-bottom: 0;
 }
 
 .navbar-default .navbar-nav > li > a,
@@ -46,6 +46,10 @@
 .navbar-default .navbar-nav > li > a:hover,
 .navbar-default .navbar-header > a:hover {
     color: #f00;
+}
+
+.navbar-collapse {
+    padding-left: 0;
 }
 
 /* Medium Devices, Desktops */
@@ -76,9 +80,79 @@
     color: white;
 }
 
-.form-control {
-    background: #d2d2d2;
+/*** FORM FORM FORM ***/
+.form-input-block {
+
+    width: 150px;
+    margin: 10px 10px 10px 0;
+    float: left;
+    height: 50px;
+
+    input, select, .btn-multi-select {
+        border: 1px solid $input-color-border;
+        background-color: $input-color-background;
+        color: $font-color-light-gray;
+        height: 24px;
+
+        &:disabled {
+            color: $font-color-dark;
+            background-color: $input-color-background;
+
+        }
+    }
+
+    .input-group {
+
+        &.date {
+
+            .glyphicon-calendar {
+                color: $font-color-dark;
+            }
+            input {
+                width: 130px;
+            }
+
+            .input-group-addon {
+                padding: 3px;
+                border: none;
+                background-color: $input-color-glyphicon-background;
+            }
+        }
+    }
 }
+
+/** PROGRESS BAR **/
+.progress {
+    background: $input-color-glyphicon-background;
+}
+
+.btn-menu {
+    background: #878787;
+    background-image: -webkit-linear-gradient(top, #878787, #000000);
+    background-image: -moz-linear-gradient(top, #878787, #000000);
+    background-image: -ms-linear-gradient(top, #878787, #000000);
+    background-image: -o-linear-gradient(top, #878787, #000000);
+    background-image: linear-gradient(to bottom, #878787, #000000);
+    border-radius: 3px;
+    color: #ffffff;
+    text-decoration: none;
+
+    min-width: 30px;
+    text-align: center;
+    margin-right: 5px;
+    border: none
+}
+
+.btn-menu:hover {
+    background: #4d4d4d;
+    background-image: -webkit-linear-gradient(top, #4d4d4d, #000000);
+    background-image: -moz-linear-gradient(top, #4d4d4d, #000000);
+    background-image: -ms-linear-gradient(top, #4d4d4d, #000000);
+    background-image: -o-linear-gradient(top, #4d4d4d, #000000);
+    background-image: linear-gradient(to bottom, #4d4d4d, #000000);
+    text-decoration: none;
+}
+
 
 /*** BUTTON BUTTON **/
 .btn-sm {

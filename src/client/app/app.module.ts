@@ -4,8 +4,6 @@ import {NgModule} from '@angular/core';
 import {HttpModule} from '@angular/http';
 import {StoreDevtoolsModule} from '@ngrx/store-devtools';
 import {StoreLogMonitorModule, useLogMonitor} from '@ngrx/store-log-monitor';
-import {StoreModule} from '@ngrx/store';
-import {EffectsModule} from '@ngrx/effects';
 
 // Pages
 import {HomeComponent}    from './pages/home/home.component';
@@ -27,7 +25,7 @@ import JSEditorComponent  from './common/jseditor/jseditor.component';
 // Providers
 import SocketService from './services/socket.service';
 import {CookieService} from 'angular2-cookie/services/cookies.service';
-import {NgForm, FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 
 import {AppComponent} from './app.component';
 import {routing} from './app.routing';
@@ -92,12 +90,7 @@ import {ChartDirective} from "./directives/chart.directive";
         routing,
         FormsModule,
         ReactiveFormsModule,
-        StoreDevtoolsModule.instrumentStore({
-            monitor: useLogMonitor({
-                visible: true,
-                position: 'right'
-            })
-        }),
+        StoreDevtoolsModule.instrumentStore(),
         StoreLogMonitorModule,
         HttpModule,
         MultiselectDropdownModule,
