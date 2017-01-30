@@ -3,7 +3,6 @@ import './util/more-info-console';
 
 import Socket = SocketIO.Socket;
 
-import * as _               from 'lodash';
 import * as io              from 'socket.io';
 import * as cors            from 'cors';
 import * as http            from "http";
@@ -37,23 +36,58 @@ const
  */
 export default class App extends Base {
 
-    public controllers = {
-        config: new ConfigController(this.opt, this),
-        system: new SystemController({}, this),
-        broker: new BrokerController({}, this),
-        cache: new CacheController({path: this.opt.path.cache}, this),
-        editor: new EditorController({path: this.opt.path.custom}, this),
-        instrument: new InstrumentController({}, this)
-    };
+    public controllers: {
+        config?: ConfigController,
+        system?: SystemController,
+        broker?: BrokerController,
+        cache?: CacheController,
+        editor?: EditorController,
+        instrument?: InstrumentController
+    } = {};
 
     private _ipc: IPC = new IPC({id: 'main'});
     private _http: any = null;
     private _io: any = null;
     private _httpApi: any = null;
 
-    public init(): Promise<any> {
+    public get ipc() {
+        return this._ipc;
+    }
+
+    public async init(): Promise<any> {
+        // Make sure the app can be cleaned up on termination
         this._setProcessListeners();
-        return this._boot();
+
+        // Initialize ConfigController to build config object used throughout app
+        this.controllers.config = new ConfigController(this.opt, this);
+        let config = await this.controllers.config.init();
+
+        // Set timezone
+        await this._setTimezone(config.system.timezone);
+
+        // Create IPC hub
+        await this._initIPC();
+
+        // Create app controllers
+        this.controllers.system = new SystemController({}, this);
+        this.controllers.broker = new BrokerController({}, this);
+        this.controllers.cache = new CacheController({path: config.path.cache}, this);
+        this.controllers.editor = new EditorController({path: config.path.custom}, this);
+        this.controllers.instrument = new InstrumentController({}, this);
+
+        // Initialize controllers
+        await this.controllers.system.init();
+        await this.controllers.broker.init();
+        await this.controllers.cache.init();
+        await this.controllers.instrument.init();
+        await this.controllers.editor.init();
+
+        // Start public API so client can follow booting process
+        await this._initAPI();
+
+        this.controllers.system.update({booting: false});
+
+        this.emit('app:ready');
     }
 
     public debug(type: string, text: string, data?: Object, socket?: Socket): void {
@@ -62,10 +96,10 @@ export default class App extends Base {
         if (type === 'error')
             console.warn('ERROR', text);
 
-        socket = socket || this._io.sockets;
-
-        if (!socket)
+        if (!this._io || !this._io.sockets || !this._io.sockets.length)
             return;
+
+        socket = socket || this._io.sockets;
 
         (socket || this._io.sockets).emit('debug', {
             time: date.getTime(),
@@ -76,34 +110,6 @@ export default class App extends Base {
         });
     }
 
-    private async _boot() {
-        let config;
-
-        // First initialize config controller and set current config
-        await this.controllers.config.init();
-        config = await this.controllers.config.set(this.opt);
-
-        await this._setTimezone(config.system.timezone);
-        await this._initAPI();
-        await this._initIPC();
-
-        // Initialize all controllers (config is already initialized)
-        await Promise.all(_.map(this.controllers, (c: any, name: string) => name !== 'config' && c.init()));
-        //
-        // Initial attempt to connect with broker
-        await this.controllers.broker.connect(config.account);
-
-        this.emit('app:ready');
-
-        process && process.send && process.send('app:ready');
-
-        this.controllers.system.update({booting: false});
-    }
-
-    /**
-     *
-     * @private
-     */
     private async _initIPC() {
         await this._ipc.init();
         await this._ipc.startServer();
@@ -199,7 +205,7 @@ export default class App extends Base {
     private _setProcessListeners() {
 
         const processExitHandler = error => {
-            this.destroy().then(() => process.exit()).catch(console.error)
+            this.destroy().then(() => process.exit(0)).catch(console.error)
         };
 
         process.on("SIGTERM", processExitHandler);
@@ -216,6 +222,7 @@ export default class App extends Base {
     }
 
     async destroy(): Promise<any> {
+        debug('Shutting down and cleaning up child processes');
         this.debug('warning', 'Shutting down server');
 
         await this._killAllChildProcesses();

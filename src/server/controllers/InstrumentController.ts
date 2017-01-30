@@ -2,6 +2,7 @@ import * as path    from 'path';
 import * as _       from 'lodash';
 import WorkerHost   from '../classes/worker/WorkerHost';
 import Base         from "../classes/Base";
+import App from "../_app";
 
 const PATH_INSTRUMENT = path.join(__dirname, '../instrument/Instrument');
 
@@ -9,20 +10,23 @@ const debug = require('debug')('TradeJS:InstrumentController');
 
 export default class InstrumentController extends Base {
 
+    public ready = false;
+
     private _unique = 0;
     private _instruments = {};
+    private _instrumentList: Array<string> = [];
 
-    constructor(opt, protected app) {
+    constructor(opt, protected app: App) {
         super(opt);
     }
 
     async init() {}
 
-    get instruments() {
+    public get instruments() {
         return this._instruments;
     }
 
-    async create(instrument:string, timeFrame:string, filePath:string = PATH_INSTRUMENT) {
+    public async create(instrument:string, timeFrame:string, filePath:string = PATH_INSTRUMENT) {
         debug(`Creating instrument ${instrument}`);
 
         if (!instrument) {
@@ -41,7 +45,7 @@ export default class InstrumentController extends Base {
         let id = `${instrument}_${timeFrame}_${++this._unique}`;
 
         let worker = new WorkerHost({
-            ipc: this.app._ipc,
+            ipc: this.app.ipc,
             id: id,
             path: filePath,
             classArguments: {
@@ -65,7 +69,7 @@ export default class InstrumentController extends Base {
         return this._instruments[id];
     }
 
-    read(id:string, from:number, until:number, count:number, bufferOnly?:boolean) {
+    public read(id:string, from:number, until:number, count:number, bufferOnly?:boolean) {
         debug(`Reading instrument ${id}`);
 
         if (!this._instruments[id])
@@ -81,7 +85,7 @@ export default class InstrumentController extends Base {
             });
     }
 
-    getIndicatorData(params) {
+    public getIndicatorData(params) {
         if (!this._instruments[params.id])
             return Promise.reject(`Reject: Instrument '${params.id}' does not exist`);
 
@@ -93,7 +97,7 @@ export default class InstrumentController extends Base {
             });
     }
 
-    async getIndicatorOptions(params) {
+    public async getIndicatorOptions(params) {
 
         return new Promise((resolve, reject) => {
 
@@ -110,7 +114,7 @@ export default class InstrumentController extends Base {
     }
 
 
-    async addIndicator(params) {
+    public async addIndicator(params) {
         let id, data;
 
         id = await this.instruments[params.id].worker.send('indicator:add', {
@@ -129,7 +133,7 @@ export default class InstrumentController extends Base {
         return {id, data};
     }
 
-    async destroy(id:string) {
+    public destroy(id:string): void {
 
         if (this._instruments[id]) {
             this._instruments[id].worker.kill();
@@ -140,9 +144,16 @@ export default class InstrumentController extends Base {
         } else {
             this.app.debug('error', 'Destroy - Could not find instrument ' + id);
         }
+
     }
 
-    async destroyAll() {
+    public async destroyAll(): Promise<any> {
         return Promise.all(_.map(this._instruments, (instrument, id) => this.destroy(id)));
     }
+
+    // public isReady() {
+    //     if (
+    //         this._instrumentList.length &&
+    //     )
+    // }
 }

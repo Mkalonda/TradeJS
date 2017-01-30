@@ -3,12 +3,12 @@ import WorkerHost from '../classes/worker/WorkerHost';
 
 export default class CacheController {
 
-    private _cache: WorkerHost = null;
+    private _worker: WorkerHost = null;
 
     constructor(protected opt, protected app) {}
 
     public init() {
-        this._cache = new WorkerHost({
+        this._worker = new WorkerHost({
             id: 'cache',
             ipc: this.app._ipc,
             path: path.join(__dirname, '../cache/Cache.js'),
@@ -17,17 +17,17 @@ export default class CacheController {
             }
         });
 
-        this._cache._ipc.on('tick', tick => {
+        this._worker._ipc.on('tick', tick => {
             this.app._io.sockets.emit('tick', tick);
         });
 
-        return this._cache.init();
+        return this._worker.init();
     }
 
     public read(instrument, timeFrame, from, until, bufferOnly) {
 
         return this
-            ._cache
+            ._worker
             .send('read', {
                 instrument: instrument,
                 timeFrame: timeFrame,
@@ -39,7 +39,7 @@ export default class CacheController {
 
     public fetch(instrument, timeFrame, from, until) {
         return this
-            ._cache
+            ._worker
             .send('fetch', {
                 instrument: instrument,
                 timeFrame: timeFrame,
@@ -50,16 +50,20 @@ export default class CacheController {
 
     public reset() {
         return this
-            ._cache
+            ._worker
             .send('@reset');
     }
 
+    public getInstrumentList() {
+        return this._worker.send('instruments-list');
+    }
+
     public async updateSettings(settings) {
-        this._cache.send('broker:settings', settings);
+        this._worker.send('broker:settings', settings);
     }
 
     public async destroy() {
-        if (this._cache)
-            return this._cache.kill();
+        if (this._worker)
+            return this._worker.kill();
     }
 }

@@ -1,43 +1,59 @@
 import BrokerApi from "../broker-api/oanda";
+import Base from "../classes/Base";
 
-export default class BrokerController {
+const debug = require('debug')('TradeJS:BrokerController');
 
-    private _brokerApi: BrokerApi = new BrokerApi();
+export default class BrokerController extends Base {
 
-    constructor(protected opt, protected app) {}
+    private _brokerApi: BrokerApi;
+
+    constructor(protected opt, protected app) {
+        super(opt);
+    }
 
     async init() {
+        this._brokerApi = new BrokerApi(this.app.controllers.config.get().account);
         await this._brokerApi.init();
     }
 
-    get isConnected() {
-        return this._brokerApi.connected
-    }
 
-    async connect(accountSettings): Promise<boolean> {
-        let connected = false;
-
-        try {
-
-            this.app.controllers.config.set({account: accountSettings});
-
-            connected = await this._brokerApi.connect(accountSettings);
-        } catch (err) {
-            console.error(err);
-        }
-
-        this.app.controllers.system.update({loggedIn: connected});
-
-        return connected;
-    }
+    // async connect(accountSettings): Promise<boolean> {
+    //     if (this.isConnected)
+    //         return true;
+    //
+    //     debug('Connecting');
+    //
+    //     let connected = false;
+    //
+    //     try {
+    //         this.app.controllers.config.set({account: accountSettings});
+    //
+    //         connected = await this._brokerApi.connect(accountSettings);
+    //     } catch (err) {
+    //         console.error(err);
+    //     }
+    //
+    //     if (connected) {
+    //         debug('Connected');
+    //         this.emit('connected');
+    //     }
+    //
+    //     this.app.controllers.system.update({loggedIn: connected});
+    //
+    //     return connected;
+    // }
 
     async disconnect(): Promise<boolean> {
+        debug('Disconnecting');
+
+        this.emit('disconnected');
+
         await this.app.controllers.config.set({account: {}});
         await this.app.controllers.system.update({loggedIn: false});
 
         try {
-            await Promise.all([ this._brokerApi.kill(), this.app.controllers.cache.updateSettings({})])
-            await this._brokerApi.kill();
+            await Promise.all([ this._brokerApi.destroy(), this.app.controllers.cache.updateSettings({})])
+            await this._brokerApi.destroy();
 
             return true;
         } catch (error) {
@@ -46,10 +62,13 @@ export default class BrokerController {
         }
     }
 
-    async getInstrumentList(): Promise<any> {
-        if (!this.isConnected)
-            return Promise.reject([]);
+    async getInstrumentList(): Promise<any> | null {
+        debug('Loading instrument list');
 
-        return this._brokerApi.getInstruments();
+        try {
+            return await this._brokerApi.getInstruments();
+        } catch (error) {
+            return null;
+        }
     }
 }

@@ -9,13 +9,13 @@ module.exports = (app: App, socket) => {
 
     // Destroy
     socket.on('instrument:destroy', (data, cb) => {
-        app.controllers.instrument
-            .destroy(data.id)
-            .then(() => cb(null))
-            .catch(error => {
-                console.log(error);
-                cb('Could not destroy instrument');
-            });
+        app.controllers.instrument.destroy(data.id);
+        cb(null);
+            // .then(() => cb(null))
+            // .catch(error => {
+            //     console.log(error);
+            //     cb('Could not destroy instrument');
+            // });
     });
 
     // TODO: Move to cache API
@@ -39,8 +39,6 @@ module.exports = (app: App, socket) => {
     });
 
     socket.on('instrument:chart-list', (data, cb) => {
-        console.log("asdfasdf", 'instrument:chart-list');
-
         let instruments = app.controllers.instrument.instruments,
             list = [],
             instrument, key;
@@ -59,7 +57,12 @@ module.exports = (app: App, socket) => {
     });
 
     socket.on('instrument:list', async (data, cb) => {
-        cb(null, await app.controllers.broker.getInstrumentList());
+        try {
+            cb(null, await app.controllers.cache.getInstrumentList())
+        } catch (error) {
+            console.log(error);
+            cb(error);
+        }
     });
 
     socket.on('instrument:indicator:options', async (data, cb) => {

@@ -1,17 +1,15 @@
-import * as _       from 'lodash';
-import * as fs      from 'fs';
-import * as path    from 'path';
-import * as mkdirp  from 'mkdirp';
-import * as sqLite  from 'sqlite3';
+import * as path        from 'path';
+import * as mkdirp      from 'mkdirp';
 
-import Mapper       from './CacheMap';
-import Fetcher      from './CacheFetch';
-import WorkerChild  from "../classes/worker/WorkerChild";
-import BrokerApi    from "../broker-api/oanda";
-import BarCalculator from "./util/bar-calculator";
+import Mapper           from './CacheMap';
+import Fetcher          from './CacheFetch';
+import WorkerChild      from "../classes/worker/WorkerChild";
+import BrokerApi        from "../broker-api/oanda";
+import BarCalculator    from "./util/bar-calculator";
+import CacheDataLayer from "./CacheDataLayer";
 
 
-const TransactionDatabase = require("sqlite3-transactions").TransactionDatabase;
+const debug                 = require('debug')('TradeJS:Cache');
 
 //const sqlLite     = require('sqlite3').verbose();
 
@@ -19,70 +17,48 @@ export default class Cache extends WorkerChild {
 
     public settings: {account: AccountSettings, path: any} = this.opt.settings;
 
+    private _ready: boolean = false;
     private _brokerApi: BrokerApi = null;
 
-    private _pathDb: string = path.join(this.settings.path.cache, 'database.db');
+    private _dataLayer: CacheDataLayer;
     private _mapper: Mapper = new Mapper({path: this.settings.path.cache});
     private _fetcher: Fetcher = new Fetcher({mapper: this._mapper, brokerApi: this._brokerApi});
     private _barCalculator: BarCalculator = new BarCalculator();
+    private _instrumentList: Array<any> = [];
 
     private _listeners = {};
-    private _db: any;
 
-    async init() {
+    public async init() {
         await super.init();
 
         // Ensure cache dir exists
         mkdirp.sync(this.settings.path.cache);
 
-        await this._openDb();
+        this._dataLayer = new CacheDataLayer({
+            path: path.join(this.settings.path.cache, 'database.db')
+        });
+
+        await this._dataLayer.init();
         await this._mapper.init();
         await this._fetcher.init();
 
         await this._setChannelEvents();
         await this._setBrokerApi();
-
         await this._ipc.startServer();
     }
 
-    async _setBrokerApi() {
-
-        // Can also be third party broker API (in near future)
-        try {
-            this._brokerApi = new BrokerApi();
-
-            await this._brokerApi.init();
-
-            this._brokerApi.connect(this.settings.account);
-
-            this._brokerApi.once('connected', async () => {
-
-                this._setBrokerApiEvents();
-
-                let instruments = await <any>this._brokerApi.getInstruments();
-
-                instruments.forEach(instrument => {
-                    this._brokerApi.subscribePriceStream(instrument.instrument);
-                });
-            });
-
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
-    async read(instrument, timeFrame, from, until, bufferOnly) {
+    public async read(instrument, timeFrame, from, until, bufferOnly): Promise<any> {
 
         await this.fetch(instrument, timeFrame, from, until);
 
-        return this._read(instrument, timeFrame, from, until, bufferOnly);
+        return this._dataLayer.read(instrument, timeFrame, from, until, bufferOnly);
     }
 
-    async write(instrument, timeFrame, candles) {
-        return this._write(instrument, timeFrame, candles)
+    public async write(instrument, timeFrame, candles): Promise<any> {
+        return this._dataLayer.write(instrument, timeFrame, candles)
     }
 
-    async fetch(instrument, timeFrame, from, until) {
+    public async fetch(instrument, timeFrame, from, until) {
         let data = await this._fetcher.fetch(this._brokerApi, instrument, timeFrame, from, until);
 
         // Write to database
@@ -92,159 +68,11 @@ export default class Cache extends WorkerChild {
         return Promise.all(data.chunks.map(chunk => this._mapper.update(instrument, timeFrame, from, until)));
     }
 
-    async reset(instrument?: string, timeFrame?: string, from?: number, until?: number) {
-
-        await this._mapper.reset(instrument, timeFrame);
-        await this._closeDb();
-
-        if (fs.existsSync(this._pathDb))
-            fs.unlinkSync(this._pathDb);
-
-        await this._openDb();
-    }
-
-    _read(instrument: string, timeFrame: string, from: number, until: number, bufferOnly?: boolean, completeOnly: boolean = true) {
-
-        return new Promise((resolve, reject) => {
-
-            let tableName = this._getTableName(instrument, timeFrame),
-                columns = ['time', 'openBid', 'highBid', 'lowBid', 'closeBid', 'volume'];
-
-            this._db.all(`SELECT ${columns.join(',')} FROM ${tableName} WHERE time >=${from} AND time <=${until}`, (err, rows) => {
-
-                if (err) {
-                    return reject(err);
-                }
-
-
-                let i = 0, len = rows.length,
-                    row, returnArr = new Float64Array(rows.length * columns.length);
-
-                for (; i < len; i++) {
-                    row = rows[i];
-                    returnArr.set(columns.map(v => row[v]), 6 * i);
-                    //returnArr.set(Object.values(rows[i]), 6 * i); // Not yet supported
-                }
-
-                if (bufferOnly) {
-                    //resolve(returnArr.buffer);
-                    resolve(Array.from(returnArr));
-                } else {
-                    resolve(Array.from(returnArr));
-                }
-            });
-        });
-    }
-
-    /**
-     *
-     * @param instrument
-     * @param timeFrame
-     * @param candles
-     * @returns {Promise}
-     * @private
-     */
-    _write(instrument, timeFrame, candles) {
-        return new Promise((resolve, reject) => {
-
-            this._createInstrumentTableIfNotExists(instrument, timeFrame)
-                .then(tableName => {
-
-                    if (!candles.length)
-                        return resolve();
-
-                    this._db.beginTransaction((err, transaction) => {
-
-                        let stmt = transaction.prepare(`INSERT OR REPLACE INTO ${tableName} VALUES (?,?,?,?,?,?,?,?,?,?,?)`),
-                            i = 0, len = candles.length, candle;
-
-                        for (; i < len; i++) {
-                            candle = candles[i];
-
-                            stmt.run([
-                                candle.time,
-                                candle.openBid,
-                                candle.openAsk,
-                                candle.highBid,
-                                candle.highAsk,
-                                candle.lowBid,
-                                candle.lowAsk,
-                                candle.closeBid,
-                                candle.closeAsk,
-                                candle.volume,
-                                candle.complete
-                            ]);
-
-                            if (!candle.complete) {
-                                //console.log(candle.time)
-                            }
-                        }
-
-                        stmt.finalize();
-
-                        transaction.commit(function(err) {
-                            if (err) return reject(err);
-
-                            resolve();
-                        });
-
-                    });
-                })
-                .catch(reject);
-        });
-    }
-
-    /**
-     *
-     * @param instrument {string}
-     * @param timeFrame {string}
-     * @returns {Promise}
-     * @private
-     */
-    _createInstrumentTableIfNotExists(instrument, timeFrame) {
-        return new Promise((resolve, reject) => {
-
-            this._db.serialize(() => {
-                let tableName = this._getTableName(instrument, timeFrame),
-                    fields = [
-                        'time int PRIMARY KEY',
-                        'openBid double',
-                        'openAsk double',
-                        'highBid double',
-                        'highAsk double',
-                        'lowBid double',
-                        'lowAsk double',
-                        'closeBid double',
-                        'closeAsk double',
-                        'volume int',
-                        'complete bool'
-                    ];
-
-                this._db.run(`CREATE TABLE IF NOT EXISTS ${tableName} (${fields.join(',')})`, function () {
-                    resolve(tableName);
-                });
-            });
-        })
-    }
-
-    _getTableName(instrument, timeFrame) {
-        return instrument.toLowerCase() + '_' + timeFrame.toLowerCase();
-    }
-
-    _setBrokerApiEvents() {
-        this._brokerApi.on('connect', api => {
-
-        });
-
-        this._brokerApi.on('disconnect', error => {
-
-        });
-
-        this._brokerApi.on('error', error => {
-
-        });
-
-        this._brokerApi.on('tick', tick => this._broadCastTick(tick));
+    public async reset(instrument?: string, timeFrame?: string, from?: number, until?: number) {
+        return Promise.all([
+            this._mapper.reset(instrument, timeFrame),
+            this._dataLayer.reset()
+        ]);
     }
 
     _broadCastTick(tick) {
@@ -260,15 +88,7 @@ export default class Cache extends WorkerChild {
 
     }
 
-    _onRegisterPriceStream() {
-
-    }
-
-    _onUnRegisterPriceStream() {
-
-    }
-
-    _setChannelEvents() {
+    private _setChannelEvents() {
         this._ipc.on('read', (opt, cb) => {
             if (!opt.until)
                 return cb('Error - Cache:read - No until is given');
@@ -303,25 +123,59 @@ export default class Cache extends WorkerChild {
             cb(null);
         });
 
-        this._ipc.on('broker:settings', async(opt, cb) => {
-            try {
-                cb(null, await this._brokerApi.connect(opt));
-            } catch (err) {
-                console.error(err);
-            }
+        this._ipc.on('instruments-list', (opt, cb) => {
+            cb(null, this._instrumentList);
+        });
+
+        this._ipc.on('broker:settings', async (accountSettings: AccountSettings, cb) => {
+            this.settings.account = accountSettings;
+            await this._setBrokerApi();
         });
     }
 
-    _openDb() {
-        this._db = new TransactionDatabase(
-            new sqLite.Database(this._pathDb)
-        );
-        //this._db = new sqlLite.Database('database.db');
-        //this._db = new sqLite.Database(this._pathDb);
-        //this._db = new sqlLite.Database(':memory:');
+    private async _setBrokerApi(): Promise<void> {
+        if (this._brokerApi)
+            await this._brokerApi.destroy();
+
+        this._brokerApi = new BrokerApi(this.settings.account);
+        await this._brokerApi.init();
+
+        this._brokerApi.on('error', error => {});
+        this._brokerApi.on('tick', tick => this._broadCastTick(tick));
+
+        if (
+            await this._loadAvailableInstruments() === true &&
+            await this._openTickStream() === true
+        ) {
+            this._ready = true;
+        }
     }
 
-    _closeDb() {
-        this._db.close();
+    private async _loadAvailableInstruments(): Promise<boolean> {
+        debug('loading instruments list');
+
+        try {
+            let instrumentList = await this._brokerApi.getInstruments();
+
+            // Do not trust result
+            if (typeof instrumentList.length != 'undefined')
+                this._instrumentList = instrumentList;
+
+            return true;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+
+    private async _openTickStream(): Promise<any> {
+        debug('opening tick stream');
+
+        try {
+            await Promise.all(this._instrumentList.map(instrument => this._brokerApi.subscribePriceStream(instrument.instrument)));
+            return true;
+        } catch (error) {
+            return false;
+        }
     }
 }

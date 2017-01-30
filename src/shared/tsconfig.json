@@ -8,7 +8,6 @@
     "sourceMap": true,
     "rootDir": "./",
     "target": "es6",
-    "listFiles": true,
     "typeRoots": [
       "../../node_modules/@types"
     ]

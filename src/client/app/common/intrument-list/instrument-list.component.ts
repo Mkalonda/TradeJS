@@ -24,7 +24,8 @@ export default class InstrumentListComponent implements OnInit, OnDestroy {
         this.socketService.socket.on('tick', this.onTick.bind(this));
 
         this.socketService.socket.emit('instrument:list', {}, (err, instrumentList) => {
-            this.instruments = instrumentList.map(instrument => instrument.instrument);
+            if (instrumentList)
+                this.instruments = instrumentList.map(instrument => instrument.instrument);
         });
         this.onTick = this.onTick.bind(this);
     }
