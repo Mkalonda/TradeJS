@@ -16,16 +16,7 @@ module.exports.getDataFilePath = (instrument, timeFrame, year, month) => {
     return `${PATH_DATA}/${instrument}/${year}/${month}_${timeFrame}.bars`;
 };
 
-/**
- *
- * Looks for gaps between date ranges
- *
- * @param from {Number}
- * @param until {Number}
- * @param ranges {Array}
- * @returns {Array}
- */
-module.exports.getGapsInDateRanges = (from:number, until:number, ranges: Array<any> = []) => {
+export function getGapsInDateRanges (from:number, until:number, ranges: Array<any> = []) {
     let chunks = [],
         i = 0, len = ranges.length, range,
         _from = from;
@@ -39,18 +30,18 @@ module.exports.getGapsInDateRanges = (from:number, until:number, ranges: Array<a
         range = ranges[i];
 
         // Cache is complete or from is higher then until, we can stop looping
-        if (range.from <= from && range.until >= until) {
+        if (range[0] <= from && range[1] >= until) {
             _from = until;
             break;
         }
 
         // Range hasn't gotten to from date yet, so continue
-        if (range.until < from)
+        if (range[1] < from)
             continue;
 
         // This range is lower then the current _from time, so we can go ahead to its until time
-        if (range.from <= _from) {
-            _from = range.until;
+        if (range[0] <= _from) {
+            _from = range[1];
         }
         // This range is higher then the current _from time, so we are missing a piece
         else {
@@ -58,10 +49,10 @@ module.exports.getGapsInDateRanges = (from:number, until:number, ranges: Array<a
 
             chunks.push({
                 from: _from,
-                until: range.from
+                until: range[0]
             });
 
-            _from = range.until;
+            _from = range[1];
         }
     }
 
@@ -74,68 +65,7 @@ module.exports.getGapsInDateRanges = (from:number, until:number, ranges: Array<a
     }
 
     return chunks;
-};
-
-/**
- *
- * Looks for missing bars
- *
- * @param timeFrame
- * @param from
- * @param until
- * @param candles
- */
-module.exports.fillMissingCandles =  (timeFrame, from, until, candles) => {
-    let i = 0, len = candles.length,
-        prevCandle, candle;
-
-    for (; i < len; i++) {
-        candle = candles[i];
-
-        // First candle, check if from is reached
-        if (i === 0) {
-
-        }
-
-        // Last candle, check if until is reached
-        if (i === len-1) {
-
-        }
-
-        prevCandle = candle;
-    }
-};
-
-/**
- *
- * @param instrument
- * @param timeFrame
- * @param list
- */
-module.exports.glueRangeDates = (instrument, timeFrame, ranges) => {
-    let prevUntil = null,
-        i = 0, len = ranges.length,
-        date;
-
-    for (; i < len; i++) {
-        date = ranges[i];
-
-        // From date matches, glue 2 dates together
-        if (date.from === prevUntil) {
-            // Set previous until to current until
-            ranges[i-1].until = date.until;
-
-            // Remove current date fromt he list
-            ranges.splice(i, 1);
-
-            // Set the loop back 1 counter
-            i--;
-            len--;
-        }
-
-        prevUntil = date.until;
-    }
-};
+}
 
 /**
  *

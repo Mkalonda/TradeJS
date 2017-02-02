@@ -374,11 +374,9 @@ OandaAdapter.prototype.getCandles = function (symbol, start, end, granularity, c
     }, function (err, body) {
         if (body && body.candles) {
             callback(null, body.candles);
-        } else if (body === "") {
+        } else {
             // Body is an empty string if there are no candles to return
             callback(null, []);
-        } else {
-            callback("Unexpected candles response for " + symbol);
         }
     });
 };

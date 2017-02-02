@@ -55,7 +55,13 @@ export default class WorkerChild extends Base {
         if (typeof process != 'undefined') {
 
             let mainFile = null,
-                settings = JSON.parse((<any>minimist(process.argv.slice(2))).settings);
+                settings = JSON.parse((<any>minimist(process.argv.slice(2))).settings),
+                id = settings.workerOptions.id,
+
+                exitHandler = (code?:number) => {
+                    debug(`${id} exit: ${code}`);
+                    process.exit(code);
+                };
 
             process.once('uncaughtException', err => {
                 console.log('uncaughtException!', err);
@@ -66,11 +72,6 @@ export default class WorkerChild extends Base {
                 console.log('unhandledRejection!', err);
                 exitHandler()
             });
-
-            function exitHandler(code?:number) {
-                debug(`Exiting [${mainFile ? mainFile.name : 'unknown'}]: ${code}`);
-                process.exit(code);
-            }
 
             process.once('SIGINT', exitHandler);
             process.once('SIGTERM', exitHandler);

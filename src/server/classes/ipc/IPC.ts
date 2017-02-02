@@ -40,7 +40,7 @@ export default class IPC extends Base {
      * @returns {Promise}
      */
     startServer() {
-        debug(`${this.id} is starting ${this.env} server`);
+        debug(`${this.id} is starting IPC server`);
 
         if (this.env === 'node') {
             return this._startServerNode();
@@ -55,7 +55,7 @@ export default class IPC extends Base {
      * @returns {Promise}
      */
     connectTo(workerId) {
-        debug(`${this.id} is connecting to ${workerId}`);
+        debug(`${this.id} connecting to ${workerId}`);
 
         if (this.env === 'node') {
             return this._connectToNode(workerId);

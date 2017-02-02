@@ -58,14 +58,14 @@ export default class Cache extends WorkerChild {
         return this._dataLayer.write(instrument, timeFrame, candles)
     }
 
-    public async fetch(instrument, timeFrame, from, until) {
+    public async fetch(instrument, timeFrame, from, until): Promise<void> {
         let data = await this._fetcher.fetch(this._brokerApi, instrument, timeFrame, from, until);
 
         // Write to database
         await this.write(instrument, timeFrame, data.candles);
 
-        // Store in mapping
-        return Promise.all(data.chunks.map(chunk => this._mapper.update(instrument, timeFrame, from, until)));
+        // Store in mapper
+        await this._mapper.update(instrument, timeFrame, from, until);
     }
 
     public async reset(instrument?: string, timeFrame?: string, from?: number, until?: number) {

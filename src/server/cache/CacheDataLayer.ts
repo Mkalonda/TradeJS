@@ -45,7 +45,8 @@ export default class CacheDataLayer {
         });
     }
 
-    public write(instrument, timeFrame, candles) {
+    public async write(instrument, timeFrame, candles) {
+
         return new Promise((resolve, reject) => {
 
             this._createInstrumentTableIfNotExists(instrument, timeFrame)
@@ -136,6 +137,14 @@ export default class CacheDataLayer {
             fs.unlinkSync(this.options.path);
 
         await this._openDb();
+    }
+
+    public readLast2() {
+        setTimeout(() => {
+            this._db.run(`SELECT * FROM ${tableName} LIMIT 10 OFFSET (SELECT COUNT(*) FROM ${tableName})-10;  (${fields.join(',')})`, function () {
+               console.log()
+            });
+        }, 500);
     }
 
     private _getTableName(instrument, timeFrame): string {

@@ -96,7 +96,7 @@ export default class WorkerHost extends Base {
         });
     }
 
-    kill() {
-        this._child.kill();
+    kill(code?: number) {
+        this._child.kill(code);
     }
 }
