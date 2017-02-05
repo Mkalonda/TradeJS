@@ -7,7 +7,7 @@ declare var window: any;
 
 export default class IPC extends Base {
 
-    id: string|number;
+    id: string | number;
     env: string;
     sockets: any = {};
 
@@ -119,9 +119,9 @@ export default class IPC extends Base {
         this._ipc = require('node-ipc');
 
         this._ipc.config.id                 = this.id;
-        this._ipc.config.retry              = 1500;
+        this._ipc.config.retry              = 5;
         this._ipc.config.silent             = true;
-        this._ipc.config.logInColor         = false;
+        this._ipc.config.logInColor         = true;
         this._ipc.config.requiresHandshake  = true;
     }
 

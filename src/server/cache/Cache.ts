@@ -6,7 +6,7 @@ import Fetcher          from './CacheFetch';
 import WorkerChild      from "../classes/worker/WorkerChild";
 import BrokerApi        from "../broker-api/oanda";
 import BarCalculator    from "./util/bar-calculator";
-import CacheDataLayer from "./CacheDataLayer";
+import CacheDataLayer   from "./CacheDataLayer";
 
 
 const debug                 = require('debug')('TradeJS:Cache');
@@ -59,13 +59,23 @@ export default class Cache extends WorkerChild {
     }
 
     public async fetch(instrument, timeFrame, from, until): Promise<void> {
-        let data = await this._fetcher.fetch(this._brokerApi, instrument, timeFrame, from, until);
+        let result = null;
 
-        // Write to database
-        await this.write(instrument, timeFrame, data.candles);
+        try {
+            result = await this._fetcher.fetch(this._brokerApi, instrument, timeFrame, from, until);
+        } catch (error) {
+            console.log(error)
+        }
 
-        // Store in mapper
-        await this._mapper.update(instrument, timeFrame, from, until);
+        // Only continue if returned data seems alright
+        if (result && result.candles) {
+
+            // Write to database
+            await this.write(instrument, timeFrame, result.candles);
+
+            // Store in mapper
+            await this._mapper.update(instrument, timeFrame, from, until);
+        }
     }
 
     public async reset(instrument?: string, timeFrame?: string, from?: number, until?: number) {

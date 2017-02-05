@@ -8,18 +8,30 @@ import * as rmdir from 'rmdir';
 
 export default class Mapper {
 
+    public static readonly MODE_PERSISTENT:number = 0;
+    public static readonly MODE_MEMORY:number = 1;
+
     private _map: any = {};
+    private _mode: number;
 
     public get map() {
         return this._map;
     }
 
+    public get mode() {
+        return this._mode;
+    }
+
     constructor(private options:any = {}) {}
 
     public async init() {
+
         if (this.options.path) {
-            this.options.path = path.join(this.options.path, 'database.map.json');
-            return this._loadFromFile();
+            this._mode = Mapper.MODE_PERSISTENT;
+            this.options.path = path.join(this.options.path, 'database-map.json');
+            await this._loadFromFile();
+        } else {
+            this._mode = Mapper.MODE_MEMORY;
         }
     }
 
@@ -45,10 +57,17 @@ export default class Mapper {
             map[instrument][timeFrame] = mergeRanges(ranges);
 
             // Persistent mode
-            if (!this._map)
-                fs.writeFileSync(this.options.path, JSON.stringify(map, null, 2));
+            if (this.mode === Mapper.MODE_PERSISTENT) {
+                fs.writeFile(this.options.path, JSON.stringify(map, null, 2), err => {
+                    if (err)
+                        reject(err);
 
-            resolve();
+                    resolve();
+                });
+            }
+            else {
+                resolve();
+            }
         });
     }
 
@@ -60,19 +79,19 @@ export default class Mapper {
 
         return new Promise((resolve, reject) => {
 
-            if (this._map) {
-                this._map = {};
-                return resolve();
+            this._map = {};
+
+            if (this.mode === Mapper.MODE_PERSISTENT) {
+
+                // Remove cache dir recursive
+                rmdir(this.options.path, () => {
+
+                    // Recreate cache dir
+                    mkdirp(this.options.path, () => {
+                        resolve();
+                    })
+                });
             }
-
-            // Remove cache dir recursive
-            rmdir(this.options.path, () => {
-
-                // Recreate cache dir
-                mkdirp(this.options.path, () => {
-                    resolve();
-                })
-            })
         });
     }
 

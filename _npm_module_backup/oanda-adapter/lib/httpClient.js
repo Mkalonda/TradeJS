@@ -111,7 +111,7 @@ module.exports = {
             request.removeAllListeners();
         });
 
-        request.once("error", options.onError || function (error) {
+        request.on("error", options.onError || function (error) {
             //console.error("[ERROR] HTTPS IN ", options.hostname, options.port, options.method, options.path, error);
             callback(error, null, 500);
         });

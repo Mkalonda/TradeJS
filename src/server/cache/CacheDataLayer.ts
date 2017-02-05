@@ -139,13 +139,13 @@ export default class CacheDataLayer {
         await this._openDb();
     }
 
-    public readLast2() {
-        setTimeout(() => {
-            this._db.run(`SELECT * FROM ${tableName} LIMIT 10 OFFSET (SELECT COUNT(*) FROM ${tableName})-10;  (${fields.join(',')})`, function () {
-               console.log()
-            });
-        }, 500);
-    }
+    // public readLast2() {
+    //     setTimeout(() => {
+    //         this._db.run(`SELECT * FROM ${tableName} LIMIT 10 OFFSET (SELECT COUNT(*) FROM ${tableName})-10;  (${fields.join(',')})`, function () {
+    //            console.log()
+    //         });
+    //     }, 500);
+    // }
 
     private _getTableName(instrument, timeFrame): string {
         return instrument.toLowerCase() + '_' + timeFrame.toLowerCase();

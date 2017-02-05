@@ -1,3 +1,4 @@
+import AccountController from "./controllers/AccountController";
 require('source-map-support').install({handleUncaughtExceptions: true});
 import './util/more-info-console';
 
@@ -38,6 +39,7 @@ export default class App extends Base {
 
     public controllers: {
         config?: ConfigController,
+        account?: AccountController,
         system?: SystemController,
         broker?: BrokerController,
         cache?: CacheController,
@@ -71,6 +73,7 @@ export default class App extends Base {
         // Create app controllers
         this.controllers.system = new SystemController({}, this);
         this.controllers.broker = new BrokerController({}, this);
+        this.controllers.account = new AccountController({}, this);
         this.controllers.cache = new CacheController({path: config.path.cache}, this);
         this.controllers.editor = new EditorController({path: config.path.custom}, this);
         this.controllers.instrument = new InstrumentController({}, this);
@@ -96,12 +99,13 @@ export default class App extends Base {
         if (type === 'error')
             console.warn('ERROR', text);
 
-        if (!this._io || !this._io.sockets || !this._io.sockets.length)
+        if (!this._io || !this._io.sockets) {
             return;
+        }
 
         socket = socket || this._io.sockets;
 
-        (socket || this._io.sockets).emit('debug', {
+        socket.emit('debug', {
             time: date.getTime(),
             timePretty: date,
             type: type,
@@ -110,7 +114,7 @@ export default class App extends Base {
         });
     }
 
-    private async _initIPC() {
+    private async _initIPC(): Promise<void> {
         await this._ipc.init();
         await this._ipc.startServer();
     }
@@ -119,7 +123,7 @@ export default class App extends Base {
      *
      * @private
      */
-    private _initAPI() {
+    private _initAPI(): Promise<void> {
 
         return new Promise(async(resolve, reject) => {
             debug('Starting API');

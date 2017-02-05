@@ -26,7 +26,7 @@ export default class ConfigController {
 
     constructor(protected opt: IAppConfig, protected app) {}
 
-    async init() {
+    async init(): Promise<IAppConfig> {
         return this.set(await this._load());
     }
 

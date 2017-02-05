@@ -49,7 +49,7 @@ export default class BackTest extends EventEmitter {
 
         this.startTime = Date.now();
 
-        await this.fetchAll();
+        await this.preFetch();
 
         // Create instrument instances
         this.EAs = await Promise.all(this.instruments.map(instrument => {
@@ -81,7 +81,7 @@ export default class BackTest extends EventEmitter {
         return this.report;
     }
 
-    async fetchAll() {
+    async preFetch() {
         this.startFetchingTime = Date.now();
         await Promise.all(this.instruments.map(instrument => this.app.controllers.cache.fetch(instrument, this.timeFrame, this.from, this.until)));
         this.endFetchingTime = Date.now();

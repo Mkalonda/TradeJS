@@ -88,6 +88,10 @@
     float: left;
     height: 50px;
 
+    .form-control {
+        padding: 0 0 0 12px;
+    }
+
     input, select, .btn-multi-select {
         border: 1px solid $input-color-border;
         background-color: $input-color-background;
