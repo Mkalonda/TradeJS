@@ -24,6 +24,7 @@ export default class ChartOverviewComponent implements OnInit {
                 private _socketService: SocketService) {
     }
 
+    
     ngOnInit() {
         this._instrumentsService.instruments$.subscribe(instruments => {
             this.setFocusToHighestIndex();

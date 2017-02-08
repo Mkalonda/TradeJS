@@ -22,7 +22,7 @@ export default class Instrument extends InstrumentCache {
         }
     }
 
-    addIndicator(name, options)  {
+    addIndicator(name, options): any {
         let indicator = null;
 
         try {

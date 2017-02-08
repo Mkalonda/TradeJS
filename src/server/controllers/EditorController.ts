@@ -60,20 +60,21 @@ export default class EditorController {
         })
     }
 
-    private _compile(inputPath, outputPath) {
-
-        return new Promise((resolve, reject) => {
-
-            let childOpt = {
-                    stdio: ['pipe', process.stdout, process.stderr, 'ipc'],
-                    //shell: true,
-                    cwd: __dirname,
-                    env: process.env
-                },
-                child = spawn('gulp', ['custom:build', `--input-path=${inputPath}`, `--output-path=${outputPath}`], childOpt);
-
-            child.on('close', resolve);
-        });
+    private async _compile(inputPath, outputPath) {
+        // Should only be run when triggered when running without file watchers
+        return Promise.resolve();
+        // return new Promise((resolve, reject) => {
+        //
+        //     let childOpt = {
+        //             stdio: ['pipe', process.stdout, process.stderr, 'ipc'],
+        //             //shell: true,
+        //             cwd: __dirname,
+        //             env: process.env
+        //         },
+        //         child = spawn('gulp', ['custom:build', `--input-path=${inputPath}`, `--output-path=${outputPath}`], childOpt);
+        //
+        //     child.on('close', resolve);
+        // });
     }
 
 

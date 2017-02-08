@@ -123,9 +123,9 @@ export default class App extends Base {
      *
      * @private
      */
-    private _initAPI(): Promise<void> {
+    private _initAPI(): Promise<any> {
 
-        return new Promise(async(resolve, reject) => {
+        return new Promise((resolve, reject) => {
             debug('Starting API');
 
             let port = this.controllers.config.get().system.port;

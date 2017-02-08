@@ -1,6 +1,7 @@
 'use strict';
 
 const
+    fs = require('fs'),
     path = require('path'),
     gulp = require('gulp'),
     sourcemaps = require('gulp-sourcemaps'),
@@ -27,7 +28,7 @@ let child = null;
  **************************************************************/
 gulp.task('server:dev', callback => runSequence('server:build:run', 'server:watch', callback));
 gulp.task('server:kill', killChildProcess);
-gulp.task('server:run', startChildProcess);
+gulp.task('server:run', ['custom:watch'], startChildProcess);
 
 gulp.task('server:build', function() {
 
@@ -46,16 +47,16 @@ gulp.task('server:build', function() {
     return es.merge(pipes);
 });
 
-gulp.task('server:build:run', ['server:kill'], function() {
+gulp.task('server:build:run', ['server:kill'], () => {
     runSequence(['copy-shared-assets', 'server:build'], 'server:run');
 });
 
-gulp.task('server:watch', [], function() {
-    gulp.watch(['./src/server/**/*.ts', './src/shared/**/*.ts', '!./src/shared/_builds/**/*'], ['server:build:run']);
+gulp.task('server:watch', callback => {
+    gulp.watch(['./src/server/**/*.ts', './src/shared/**/*.ts', '!./src/shared/_builds/**/*'], ['server:build:run'], callback);
 });
 
-/** TEMP NEEDED TO COPY OVER JSON FILES TO DIST FOLDER **/
-gulp.task('copy-shared-assets', function() {
+/** NEEDED TO COPY OVER JSON FILES TO DIST FOLDER **/
+gulp.task('copy-shared-assets', () => {
     gulp.src(['./src/shared/**/*.json', '!**/tsconfig.json'])
         .pipe(gulp.dest('./dist/shared'));
 });
@@ -66,9 +67,7 @@ gulp.task('copy-shared-assets', function() {
 *
 **************************************************************/
 
-gulp.task('client:prod', callback => runSequence('client:build:prod', callback));
-
-gulp.task('client:build:prod', function(callback) {
+gulp.task('client:build', (callback) => {
     const
         outputPath = path.join(__dirname, 'dist', 'client'),
         buildNode = spawn('./node_modules/.bin/ng', ['build', '--prod', `--output-path=${outputPath}`], {
@@ -81,7 +80,7 @@ gulp.task('client:build:prod', function(callback) {
     })
 });
 
-gulp.task('copy-client-assets', function() {
+gulp.task('copy-client-assets', () => {
     gulp.src(['./src/client/**/*.html', '!**/index.html'])
         .pipe(gulp.dest('./dist/client'));
 });
@@ -91,23 +90,21 @@ gulp.task('copy-client-assets', function() {
  * CUSTOM CUSTOM CUSTOM CUSTOM CUSTOM
  *
  **************************************************************/
-gulp.task('custom:build', function(callback) {
-    callback();
-    //runSequence('custom:compile', 'custom:copy-assets', callback);
+gulp.task('custom:build', ['custom:compile', 'custom:copy-assets'], function() {
+    console.log('adfsaf');
 });
 
-gulp.task('custom:watch', function(callback) {
-
+gulp.task('custom:watch', (callback) => {
     const watcher = gulp.watch('custom/**/*');
-    console.log('WATCH WATCH!');
+
     watcher.on('change', function(event) {
 
         let inputPath = _getInputAbsoluteRootFolder(event.path),
             outputPath = _getOutputAbsoluteRootFolder(event.path);
+        console.log('outputPath',  outputPath);
+        console.log('outputPath', 'outputPath', 'outputPath', 'outputPath', 'outputPath', outputPath);
 
-        console.log('outputPath', 'outputPath', 'outputPath', 'outputPath', 'outputPath', inputPath);
-
-        let tsProject   = ts.createProject(`./custom/tsconfig.json`),
+        let tsProject = ts.createProject(`./custom/tsconfig.json`),
             tsResult = gulp.src(`${inputPath}/**/*.ts`)
             .pipe(sourcemaps.init()) // This means sourcemaps will be generated
             .pipe(tsProject());
@@ -154,14 +151,30 @@ gulp.task('custom:compile', function() {
 
     console.log('argv argv', argv);
 
+    // let inputPath = _getInputAbsoluteRootFolder(event.path),
+    //     outputPath = _getOutputAbsoluteRootFolder(event.path);
+
+    // console.log('outputPath',  outputPath);
+    // console.log('outputPath', 'outputPath', 'outputPath', 'outputPath', 'outputPath', outputPath);
+
     let pipes = [argv['input-path']].map(dir => {
+        console.log('dir', 'dir', dir, argv['output-path']);
 
         return gulp.src(argv['input-path'])
             .pipe(webpack({
-                entry: dir,
+                entry: dir + '/',
                 resolve: {
+                    root: dir,
                     // Add `.ts` and `.tsx` as a resolvable extension.
-                    extensions: ['.ts', '.js']
+                    extensions: ['.ts', '.js'],
+                    alias: {
+                        'tradejs/ea': path.join(__dirname, '/src/server/ea/EA'),
+                        'tradejs/indicator/*': path.join(__dirname, '../dist/shared/indicators/*'),
+                        'tradejs/indicator': path.join(__dirname, '../dist/shared/indicators/Indicator')
+                    },
+                    modulesDirectories: [
+                        'node_modules'
+                    ]
                 },
                 module: {
                     loaders: [
@@ -169,20 +182,9 @@ gulp.task('custom:compile', function() {
                         { test: /\.tsx?$/, loader: 'ts-loader' }
                     ]
                 },
-                alias: {
-
-                }
+                externals: []
             }))
             .pipe(gulp.dest(argv['output-path']));
-
-        // return gulp.src(`${dir}/**/*.*`)
-        //     .pipe(ts({
-        //         allowJs: true,
-        //         noImplicitAny: true,
-        //         target: 'es6',
-        //         module: "commonjs"
-        //     }))
-        //     .pipe(gulp.dest(argv['output-path']));
     });
 
     return es.merge(pipes);
@@ -191,6 +193,9 @@ gulp.task('custom:compile', function() {
 gulp.task('custom:copy-assets', function(callback) {
     gulp.src([argv['input-path'] + '/**/*', '!**/.ts'])
         .pipe(gulp.dest(argv['input-path']))
+        .on('error', (error) => {
+            console.log(error);
+        })
         .on('end', callback);
 });
 
@@ -208,6 +213,7 @@ function startChildProcess(callback) {
     callback();
 }
 
+
 function killChildProcess() {
     return new Promise(resolve => {
         if (child && child.pid && !child.isClosing) {
@@ -222,20 +228,6 @@ function killChildProcess() {
             resolve();
     });
 }
-
-// function killChildProcess() {
-//     return new Promise(resolve => {
-//         if (child && child.pid)
-//             kill(child.pid, 'SIGTERM', err => {
-//                 if (err)
-//                     console.log(err);
-//
-//                 resolve();
-//             });
-//         else
-//             resolve();
-//     });
-// }
 
 /***************************************************************
  *

@@ -26,7 +26,7 @@ export default class BrokerController extends Base {
             delete require.cache[path.resolve(filePath)];
 
             // Load the new BrokerApi
-            let BrokerApi = require(filePath);
+            let BrokerApi = require(filePath).default;
             this._brokerApi = new BrokerApi(this.app.controllers.config.get().account);
             await this._brokerApi.init();
 
@@ -36,13 +36,14 @@ export default class BrokerController extends Base {
 
         } catch (error) {
             this._ready = false;
-            this.emit('ready-state', {state: false})
-            console.log(error);
+            this.emit('ready-state', {state: false});
+            console.log('Error creating broker API \n\n', error);
         }
     }
 
     public getAccounts(): Promise<Array<any>> {
-        return this._brokerApi.getAccounts();
+        if (this._ready)
+            return this._brokerApi.getAccounts();
     }
 
 
@@ -77,12 +78,14 @@ export default class BrokerController extends Base {
 
         await this.app.controllers.system.update({loggedIn: false});
 
-        try {
-            await Promise.all([this._brokerApi.destroy(), this.app.controllers.cache.updateSettings({})]);
-            await this._brokerApi.destroy();
-            this._brokerApi = null;
-        } catch (error) {
-            console.log(error);
+        if (this._brokerApi) {
+            try {
+                await Promise.all([this._brokerApi.destroy(), this.app.controllers.cache.updateSettings({})]);
+                await this._brokerApi.destroy();
+                this._brokerApi = null;
+            } catch (error) {
+                console.log(error);
+            }
         }
 
         debug('Disconnected');

@@ -4,7 +4,8 @@ module.exports = {
         "id": null,
         "environment": null,
         "username": null,
-        "token": null
+        "token": null,
+        "accountId": null
     },
     "path": {
         "cache": "../../../",

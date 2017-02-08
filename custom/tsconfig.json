@@ -8,10 +8,11 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "baseUrl": ".",
+    "allowJs": true,
     "paths": {
       "tradejs/ea": ["../src/server/ea/EA"],
-      "tradejs/indicator/*": ["../src/shared/indicators/*"],
-      "tradejs/indicator": ["../src/shared/indicators/indicator"]
+      "tradejs/indicator/*": ["../dist/shared/indicators/*"],
+      "tradejs/indicator": ["../dist/shared/indicators/Indicator"]
     }
   }
 }
