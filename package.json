@@ -1,6 +1,6 @@
 {
   "name": "TradeJS",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "Javascript Trading Client",
   "main": "index.js",
   "license": "Apache License 2.0",

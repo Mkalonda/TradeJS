@@ -12,11 +12,7 @@ Can be run as
  probably best to come back in another 2 months ;)
  
 
- ## Dashboard
  ![Alt text](doc/screenshot/dashboard.png?raw=true "Title")
- 
- ## Backtest
- ![Alt text](doc/screenshot/backtest.png?raw=true "Title")
  
  ## Build in Editor
  ![Alt text](doc/screenshot/editor.png?raw=true "Title")

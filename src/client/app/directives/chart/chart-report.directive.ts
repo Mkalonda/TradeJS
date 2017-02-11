@@ -97,8 +97,6 @@ export class ChartReportDirective implements OnInit, AfterViewInit {
 
 
     private _prepareData(data) {
-        return data.map(order => [order.equality]);
+        return data.map(order => [order.equality]).reverse();
     }
-
-
 }
