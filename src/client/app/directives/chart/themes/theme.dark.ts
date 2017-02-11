@@ -1,4 +1,6 @@
-var Highcharts = require('highcharts/highstock');
+const
+    Highcharts = require('highcharts'),
+    Highstock = require('highcharts/highstock');
 
 /* global document */
 // Load the fonts
@@ -8,7 +10,15 @@ Highcharts.createElement('link', {
     type: 'text/css'
 }, null, document.getElementsByTagName('head')[0]);
 
-Highcharts.theme = {
+/* global document */
+// Load the fonts
+Highstock.createElement('link', {
+    href: 'https://fonts.googleapis.com/css?family=Unica+One',
+    rel: 'stylesheet',
+    type: 'text/css'
+}, null, document.getElementsByTagName('head')[0]);
+
+Highstock.theme = Highcharts.theme = {
     // colors: ['#2b908f', '#90ee7e', '#f45b5b', '#7798BF', '#aaeeee', '#ff0066', '#eeaaee',
     //     '#55BF3B', '#DF5353', '#7798BF', '#aaeeee'],
 
@@ -237,5 +247,7 @@ Highcharts.theme = {
     maskColor: 'rgba(255,255,255,0.3)'
 };
 
+
 // Apply the theme
 Highcharts.setOptions(Highcharts.theme);
+Highstock.setOptions(Highstock.theme);

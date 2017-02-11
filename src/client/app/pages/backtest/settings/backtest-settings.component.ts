@@ -81,6 +81,7 @@ export class BacktestSettingsComponent implements OnInit, AfterViewInit {
 
         this._socketService.socket.emit('backtest:run', data, (err, report) => {
             this._report = report;
+            console.log(report);
             this._isRunning = false;
             this.toggleLoading(false);
         });

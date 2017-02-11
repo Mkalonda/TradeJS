@@ -5,7 +5,7 @@ export default class Base extends EventEmitter {
 
     protected options: any = <any>{};
 
-    constructor(protected opt:any = <any>{}) {
+    constructor(protected opt?: any) {
         super();
 
         // TODO: until opt is fully renamed to 'options' in all classes
@@ -16,6 +16,7 @@ export default class Base extends EventEmitter {
         this.opt = this.options = merge(this.options, options);
 
     }
+
 
     public async init(): Promise<any> {}
 }

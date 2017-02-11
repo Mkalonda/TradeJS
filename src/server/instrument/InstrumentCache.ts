@@ -55,7 +55,7 @@ export default class InstrumentCache extends WorkerChild {
 
             this.ticks.push(candle);
 
-            this.onTick();
+            this.onTick(candle[0], candle[1], candle[2]);
         }
 
         //this.ticks.push(candle);
@@ -94,7 +94,7 @@ export default class InstrumentCache extends WorkerChild {
     /**
      *
      */
-    onTick(){
+    onTick(timestamp, bid, ask) {
         console.log('super tick function, you should define one in your class!');
     }
 

@@ -9,7 +9,7 @@ import {Router} from '@angular/router';
 @Component({
     selector: 'page-backtest',
     templateUrl: './backtest.component.html',
-    styleUrls: ['./backtest.component.css']
+    styleUrls: ['./backtest.component.scss']
 })
 
 export class BacktestComponent implements AfterViewInit {
@@ -23,6 +23,7 @@ export class BacktestComponent implements AfterViewInit {
     @ViewChild(BacktestReportsComponent) backtestReports: BacktestReportsComponent;
 
     socket: any;
+
 
     constructor(socket: SocketService,
                 private route: ActivatedRoute) {
@@ -54,6 +55,8 @@ export class BacktestComponent implements AfterViewInit {
         this.socket.emit('backtest:run', data, (err, report) => {
             if (err)
                 return this.toggleErrorState(err);
+
+            console.log(report);
 
             this.report = report;
 

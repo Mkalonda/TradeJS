@@ -26,7 +26,7 @@ export default class InstrumentController extends Base {
         return this._instruments;
     }
 
-    public async create(instrument:string, timeFrame:string, filePath:string = PATH_INSTRUMENT) {
+    public async create(instrument:string, timeFrame:string, filePath:string = PATH_INSTRUMENT, options = {}) {
         debug(`Creating instrument ${instrument}`);
 
         if (!instrument) {
@@ -48,10 +48,10 @@ export default class InstrumentController extends Base {
             ipc: this.app.ipc,
             id: id,
             path: filePath,
-            classArguments: {
+            classArguments: Object.assign(options, {
                 instrument: instrument,
                 timeFrame: timeFrame
-            }
+            })
         });
 
         await worker.init();

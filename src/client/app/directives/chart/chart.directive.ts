@@ -1,12 +1,12 @@
 import * as _               from 'lodash';
 import {Directive, ElementRef, OnInit, Input, AfterViewInit, Output} from '@angular/core';
-import {InstrumentModel} from "../models/instrument.model";
+import {InstrumentModel} from "../../models/instrument.model";
 import * as moment          from 'moment/moment';
 
 // Themes
-import ThemeDefault from './chart-theme/theme.default';
-import './chart-theme/theme.dark';
-import InstrumentsService from "../services/instruments.service";
+import ThemeDefault from './themes/theme.default';
+import './themes/theme.dark';
+import InstrumentsService from "../../services/instruments.service";
 
 const HighStock = require('highcharts/highstock');
 
@@ -17,11 +17,13 @@ const HighStock = require('highcharts/highstock');
 
 export class ChartDirective implements OnInit, AfterViewInit {
 
+    @Input() type: string = 'stock';
     @Input() model: InstrumentModel;
     @Input() height: number;
 
     public loading: boolean = true;
     public chart: any;
+
 
     constructor(
         public elementRef: ElementRef,
@@ -79,8 +81,13 @@ export class ChartDirective implements OnInit, AfterViewInit {
         // Clone a new settings object
         let settings = _.cloneDeep(ThemeDefault);
 
-        // create the chart
-        this.chart = HighStock.stockChart(this.elementRef.nativeElement, settings);
+        if (this.type === 'stock') {
+            // create the chart
+            this.chart = HighStock.stockChart(this.elementRef.nativeElement, settings);
+        }
+        else if (this.type === 'line') {
+
+        }
     }
 
     private async _fetch(from?: number, until?: number) {

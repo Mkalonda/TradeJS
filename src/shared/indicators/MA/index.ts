@@ -13,7 +13,9 @@ export default class MA extends Indicator {
         });
     }
 
-    onTick(shift:number = 0): Promise<any> | void {
+    onTick(bid: number, ask: number, shift:number = 0): Promise<any> | void {
+        super.onTick(bid, ask, shift);
+
         let period = this.options.period,
             ticks = this.ticks.slice((this.ticks.length - shift) - period, this.ticks.length - shift);
 

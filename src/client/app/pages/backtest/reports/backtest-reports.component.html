@@ -11,7 +11,6 @@
         <div class="col-sm-3">
             <ul class="key-value-list">
                 <li><span>Diff</span>{{report.diff}}</li>
-                <li><span>Equality</span>{{report.equality}}</li>
                 <li><span>Nr of trades</span>{{report.nrOfTrades}}</li>
             </ul>
         </div>
@@ -42,10 +41,14 @@
                                 <h5>{{instrument.instrument}}</h5>
 
                                 <ul class="key-value-list">
-                                    <li><span>Diff</span>{{diff}}</li>
+                                    <li><span>Diff</span><span
+                                            [class.text-negative]="instrument.diff < 0"
+                                            [class.text-positive]="instrument.diff >= 0"
+                                    >{{instrument.diff}}</span></li>
                                     <li><span>Equality</span>{{instrument.equality}}</li>
                                     <li><span>Nr of trades</span>{{instrument.nrOfTrades}}</li>
                                 </ul>
+                                \
                                 <ul class="key-value-list">
                                     <li><span>Completed in</span>{{instrument.time.totalPretty}}</li>
                                     <li><span>Fetching</span>{{instrument.time.fetchingPretty}}</li>
@@ -58,7 +61,7 @@
                                 </ul>
                             </div>
                             <div class="col-sm-9">
-                                <div chart class="chart" [height]="200"></div>
+                                <div chart-report class="chart " [height]="200" [data]="instrument.orders"></div>
                             </div>
                         </div>
                     </div>

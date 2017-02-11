@@ -58,14 +58,15 @@ export default class Indicator {
 
     _doCatchUp(): void {
         let len = this.ticks.length,
-            i = 0;
+            i = 0, tick;
 
         for (; i < len; i++) {
-            this.onTick(len-i);
+            tick = this.ticks[i];
+            this.onTick(tick[0], tick[1], len-i);
         }
     }
 
-    onTick(shift?: number): Promise<any> | void {
+    onTick(bid: number, ask: number, shift: number = 0): Promise<any> | void {
 
     }
 }

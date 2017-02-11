@@ -27,8 +27,8 @@ export default class WorkerChild extends Base {
     protected _ipc: IPC;
     protected opt:any;
 
-    constructor(opt, private workerOptions:WorkerOptions) {
-        super(opt);
+    constructor(options, private workerOptions:WorkerOptions) {
+        super(options);
 
         /**
          *

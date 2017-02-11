@@ -52,7 +52,8 @@ import InstrumentsService from "./services/instruments.service";
 import {DraggableDirective} from "./directives/draggable.directive";
 import {ResizableDirective} from "./directives/resizable.directive";
 import {ChartBoxComponent} from "./common/chart-box/chart-box.component";
-import {ChartDirective} from "./directives/chart.directive";
+import {ChartDirective} from "./directives/chart/chart.directive";
+import {ChartReportDirective} from "./directives/chart/chart-report.directive";
 
 @NgModule({
     declarations: [
@@ -83,7 +84,8 @@ import {ChartDirective} from "./directives/chart.directive";
         ModalAnchorDirective,
         DraggableDirective,
         ResizableDirective,
-        ChartDirective
+        ChartDirective,
+        ChartReportDirective
     ],
     imports: [
         BrowserModule,

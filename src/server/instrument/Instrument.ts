@@ -15,10 +15,10 @@ export default class Instrument extends InstrumentCache {
         await this._setIPCEvents();
     }
 
-    onTick() {
+    async onTick(timestamp, bid, ask): Promise<void> {
         // Tick indicators
         for (let name in this.indicators) {
-            this.indicators[name].onTick();
+            this.indicators[name].onTick(bid, ask);
         }
     }
 

@@ -12,7 +12,7 @@ import {DialogComponent} from "../dialog/dialog.component";
 import IndicatorModel from "../../models/indicator";
 import {InstrumentModel} from "../../models/instrument.model";
 import InstrumentsService from "../../services/instruments.service";
-import {ChartDirective} from "../../directives/chart.directive";
+import {ChartDirective} from "../../directives/chart/chart.directive";
 import {ResizableDirective} from "../../directives/resizable.directive";
 
 declare var $:any;

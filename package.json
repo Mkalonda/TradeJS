@@ -87,7 +87,7 @@
     "ts-node": "2.0.0",
     "tsconfig-paths": "^2.1.0",
     "tslint": "4.4.2",
-    "typescript": "2.1.5",
+    "typescript": "^2.1.5",
     "underscore": "1.8.3",
     "webpack-stream": "3.2.0",
     "zone.js": "0.7.6"

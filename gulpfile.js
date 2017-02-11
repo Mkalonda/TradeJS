@@ -1,6 +1,7 @@
 'use strict';
 
 const
+    _ = require('lodash'),
     fs = require('fs'),
     path = require('path'),
     gulp = require('gulp'),
@@ -17,7 +18,26 @@ const
     // TODO: Should not be necessary
     kill = require('tree-kill'),
 
-    PATH_APP_INIT_FILE = 'dist/server/app';
+    PATH_APP_INIT_FILE = 'dist/server/app',
+
+    paths = {
+        server: {
+            in: path.join(__dirname, 'src', 'server'),
+            out: path.join(__dirname, 'dist', 'server')
+        },
+        shared: {
+            in: path.join(__dirname, 'src', 'shared'),
+            out: path.join(__dirname, 'dist', 'shared')
+        },
+        client: {
+            in: path.join(__dirname, 'src', 'client'),
+            out: path.join(__dirname, 'dist', 'client')
+        },
+        custom: {
+            in: path.join(__dirname, 'custom'),
+            out: path.join(__dirname, '_builds')
+        }
+    };
 
 let child = null;
 
@@ -26,33 +46,31 @@ let child = null;
  * SERVER SERVER SERVER SERVER SERVER SERVER SERVER
  *
  **************************************************************/
-gulp.task('server:dev', callback => runSequence('server:build:run', 'server:watch', callback));
+gulp.task('server:dev', callback => runSequence(['copy-shared-assets', 'server:build'],  'custom:watch', 'server:run', 'server:watch', callback));
+gulp.task('server:run', startChildProcess);
 gulp.task('server:kill', killChildProcess);
-gulp.task('server:run', ['custom:watch'], startChildProcess);
+gulp.task('server:watch', () => {
+    gulp.watch(['./src/server/**/*.ts'], () => runSequence('server:kill', 'server:build', 'custom:build', 'server:run'));
+});
 
-gulp.task('server:build', function() {
+gulp.task('server:build', () => {
 
-    let pipes = ['server', 'shared'].map(dir => {
+    let tsProject = ts.createProject('src/server/tsconfig.json'),
+        tsResult = tsProject.src()
+            .pipe(sourcemaps.init())
+            .pipe(tsProject());
 
-        let tsProject = ts.createProject(`./src/${dir}/tsconfig.json`),
-            tsResult = tsProject.src()
-                .pipe(sourcemaps.init())
-                .pipe(tsProject());
+    return tsResult.js
+        .pipe(sourcemaps.write('./'))
+        .pipe(gulp.dest('dist/server'));
+});
 
-        return tsResult.js
-            .pipe(sourcemaps.write('./'))
-            .pipe(gulp.dest(`./dist/${dir}`))
+gulp.task('server:build:run', ['server:kill'], callback => {
+    runSequence(['copy-shared-assets', 'server:build'], () => {
+        buildCustom(null, () => {
+            runSequence('server:run', callback);
+        });
     });
-
-    return es.merge(pipes);
-});
-
-gulp.task('server:build:run', ['server:kill'], () => {
-    runSequence(['copy-shared-assets', 'server:build'], 'server:run');
-});
-
-gulp.task('server:watch', callback => {
-    gulp.watch(['./src/server/**/*.ts', './src/shared/**/*.ts', '!./src/shared/_builds/**/*'], ['server:build:run'], callback);
 });
 
 /** NEEDED TO COPY OVER JSON FILES TO DIST FOLDER **/
@@ -62,10 +80,10 @@ gulp.task('copy-shared-assets', () => {
 });
 
 /***************************************************************
-*
-* CLIENT CLIENT CLIENT CLIENT CLIENT CLIENT CLIENT
-*
-**************************************************************/
+ *
+ * CLIENT CLIENT CLIENT CLIENT CLIENT CLIENT CLIENT
+ *
+ **************************************************************/
 
 gulp.task('client:build', (callback) => {
     const
@@ -90,114 +108,55 @@ gulp.task('copy-client-assets', () => {
  * CUSTOM CUSTOM CUSTOM CUSTOM CUSTOM
  *
  **************************************************************/
-gulp.task('custom:build', ['custom:compile', 'custom:copy-assets'], function() {
-    console.log('adfsaf');
+gulp.task('custom:build', ['custom:copy-assets'], callback => {
+    buildCustom(null, callback);
 });
 
 gulp.task('custom:watch', (callback) => {
     const watcher = gulp.watch('custom/**/*');
 
-    watcher.on('change', function(event) {
-
-        let inputPath = _getInputAbsoluteRootFolder(event.path),
-            outputPath = _getOutputAbsoluteRootFolder(event.path);
-        console.log('outputPath',  outputPath);
-        console.log('outputPath', 'outputPath', 'outputPath', 'outputPath', 'outputPath', outputPath);
-
-        let tsProject = ts.createProject(`./custom/tsconfig.json`),
-            tsResult = gulp.src(`${inputPath}/**/*.ts`)
-            .pipe(sourcemaps.init()) // This means sourcemaps will be generated
-            .pipe(tsProject());
-
-        return tsResult.js
-            .pipe(sourcemaps.write()) // Now the sourcemaps are added to the .js file
-            .pipe(gulp.dest(outputPath));
-
-
-        // gulp.src('src/**/*.ts')
-        //     .pipe(ts({
-        //         noImplicitAny: true,
-        //         out: 'output.js'
-        //     }))
-        //     .pipe(gulp.dest('built/local'));
-        //
-        // let tsProject   = ts.createProject(`./custom/tsconfig.json`),
-        //     tsResult    = tsProject.src()
-        //         .pipe(sourcemaps.init())
-        //         .pipe(tsProject());
-        //
-        // tsResult.js
-        //     .pipe(sourcemaps.write('./'))
-        //     .pipe(gulp.dest(`./dist/${dir}`))
-        //     .on('end', () => {
-        //
-        //         // Copy assets
-        //         gulp.src([inputPath + '/**/*', '!**/.ts'])
-        //             .pipe(gulp.dest(outputPath))
-        //             .on('end', () => {
-        //                 console.info('GULP: Custom build complete');
-        //             });
-        //
-        //     })
+    watcher.on('change', event => {
+        buildCustom(event.path);
     });
 
     callback();
 });
 
-gulp.task('custom:compile', function() {
+gulp.task('custom:copy-assets', (callback) => {
+    let inputPath = argv['input-path'] ? _getInputAbsoluteRootFolder(argv['input-path']) : path.join(__dirname, 'custom'),
+        outputPath = argv['output-path'] ? _getOutputAbsoluteRootFolder(argv['output-path']) : path.join(__dirname, '_builds');
 
-    if (!argv['input-path'] || !argv['output-path'])
-        throw new Error('Gulp build custom, --input-path and --output-path must be defined');
-
-    console.log('argv argv', argv);
-
-    // let inputPath = _getInputAbsoluteRootFolder(event.path),
-    //     outputPath = _getOutputAbsoluteRootFolder(event.path);
-
-    // console.log('outputPath',  outputPath);
-    // console.log('outputPath', 'outputPath', 'outputPath', 'outputPath', 'outputPath', outputPath);
-
-    let pipes = [argv['input-path']].map(dir => {
-        console.log('dir', 'dir', dir, argv['output-path']);
-
-        return gulp.src(argv['input-path'])
-            .pipe(webpack({
-                entry: dir + '/',
-                resolve: {
-                    root: dir,
-                    // Add `.ts` and `.tsx` as a resolvable extension.
-                    extensions: ['.ts', '.js'],
-                    alias: {
-                        'tradejs/ea': path.join(__dirname, '/src/server/ea/EA'),
-                        'tradejs/indicator/*': path.join(__dirname, '../dist/shared/indicators/*'),
-                        'tradejs/indicator': path.join(__dirname, '../dist/shared/indicators/Indicator')
-                    },
-                    modulesDirectories: [
-                        'node_modules'
-                    ]
-                },
-                module: {
-                    loaders: [
-                        // all files with a `.ts` or `.tsx` extension will be handled by `ts-loader`
-                        { test: /\.tsx?$/, loader: 'ts-loader' }
-                    ]
-                },
-                externals: []
-            }))
-            .pipe(gulp.dest(argv['output-path']));
-    });
-
-    return es.merge(pipes);
-});
-
-gulp.task('custom:copy-assets', function(callback) {
-    gulp.src([argv['input-path'] + '/**/*', '!**/.ts'])
-        .pipe(gulp.dest(argv['input-path']))
+    gulp.src([inputPath + '/**/*.json'])
+        .pipe(gulp.dest(outputPath))
         .on('error', (error) => {
             console.log(error);
         })
         .on('end', callback);
 });
+
+
+/***************************************************************
+ *
+ * BUILD BUILD BUILD BUILD BUILD BUILD
+ *
+ **************************************************************/
+function buildCustom(rootPath, callback = () => {}) {
+
+    let inputPath = rootPath ? _getInputAbsoluteRootFolder(rootPath) : path.join(__dirname, 'custom'),
+        outputPath = rootPath ? _getOutputAbsoluteRootFolder(rootPath) : path.join(__dirname, '_builds');
+
+    console.log('outputPath', 'outputPath', 'outputPath', 'outputPath', 'outputPath', outputPath);
+
+    let tsProject = ts.createProject(`./custom/tsconfig.json`),
+        tsResult = gulp.src(`${inputPath}/**/*.ts`)
+            .pipe(sourcemaps.init()) // This means sourcemaps will be generated
+            .pipe(tsProject());
+
+    return tsResult.js
+        .pipe(sourcemaps.write()) // Now the sourcemaps are added to the .js file
+        .pipe(gulp.dest(outputPath))
+        .on('end', callback);
+}
 
 /***************************************************************
  *

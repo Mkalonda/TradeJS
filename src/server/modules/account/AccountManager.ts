@@ -2,13 +2,26 @@ import Base from "../../classes/Base";
 
 export default class AccountManager extends Base {
 
-    private _account: AccountSettings;
+    private _equality: number = 10000;
 
-    constructor() {
-        super();
+    public get equality() {
+        return this._equality;
     }
 
-    async init() {}
+    public set equality(amount: number) {
+        this._equality = amount;
+    }
 
+    constructor(options) {
+        super(options);
+    }
 
+    async init() {
+        this._equality = this.options.equality;
+    }
+
+    public addEquality(amount: number) {
+        this._equality += amount;
+        console.log('Equality: ', this._equality);
+    }
 }

@@ -1,5 +1,13 @@
 export default {
 
+    title:{
+        text: null
+    },
+
+    legend: {
+        enabled: false
+    },
+
     chart: {
         type: 'candlestick',
 

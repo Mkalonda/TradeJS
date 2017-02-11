@@ -53,7 +53,9 @@ export default class BackTest extends EventEmitter {
 
         // Create instrument instances
         this.EAs = await Promise.all(this.instruments.map(instrument => {
-            return this.app.controllers.instrument.create(instrument, this.timeFrame, EAPath);
+            return this.app.controllers.instrument.create(instrument, this.timeFrame, EAPath, {
+                equality: this.opt.equality
+            });
         }));
 
         // Wait until all have finished
@@ -105,7 +107,7 @@ export default class BackTest extends EventEmitter {
         ticksPerSecond = Math.round(totalTicks / (totalTestTime / 1000));
 
         return {
-            equality: 0,
+            startEquality: this.opt.equality,
             diff: 0,
             timeFrame: this.timeFrame,
             from: this.from,
@@ -140,9 +142,10 @@ export default class BackTest extends EventEmitter {
 
             return {
                 id: EA.id,
-                equality: 0,
-                diff: 0,
-                nrOfTrades: 0,
+                equality: report.equality.toFixed(4),
+                diff: (report.equality - this.opt.equality).toFixed(4),
+                orders: report.orders,
+                nrOfTrades: report.orders.length,
                 instrument: EA.instrument,
                 timeFrame: this.timeFrame,
                 from: this.from,

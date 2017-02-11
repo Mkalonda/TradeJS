@@ -80,16 +80,16 @@ ss-multiselect-dropdown > div > button {
     font-size: 12px;
 }
 
-.key-value-list span {
+.key-value-list span:first-child {
     display: inline-block;
     width: 100px;
     font-weight: bold;
-}
 
-.key-value-list span:after {
-    content: ":";
-    width: 10px;
-    float: right;
+    &:after {
+        content: ":";
+        width: 10px;
+        float: right;
+    }
 }
 
 .vertical-divider {
@@ -123,4 +123,12 @@ ss-multiselect-dropdown > div > button {
     flex:auto;
     overflow-y: auto;
     position: relative;
+}
+
+.text-negative {
+    color: $general-error;
+}
+
+.text-positive {
+    color: $general-success;
 }
