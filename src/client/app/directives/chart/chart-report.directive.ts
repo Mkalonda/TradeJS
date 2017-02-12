@@ -80,6 +80,8 @@ export class ChartReportDirective implements OnInit, AfterViewInit {
             }
         }];
 
+        settings.xAxis[0].gridLineWidth = 0;
+
         settings.yAxis = <any>[
             {
                 labels: {

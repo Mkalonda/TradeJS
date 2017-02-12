@@ -8,14 +8,17 @@ Can be run as
 - Standalone client connected to the cloud (with a custom server)
 - Standalone server running elastic in the cloud (with a custom client)
 
- #(!!Under heavy development!! (27 nov 2016))
- probably best to come back in another 2 months ;)
+ #Under heavy development! (12 02  2017))
+ Probably best to come back in another 2 months ;)
  
 
  ![Alt text](doc/screenshot/dashboard.png?raw=true "Title")
  
  ## Build in Editor
  ![Alt text](doc/screenshot/editor.png?raw=true "Title")
+ 
+ ## Mobile (in development)editor
+ ![Alt text](doc/screenshot/mobile.png?raw=true "Title")
  
   #### How to start (temp, this will be normalized in the future)
   
