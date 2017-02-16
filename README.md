@@ -17,7 +17,7 @@ Can be run as
  ## Build in Editor
  ![Alt text](doc/screenshot/editor.png?raw=true "Title")
  
- ## Mobile (in development)editor
+ ## Mobile (in development)
  ![Alt text](doc/screenshot/mobile.png?raw=true "Title")
  
   #### How to start (temp, this will be normalized in the future)

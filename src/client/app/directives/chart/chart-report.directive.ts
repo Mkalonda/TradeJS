@@ -21,20 +21,21 @@ export class ChartReportDirective implements OnInit, AfterViewInit {
     public loading: boolean = true;
     public chart: any;
 
-    constructor(
-        public elementRef: ElementRef,
-        private _instrumentsService: InstrumentsService) {
+    constructor(public elementRef: ElementRef,
+                private _instrumentsService: InstrumentsService) {
     }
 
-    ngOnInit() {}
+    
+    ngOnInit() {
+    }
 
     ngAfterViewInit() {
         if (this.height)
             this.setHeight(this.height);
 
-        this._createChart();
-
-
+        requestAnimationFrame(() => {
+            this._createChart();
+        });
     }
 
     public setHeight(height: number): void {
@@ -66,7 +67,7 @@ export class ChartReportDirective implements OnInit, AfterViewInit {
         let data = this._prepareData(this.data);
 
         // Clone a new settings object
-        let settings = _.cloneDeep(ThemeDefault);
+        let settings = <any>_.cloneDeep(ThemeDefault);
 
         delete settings.chart;
         //settings.chart.marginLeft = 100;
@@ -74,20 +75,38 @@ export class ChartReportDirective implements OnInit, AfterViewInit {
         settings.series = [{
             name: 'base',
             data: data,
-            //minPointLength: 1,
             dataGrouping: {
                 enabled: false
             }
         }];
 
+        settings.tooltip = {
+            useHTML: true,
+            formatter: function () {
+                console.log(this);
+
+                return `<ul>
+<li><span>Nr</span>: ${this.x}</li>
+<li><span>Equality</span>: ${this.y}</li>
+<li><span>Profit</span>: ${this.profit}</li>
+</ul>`;
+            }
+        };
+
+        settings.xAxis[0].tickInterval = 1;
         settings.xAxis[0].gridLineWidth = 0;
+        settings.xAxis[0].labels.step = 1;
 
         settings.yAxis = <any>[
             {
-                labels: {
+                title: {
                     enabled: false
                 },
-                opposite:false,
+                labels: {
+                    enabled: true,
+                    step: 1
+                },
+                tickInterval: 1,
                 height: '73%',
                 borderWidth: 3,
                 borderColor: '#FF0000'
@@ -99,6 +118,7 @@ export class ChartReportDirective implements OnInit, AfterViewInit {
 
 
     private _prepareData(data) {
-        return data.map(order => [order.equality]).reverse();
+        return data.map(order => ({y: order.equality, data: order})).reverse();
     }
 }
+

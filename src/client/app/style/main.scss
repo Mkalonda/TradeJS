@@ -132,3 +132,6 @@ ss-multiselect-dropdown > div > button {
 .text-positive {
     color: $general-success;
 }
+
+input::-webkit-inner-spin-button { display: none; }
+input::-webkit-calendar-picker-indicator { margin-right: -20px; background:transparent;}

@@ -1,10 +1,10 @@
 import {Component, AfterViewInit, OnInit, ElementRef} from '@angular/core';
-import {CookieService} from 'angular2-cookie/core';
+import {CookieService}  from 'angular2-cookie/core';
 import {FormBuilder, FormGroup} from "@angular/forms";
 import {IMultiSelectOption, IMultiSelectSettings} from 'angular-2-dropdown-multiselect/src/multiselect-dropdown';
 import {BacktestSettingsModel} from "./backtest-settings.model";
-import SocketService from "../../../services/socket.service";
-
+import SocketService    from "../../../services/socket.service";
+import * as moment      from 'moment'
 
 @Component({
     selector: 'backtest-settings',
@@ -25,8 +25,8 @@ export class BacktestSettingsComponent implements OnInit, AfterViewInit {
     model: BacktestSettingsModel;
 
     multiSelectOptions: IMultiSelectOption[] = [
-        <any>{ id: 'EUR_USD', name: 'EUR_USD' },
-        <any>{ id: 'USD_CAD', name: 'USD_CAD' }
+        <any>{id: 'EUR_USD', name: 'EUR_USD'},
+        <any>{id: 'USD_CAD', name: 'USD_CAD'}
     ];
 
     private multiSelectSettings: IMultiSelectSettings = {
@@ -34,7 +34,7 @@ export class BacktestSettingsComponent implements OnInit, AfterViewInit {
         maxHeight: '200px',
         showUncheckAll: true
     };
-    
+
     static defaults = {
         EA: '',
         instruments: [],
@@ -48,17 +48,19 @@ export class BacktestSettingsComponent implements OnInit, AfterViewInit {
 
     form: FormGroup;
 
-    constructor(
-        private _cookieService:CookieService,
-        private formBuilder: FormBuilder,
-        private _socketService: SocketService,
-        private _elementRef: ElementRef) {}
+    constructor(private _cookieService: CookieService,
+                private formBuilder: FormBuilder,
+                private _socketService: SocketService,
+                private _elementRef: ElementRef) {
+    }
 
     ngOnInit(): void {
         this._$el = $(this._elementRef.nativeElement);
 
-        this.model  = new BacktestSettingsModel();
+        this.model = new BacktestSettingsModel();
         this.model.update(this.loadSavedSettings());
+        this.model.from = this._parseDate(this.model.from);
+        this.model.until = this._parseDate(this.model.until);
 
         this._selectedOptions = this.model.instruments;
 
@@ -67,7 +69,8 @@ export class BacktestSettingsComponent implements OnInit, AfterViewInit {
         this.form.valueChanges.subscribe(() => this.onChange());
     }
 
-    ngAfterViewInit(): void {}
+    ngAfterViewInit(): void {
+    }
 
     run() {
         this._isRunning = true;
@@ -95,7 +98,7 @@ export class BacktestSettingsComponent implements OnInit, AfterViewInit {
         this.saveSettings();
     }
 
-    onSubmit(event:Event): void {
+    onSubmit(event: Event): void {
         event.preventDefault();
 
         this.run();
@@ -110,7 +113,7 @@ export class BacktestSettingsComponent implements OnInit, AfterViewInit {
     }
 
     getCookie(): Object | null {
-        let data:any = null;
+        let data: any = null;
 
         try {
             let cookie = this._cookieService.get('backtest-settings');
@@ -125,7 +128,7 @@ export class BacktestSettingsComponent implements OnInit, AfterViewInit {
         return data;
     }
 
-    toggleLoading(state:boolean) {
+    toggleLoading(state: boolean) {
         if (state) {
             this._$el.find('input, select, button').prop('disabled', true);
             //$reportsContainer.html('<div class="loader-wrapper"><img src="/img/loader.gif" class="loader" /></div>');
@@ -133,5 +136,9 @@ export class BacktestSettingsComponent implements OnInit, AfterViewInit {
             this._$el.find('input, select, button').prop('disabled', false);
             //$reportsContainer.empty();
         }
+    }
+
+    private _parseDate(date) {
+        return date.replace('/', '-').split('T')[0];
     }
 }

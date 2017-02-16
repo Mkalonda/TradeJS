@@ -114,7 +114,7 @@ table {
     background: $background-light;
 
     > * {
-        overflow: auto;
+        overflow-y: scroll;
         height: 100%;
     }
 }

@@ -29,6 +29,7 @@
             </ul>
         </div>
     </div>
+
     <hr/>
 
     <div *ngFor="let instrument of report.instruments">
@@ -37,7 +38,7 @@
                 <div class="col-sm-12">
                     <div class="container-fluid">
                         <div class="row">
-                            <div class="col-fixed-150">
+                            <div class="col-fixed-220 pull-left">
                                 <h5>{{instrument.instrument}}</h5>
 
                                 <ul class="key-value-list">
@@ -60,7 +61,7 @@
                                     <li><span>Ticks p / s</span>{{instrument.ticksPerSecondPretty}}</li>
                                 </ul>
                             </div>
-                            <div class="col-sm-9">
+                            <div class="" style="margin-left: 220px;">
                                 <div chart-report class="chart " [height]="200" [data]="instrument.orders"></div>
                             </div>
                         </div>
