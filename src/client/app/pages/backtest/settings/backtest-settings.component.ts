@@ -76,11 +76,10 @@ export class BacktestSettingsComponent implements OnInit, AfterViewInit {
         this._isRunning = true;
         this.toggleLoading(true);
 
-        let data = Object.assign(this.model);
-
-        data.from = Date.now() - 1000000000; //moment(data.from,'dd/mm/yyyy').unix() * 1000;
-        //data.until = moment(data.until, 'dd/mm/yyyy').unix() || Date.now();
-        data.until = Date.now();
+        let data = Object.assign({}, this.model, {
+            from: moment(this.model, 'YYYY-MM-DD').valueOf(),
+            until: moment(this.model, 'YYYY-MM-DD').valueOf()
+        });
 
         this._socketService.socket.emit('backtest:run', data, (err, report) => {
             this._report = report;
@@ -91,8 +90,6 @@ export class BacktestSettingsComponent implements OnInit, AfterViewInit {
     }
 
     onChange(): void {
-        //this.form.value.instruments = ;
-
         Object.assign(this.model, this.form.value, {instruments: this._selectedOptions});
 
         this.saveSettings();
@@ -128,6 +125,7 @@ export class BacktestSettingsComponent implements OnInit, AfterViewInit {
         return data;
     }
 
+
     toggleLoading(state: boolean) {
         if (state) {
             this._$el.find('input, select, button').prop('disabled', true);
@@ -138,7 +136,7 @@ export class BacktestSettingsComponent implements OnInit, AfterViewInit {
         }
     }
 
-    private _parseDate(date) {
-        return date.replace('/', '-').split('T')[0];
+    private _parseDate(date: String | Date): String {
+        return moment(date).format('YYYY-MM-DD');
     }
 }

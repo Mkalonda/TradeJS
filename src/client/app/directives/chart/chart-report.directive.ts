@@ -25,7 +25,6 @@ export class ChartReportDirective implements OnInit, AfterViewInit {
                 private _instrumentsService: InstrumentsService) {
     }
 
-    
     ngOnInit() {
     }
 
@@ -86,9 +85,9 @@ export class ChartReportDirective implements OnInit, AfterViewInit {
                 console.log(this);
 
                 return `<ul>
-<li><span>Nr</span>: ${this.x}</li>
+<li> ${this.x}</li>
 <li><span>Equality</span>: ${this.y}</li>
-<li><span>Profit</span>: ${this.profit}</li>
+<li><span>Profit</span>: ${this.data.profit}</li>
 </ul>`;
             }
         };
