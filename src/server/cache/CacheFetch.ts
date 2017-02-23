@@ -1,7 +1,7 @@
 import * as _           from 'lodash';
 import * as util        from './util/util';
 import Mapper           from "./CacheMap";
-import BrokerApi        from "../broker-api/oanda";
+import BrokerApi        from "../broker-api/oanda/oanda";
 import * as mergeRanges from 'merge-ranges';
 
 const utilDate  = require('../util/date');

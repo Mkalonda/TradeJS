@@ -4,7 +4,7 @@ import * as mkdirp      from 'mkdirp';
 import Mapper           from './CacheMap';
 import Fetcher          from './CacheFetch';
 import WorkerChild      from "../classes/worker/WorkerChild";
-import BrokerApi        from "../broker-api/oanda";
+import BrokerApi        from "../broker-api/oanda/oanda";
 import BarCalculator    from "./util/bar-calculator";
 import CacheDataLayer   from "./CacheDataLayer";
 

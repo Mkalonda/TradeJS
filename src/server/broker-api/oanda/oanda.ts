@@ -1,8 +1,7 @@
-import Base from "../classes/Base";
-import * as constants from '../../shared/constants/broker';
+import Base from "../../classes/Base";
+import * as constants from '../../../shared/constants/broker';
 
-const OANDAAdapter = require('../../../_npm_module_backup/oanda-adapter/index');
-
+const OANDAAdapter = require('./oanda-adapter/index');
 
 export default class BrokerApi extends Base {
 

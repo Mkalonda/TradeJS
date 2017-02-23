@@ -55,14 +55,19 @@ gulp.task('server:watch', () => {
 
 gulp.task('server:build', () => {
 
-    let tsProject = ts.createProject('src/server/tsconfig.json'),
-        tsResult = tsProject.src()
-            .pipe(sourcemaps.init())
-            .pipe(tsProject());
+    let pipes = ['server', 'shared'].map(dir => {
 
-    return tsResult.js
-        .pipe(sourcemaps.write('./'))
-        .pipe(gulp.dest('dist/server'));
+        let tsProject = ts.createProject(`./src/${dir}/tsconfig.json`),
+            tsResult = tsProject.src()
+                .pipe(sourcemaps.init())
+                .pipe(tsProject());
+
+        return tsResult.js
+            .pipe(sourcemaps.write('./'))
+            .pipe(gulp.dest(`./dist/${dir}`))
+    });
+
+    return es.merge(pipes);
 });
 
 gulp.task('server:build:run', ['server:kill'], callback => {

@@ -9,7 +9,6 @@ export default class IPC extends Base {
 
     id: string | number;
     env: string;
-    sockets: any = {};
 
     private _unique: number = 0;
     private _ipc: any = null;
@@ -67,18 +66,12 @@ export default class IPC extends Base {
     send(workerId:string, eventName:string, data:any = {}, waitForCallback:boolean = true) {
 
         return new Promise((resolve, reject) => {
-
-            let socket      = this._ipc.of[workerId] || this._ipc.server.of[workerId],
-            //let socket      = this.sockets[workerId],
-                cbTimeout   = 60000,
+            let cbTimeout   = 60000,
                 _data = <any>{
                     type: eventName,
                     id: this.id,
                     data: data
                 };
-
-            if (!socket)
-                return reject('Socket does not exist! ' + workerId);
 
             // Continue when waitForCallback is ack string OR true
             if (waitForCallback) {
@@ -104,7 +97,11 @@ export default class IPC extends Base {
                 }
             }
 
-            socket.emit('message', _data);
+            if (!this._ipc.of[workerId] && this._ipc.server && this._ipc.server.of) {
+                this._ipc.server.emit(this._ipc.server.of[workerId], 'message', _data);
+            } else {
+                this._ipc.of[workerId].emit('message', _data);
+            }
 
             if (!waitForCallback)
                 resolve();
@@ -131,12 +128,11 @@ export default class IPC extends Base {
      * @private
      */
     _startServerNode() {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
 
             this._ipc.serve(() => {
 
                 this._ipc.server.on('connect', (socket) => {
-                    this.sockets[socket.id] = socket;
                 });
 
                 this._ipc.server.on('message', (data, socket) => {
@@ -165,8 +161,6 @@ export default class IPC extends Base {
 
             this._ipc.connectTo(workerId, () => {
                 let socket = this._ipc.of[workerId];
-
-                this.sockets[workerId] = socket;
 
                 socket.on('connect', () => {
                     debug(`${this.id} connected to ${workerId}`);
