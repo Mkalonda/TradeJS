@@ -10,9 +10,9 @@
     "baseUrl": ".",
     "allowJs": true,
     "paths": {
-      "tradejs/ea": ["../src/server/ea/EA"],
-      "tradejs/indicator/*": ["../dist/shared/indicators/*"],
-      "tradejs/indicator": ["../dist/shared/indicators/Indicator"]
+      "tradejs/ea": ["../server/classes/ea/EA"],
+      "tradejs/indicator/*": ["../shared/indicators/*"],
+      "tradejs/indicator": ["../shared/indicators/Indicator"]
     }
   }
 }

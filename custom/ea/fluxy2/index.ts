@@ -1,4 +1,4 @@
-import EA from '../../../dist/server/ea/EA';
+import EA from '../../../server/classes/ea/EA';
 import {IEA} from "tradejs/ea";
 
 export default class MyEA extends EA implements IEA {
@@ -13,13 +13,12 @@ export default class MyEA extends EA implements IEA {
         });
     }
 
-
     public async onTick(timestamp, bid, ask): Promise<void> {
         await super.onTick(timestamp, bid, ask);
 
         if (this.count++ < 5) {
 
-            this.orderManager.add({
+            await this.orderManager.add({
                 instrument: this.instrument,
                 count: 1,
                 type: 'se',
@@ -28,9 +27,10 @@ export default class MyEA extends EA implements IEA {
             });
         }
 
-        if (this.count > 15) {
+        if (this.count > 25) {
             if (this.orderManager.orders.length)
-                this.orderManager.close(this.orderManager.orders[0].id, bid, ask);
+                await this.orderManager.close(this.orderManager.orders[0].id, bid, ask);
         }
     }
+    
 }

@@ -1,0 +1,117 @@
+<div class="debugger-header">
+    <i class="splitter fa fa-bars text-white" aria-hidden="true">&nbsp;</i>
+    <p>Debugger ({{messages.length}})</p>
+</div>
+
+<div class="tabs-container">
+
+    <!-- Tab nav -->
+    <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active"><a data-target="#profile" aria-controls="profile" role="tab" data-toggle="tab">Backtest</a></li>
+        <li role="presentation"><a data-target="#home" aria-controls="home" role="tab" data-toggle="tab">Debugger</a></li>
+        <li role="presentation"><a data-target="#messages" aria-controls="messages" role="tab" data-toggle="tab">Result</a></li>
+        <li role="presentation"><a data-target="#settings" aria-controls="settings" role="tab" data-toggle="tab">Settings</a></li>
+    </ul>
+
+    <!-- Tab content -->
+    <div class="tab-content">
+
+        <!-- Backtest -->
+        <div role="tabpanel" class="tab-pane active" id="profile">
+            <div class="container-fluid">
+                <backtest-settings></backtest-settings>
+            </div>
+        </div>
+
+        <!-- Debugger -->
+        <div role="tabpanel" class="tab-pane" id="home">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th style="width: 30px;"></th>
+                    <th>Message</th>
+                    <th>Time</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let message of messages">
+                    <td>
+                        <i *ngIf="message.type === 'info'" class="fa fa-info">&nbsp;</i>
+                        <i *ngIf="message.type === 'error'" class="fa fa-close">&nbsp;</i>
+                        <i *ngIf="message.type === 'warning'" class="fa fa-warning">&nbsp;</i>
+                    </td>
+                    <td>{{message.text}}</td>
+                    <td>{{message.timePretty}}</td>
+                </tr>
+                <tr *ngFor="let message of messages">
+                    <td>
+                        <i *ngIf="message.type === 'info'" class="fa fa-info">&nbsp;</i>
+                        <i *ngIf="message.type === 'error'" class="fa fa-close">&nbsp;</i>
+                        <i *ngIf="message.type === 'warning'" class="fa fa-warning">&nbsp;</i>
+                    </td>
+                    <td>{{message.text}}</td>
+                    <td>{{message.timePretty}}</td>
+                </tr>
+                <tr *ngFor="let message of messages">
+                    <td>
+                        <i *ngIf="message.type === 'info'" class="fa fa-info">&nbsp;</i>
+                        <i *ngIf="message.type === 'error'" class="fa fa-close">&nbsp;</i>
+                        <i *ngIf="message.type === 'warning'" class="fa fa-warning">&nbsp;</i>
+                    </td>
+                    <td>{{message.text}}</td>
+                    <td>{{message.timePretty}}</td>
+                </tr>
+                <tr *ngFor="let message of messages">
+                    <td>
+                        <i *ngIf="message.type === 'info'" class="fa fa-info">&nbsp;</i>
+                        <i *ngIf="message.type === 'error'" class="fa fa-close">&nbsp;</i>
+                        <i *ngIf="message.type === 'warning'" class="fa fa-warning">&nbsp;</i>
+                    </td>
+                    <td>{{message.text}}</td>
+                    <td>{{message.timePretty}}</td>
+                </tr>
+                <tr *ngFor="let message of messages">
+                    <td>
+                        <i *ngIf="message.type === 'info'" class="fa fa-info">&nbsp;</i>
+                        <i *ngIf="message.type === 'error'" class="fa fa-close">&nbsp;</i>
+                        <i *ngIf="message.type === 'warning'" class="fa fa-warning">&nbsp;</i>
+                    </td>
+                    <td>{{message.text}}</td>
+                    <td>{{message.timePretty}}</td>
+                </tr>
+                <tr *ngFor="let message of messages">
+                    <td>
+                        <i *ngIf="message.type === 'info'" class="fa fa-info">&nbsp;</i>
+                        <i *ngIf="message.type === 'error'" class="fa fa-close">&nbsp;</i>
+                        <i *ngIf="message.type === 'warning'" class="fa fa-warning">&nbsp;</i>
+                    </td>
+                    <td>{{message.text}}</td>
+                    <td>{{message.timePretty}}</td>
+                </tr>
+                <tr *ngFor="let message of messages">
+                    <td>
+                        <i *ngIf="message.type === 'info'" class="fa fa-info">&nbsp;</i>
+                        <i *ngIf="message.type === 'error'" class="fa fa-close">&nbsp;</i>
+                        <i *ngIf="message.type === 'warning'" class="fa fa-warning">&nbsp;</i>
+                    </td>
+                    <td>{{message.text}}</td>
+                    <td>{{message.timePretty}}</td>
+                </tr>
+                <tr *ngFor="let message of messages">
+                    <td>
+                        <i *ngIf="message.type === 'info'" class="fa fa-info">&nbsp;</i>
+                        <i *ngIf="message.type === 'error'" class="fa fa-close">&nbsp;</i>
+                        <i *ngIf="message.type === 'warning'" class="fa fa-warning">&nbsp;</i>
+                    </td>
+                    <td>{{message.text}}</td>
+                    <td>{{message.timePretty}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="messages">...</div>
+        <div role="tabpanel" class="tab-pane" id="settings">...</div>
+
+    </div>
+</div>

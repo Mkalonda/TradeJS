@@ -1,0 +1,24 @@
+{
+  "name": "tradejs-tools",
+  "description": "TradeJS Tools",
+  "main": "main",
+  "scripts": {
+    "postinstall": "electron-rebuild",
+    "electron:build": "electron-packager ./ TradeJS --platform=darwin --overwrite --ignore=/e2e --ignore=/src/client",
+    "electron:rebuild": "electron-rebuild ./ TradeJS --platform=darwin --overwrite --ignore=/e2e --ignore=/src/client -f -w sqlite3",
+    "electron:dev": "npm run _electron",
+    "electron:prod": "npm run build && cross-env NODE_ENV=production npm run _electron",
+    "_electron": "electron . --electron=true"
+  },
+  "dependencies": {
+    "cross-env": "^3.1.4",
+    "debug": "^2.6.1",
+    "electron": "1.4.15",
+    "electron-builder": "14.1.1",
+    "electron-packager": "8.5.2",
+    "electron-prebuilt": "1.4.13",
+    "electron-rebuild": "1.5.7"
+  },
+  "author": "Kewin Brandsma",
+  "private": false
+}

@@ -1,12 +1,15 @@
 # config
 /config/*
-!/config/tradejs.config.default.js
+!/config/tradejs.config.default.ts
 
 # cache
 /cache/
 
 # compiled output
-/dist/
+/server/**/*.js
+/server/**/*.map
+/shared/**/*.js
+/shared/**/*.map
 
 # dependencies
 node_modules
@@ -19,7 +22,7 @@ node_modules
 /connect.lock
 /coverage/*
 /libpeerconnection.log
-npm-debug.log
+npm-debug.*
 testem.log
 /typings
 

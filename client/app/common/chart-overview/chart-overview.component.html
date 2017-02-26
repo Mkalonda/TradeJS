@@ -1,0 +1,34 @@
+<div class="chart-overview-container">
+    <chart-box #chartBox
+               *ngFor="let model of instrumentsService.instruments$ | async"
+               [ngClass]="{focused: chartBox.focus}"
+               [model]="model"
+               [startRandomized]="true"
+               draggable
+               resizable
+               (onBeforeResize)="chartBox.forceChartInCorner($event)"
+               (onAfterResize)="chartBox.unlockChartFromCorner() && chartBox.chart.reflow()"
+               (click)="toggleFocused(chartBox)">
+    </chart-box>
+
+    <div *ngIf="instrumentsService.instruments.length === 0" class="chart-no-charts">
+        <p>No charts, click on any instrument in the left panel to open a new chart.</p>
+    </div>
+</div>
+<div class="chart-overview-tabs">
+    <ul>
+        <li *ngFor="let chartBox of charts"
+            [ngClass]="{active: chartBox.focus}"
+            (click)="toggleFocused(chartBox)"
+        >
+            <a>{{chartBox.model.data.instrument}}</a>
+        </li>
+    </ul>
+
+    <ul class="chart-overview-buttons">
+        <li>
+            <i class="fa fa-table" (click)="tileWindows()"></i>
+        </li>
+    </ul>
+</div>
+
