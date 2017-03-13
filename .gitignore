@@ -24,11 +24,6 @@ node_modules
 /libpeerconnection.log
 npm-debug.*
 testem.log
-/typings
-
-# e2e
-/e2e/*.js
-/e2e/*.map
 
 #System Files
 .DS_Store

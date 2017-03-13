@@ -272,18 +272,21 @@ OandaAdapter.prototype._onPricesData = function (data) {
         }
     }, this);
 };
+
 OandaAdapter.prototype._pricesHeartbeatTimeout = function () {
     console.warn('[WARN] OandaAdapter: No heartbeat received from prices stream for 10 seconds. Reconnecting.');
     delete this.lastPriceSubscriptions;
     this._streamPrices();
 };
-OandaAdapter.prototype.getCandles = function (symbol, start, end, granularity, callback) {
+
+OandaAdapter.prototype.getCandles = function (symbol, start, end, granularity, count, callback) {
     this._sendRESTRequest({
         method: 'GET',
         path: '/v1/candles?' + querystring.stringify({
+            count: count,
             instrument: symbol,
-            start: new Date(start).getTime(),
-            end: new Date(end).getTime(),
+            start: start,
+            end: end,
             granularity: granularity,
             alignmentTimezone: 'GMT0',
             dailyAlignment: 0
@@ -333,22 +336,22 @@ OandaAdapter.prototype.getOpenTrades = function (accountId, callback) {
     });
 };
 /**
-* @method createOrder
-* @param {String} accountId Required.
-* @param {Object} order
-* @param {String} order.instrument Required. Instrument to open the order on.
-* @param {Number} order.units Required. The number of units to open order for.
-* @param {String} order.side Required. Direction of the order, either ‘buy’ or ‘sell’.
-* @param {String} order.type Required. The type of the order ‘limit’, ‘stop’, ‘marketIfTouched’ or ‘market’.
-* @param {String} order.expiry Required. If order type is ‘limit’, ‘stop’, or ‘marketIfTouched’. The value specified must be in a valid datetime format.
-* @param {String} order.price Required. If order type is ‘limit’, ‘stop’, or ‘marketIfTouched’. The price where the order is set to trigger at.
-* @param {Number} order.lowerBound Optional. The minimum execution price.
-* @param {Number} order.upperBound Optional. The maximum execution price.
-* @param {Number} order.stopLoss Optional. The stop loss price.
-* @param {Number} order.takeProfit Optional. The take profit price.
-* @param {Number} order.trailingStop Optional The trailing stop distance in pips, up to one decimal place.
-* @param {Function} callback
-*/
+ * @method createOrder
+ * @param {String} accountId Required.
+ * @param {Object} order
+ * @param {String} order.instrument Required. Instrument to open the order on.
+ * @param {Number} order.units Required. The number of units to open order for.
+ * @param {String} order.side Required. Direction of the order, either ‘buy’ or ‘sell’.
+ * @param {String} order.type Required. The type of the order ‘limit’, ‘stop’, ‘marketIfTouched’ or ‘market’.
+ * @param {String} order.expiry Required. If order type is ‘limit’, ‘stop’, or ‘marketIfTouched’. The value specified must be in a valid datetime format.
+ * @param {String} order.price Required. If order type is ‘limit’, ‘stop’, or ‘marketIfTouched’. The price where the order is set to trigger at.
+ * @param {Number} order.lowerBound Optional. The minimum execution price.
+ * @param {Number} order.upperBound Optional. The maximum execution price.
+ * @param {Number} order.stopLoss Optional. The stop loss price.
+ * @param {Number} order.takeProfit Optional. The take profit price.
+ * @param {Number} order.trailingStop Optional The trailing stop distance in pips, up to one decimal place.
+ * @param {Function} callback
+ */
 OandaAdapter.prototype.createOrder = function (accountId, order, callback) {
     if (!order.instrument) {
         return callback('instrument is a required field');
@@ -363,10 +366,10 @@ OandaAdapter.prototype.createOrder = function (accountId, order, callback) {
         return callback('type is a required field. Specify market, marketIfTouched, stop or limit');
     }
     if ((order.type !== 'market') && !order.expiry) {
-        return callback('expiry is a required field for order type'  + order.type);
+        return callback('expiry is a required field for order type' + order.type);
     }
     if ((order.type !== 'market') && !order.price) {
-        return callback('price is a required field for order type'  + order.type);
+        return callback('price is a required field for order type' + order.type);
     }
     this._sendRESTRequest({
         method: 'POST',
@@ -396,8 +399,8 @@ OandaAdapter.prototype.closeTrade = function (accountId, tradeId, callback) {
 OandaAdapter.prototype._sendRESTRequest = function (request, callback) {
     request.hostname = this.restHost;
     request.headers = request.headers || {
-        Authorization: 'Bearer ' + this.accessToken
-    };
+            Authorization: 'Bearer ' + this.accessToken
+        };
     request.secure = this.secure;
     httpClient.sendRequest(request, (error, body, httpCode) => {
         if (!error)

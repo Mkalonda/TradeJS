@@ -15,6 +15,7 @@ export default class Mapper {
 
     private _map: any = {};
     private _mode: number;
+    private _pathFile: string;
 
     public get map() {
         return this._map;
@@ -30,7 +31,7 @@ export default class Mapper {
 
         if (this.options.path) {
             this._mode = Mapper.MODE_PERSISTENT;
-            this.options.path = path.join(this.options.path, 'data-mapper.json');
+            this._pathFile = path.join(this.options.path, 'database-mapper.json');
             await this._loadFromFile();
         } else {
             this._mode = Mapper.MODE_MEMORY;
@@ -61,7 +62,7 @@ export default class Mapper {
             // Persistent mode
             if (this.mode === Mapper.MODE_PERSISTENT) {
 
-                fs.writeFile(this.options.path, JSON.stringify(map, null, 2), err => {
+                fs.writeFile(this._pathFile, JSON.stringify(map, null, 2), err => {
                     if (err)
                         reject(err);
 
@@ -128,11 +129,11 @@ export default class Mapper {
 
         return new Promise((resolve, reject) => {
 
-            fs.exists(this.options.path, (result) => {
+            fs.exists(this._pathFile, (result) => {
 
                 if (result) {
 
-                    fs.readFile(this.options.path, (err, content) => {
+                    fs.readFile(this._pathFile, (err, content) => {
 
                         try {
                             this._map = JSON.parse(content.toString());

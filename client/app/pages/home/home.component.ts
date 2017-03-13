@@ -1,6 +1,4 @@
-import {Component, ViewChild, ElementRef} from '@angular/core';
-import InstrumentListComponent from '../../common/intrument-list/instrument-list.component';
-import ChartOverviewComponent from '../../common/chart-overview/chart-overview.component';
+import {Component, ElementRef} from '@angular/core';
 
 @Component({
     selector: 'page-home',
@@ -9,9 +7,6 @@ import ChartOverviewComponent from '../../common/chart-overview/chart-overview.c
 })
 
 export class HomeComponent {
-
-    @ViewChild(InstrumentListComponent) instrumentList: InstrumentListComponent;
-    @ViewChild(ChartOverviewComponent) chartOverview: ChartOverviewComponent;
 
     constructor(
         private _elementRef: ElementRef

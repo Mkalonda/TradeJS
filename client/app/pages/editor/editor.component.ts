@@ -16,8 +16,8 @@ export class EditorComponent implements AfterViewInit {
     // we pass the Component we want to get
     // assign to a public property on our class
     // give it the type for our component
-    @ViewChild(FileTreeComponent) fileTree: FileTreeComponent;
-    @ViewChild(JSEditorComponent) jsEditor: JSEditorComponent;
+    @ViewChild('file-tree') fileTree: FileTreeComponent;
+    @ViewChild('js-editor') jsEditor: JSEditorComponent;
 
     constructor(private _router: Router) {}
 

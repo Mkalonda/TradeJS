@@ -45,8 +45,9 @@ import {ResizableDirective} from './directives/resizable.directive';
 import {ChartBoxComponent} from './common/chart-box/chart-box.component';
 import {ChartDirective} from './directives/chart/chart.directive';
 import {ChartReportDirective} from './directives/chart/chart-report.directive';
-import {BacktestSettingsComponent} from "./common/backtest-settings/backtest-settings.component";
-import {BacktestReportsComponent} from "./common/backtest-report/backtest-reports.component";
+import {BacktestSettingsComponent} from './common/backtest-settings/backtest-settings.component';
+import {BacktestReportsComponent} from './common/backtest-report/backtest-reports.component';
+
 
 @NgModule({
     declarations: [
@@ -82,7 +83,7 @@ import {BacktestReportsComponent} from "./common/backtest-report/backtest-report
         routing,
         FormsModule,
         ReactiveFormsModule,
-        StoreLogMonitorModule,
+        // StoreLogMonitorModule,
         HttpModule,
         MultiselectDropdownModule
     ],

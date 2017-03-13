@@ -7,3 +7,5 @@ export interface InstrumentSettings {
     until?: number;
     bars?: Array<any>;
 }
+
+export default {};

@@ -1,3 +1,4 @@
+import * as _           from 'lodash';
 import {Injectable, Output, EventEmitter} from '@angular/core';
 import {InstrumentModel} from '../models/instrument.model';
 import {InstrumentSettings} from '../../../shared/interfaces/InstrumentSettings';
@@ -42,15 +43,14 @@ export default class InstrumentsService {
     }
 
     public add(instrumentModel: InstrumentModel): void {
-        this._instruments.push(instrumentModel);
-        this.instruments$.next(this._instruments);
+        let existingModel = _.find(this._instruments, (instrument) => instrument.data.id === instrumentModel.data.id);
 
-        // if (!model.data.id)
-        //     this._createOnServer(model.data).then(options => {
-        //         model.set(options);
-        //
-        //         model.synced.emit(true);
-        //     });
+        if (existingModel) {
+
+        } else {
+            this._instruments.push(instrumentModel);
+            this.instruments$.next(this._instruments);
+        }
     }
 
     public remove(model: InstrumentModel) {
@@ -61,9 +61,6 @@ export default class InstrumentsService {
     }
 
     public fetch(model: InstrumentModel, count = 300, offset = 0, from?: number, until?: number): Promise<any> {
-
-        // from = moment(new Date()).subtract(7, 'days').valueOf();
-        // until = Date.now();
 
         let startTime = Date.now();
 
@@ -77,6 +74,7 @@ export default class InstrumentsService {
                 until,
                 from
             }, (err, data) => {
+
                 if (err)
                     alert(err);
 

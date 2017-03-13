@@ -14,13 +14,15 @@ export default class CacheDataLayer {
         return this._openDb();
     }
 
-    public read(instrument: string, timeFrame: string, from: number, until: number, count: number, bufferOnly?: boolean, completeOnly: boolean = true) {
+    public read(instrument: string, timeFrame: string, from: number, until: number, count = 500, bufferOnly?: boolean, completeOnly: boolean = true) {
 
         return new Promise((resolve, reject) => {
 
             let tableName = this._getTableName(instrument, timeFrame),
                 columns = ['time', 'openBid', 'highBid', 'lowBid', 'closeBid', 'volume'],
                 queryString;
+
+            debug(`DataLayer: Read ${tableName} from ${new Date(from)} until ${new Date(until)} count ${count}`);
 
             queryString = `SELECT ${columns.join(',')}  FROM ${tableName} `;
 
@@ -70,12 +72,13 @@ export default class CacheDataLayer {
     }
 
     public async write(instrument, timeFrame, candles) {
-        debug('DataLayer: Write ' + candles.length + ' candles to' + instrument);
 
         return new Promise((resolve, reject) => {
 
             this._createInstrumentTableIfNotExists(instrument, timeFrame)
                 .then(tableName => {
+
+                    debug('DataLayer: Write ' + candles.length + ' candles to ' + tableName);
 
                     if (!candles.length)
                         return resolve();

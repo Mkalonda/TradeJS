@@ -4,13 +4,15 @@ import {ViewContainerRef} from '@angular/core';
 import {ModalComponent} from '../common/modal/modal.component';
 import ModalService from '../services/modal.service';
 
-declare var $: any;
+declare let $: any;
 
 @Directive({
     selector: '[modalAnchor]'
 })
 
 export class ModalAnchorDirective {
+    
+    public modalComponentRef;
 
     constructor(
         private viewContainer: ViewContainerRef,
@@ -24,15 +26,23 @@ export class ModalAnchorDirective {
         this.viewContainer.clear();
 
         let modalComponentFactory = this.componentFactoryResolver.resolveComponentFactory(modalComponent);
-        let modalComponentRef = <any>this.viewContainer.createComponent(modalComponentFactory);
+        this.modalComponentRef = <any>this.viewContainer.createComponent(modalComponentFactory);
 
-        modalComponentRef.instance.options = options;
+        this.modalComponentRef.instance.options = options;
 
-        modalComponentRef.changeDetectorRef.detectChanges();
+        this.modalComponentRef.changeDetectorRef.detectChanges();
 
-        $(modalComponentRef._nativeElement.firstElementChild).modal('show');
+        this.show();
 
-        return modalComponentRef;
+        return this.modalComponentRef;
+    }
+
+    show() {
+        $(this.modalComponentRef.instance.elementRef.nativeElement.firstElementChild).modal('show');
+    }
+
+    hide() {
+
     }
 
     destroy(modalComponentRef) {

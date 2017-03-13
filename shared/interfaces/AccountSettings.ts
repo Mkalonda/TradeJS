@@ -1,4 +1,4 @@
-interface AccountSettings {
+export interface AccountSettings {
     broker: string,
     id: number,
     environment: string,

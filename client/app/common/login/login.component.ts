@@ -1,4 +1,4 @@
-import {Component, AfterViewInit} from '@angular/core';
+import {Component, AfterViewInit, ElementRef} from '@angular/core';
 
 @Component({
     selector: 'login',
@@ -7,11 +7,12 @@ import {Component, AfterViewInit} from '@angular/core';
 })
 
 export default class LoginComponent implements AfterViewInit {
-
     public isLoading = true;
     public options: any = {};
 
-    constructor() {}
+    constructor(public elementRef: ElementRef) {
+
+    }
 
     ngAfterViewInit() {}
 

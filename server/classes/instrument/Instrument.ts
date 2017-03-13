@@ -16,6 +16,7 @@ export default class Instrument extends InstrumentCache {
     }
 
     async onTick(timestamp, bid, ask): Promise<void> {
+
         // Tick indicators
         for (let name in this.indicators) {
             this.indicators[name].onTick(bid, ask);

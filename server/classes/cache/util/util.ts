@@ -16,7 +16,7 @@ module.exports.getDataFilePath = (instrument, timeFrame, year, month) => {
     return `${PATH_DATA}/${instrument}/${year}/${month}_${timeFrame}.bars`;
 };
 
-export function getGapsInDateRanges (from:number, until:number, ranges: Array<any> = []) {
+export const getGapsInDateRanges = (from:number, until:number, count, ranges: Array<any> = []) => {
     let chunks = [],
         i = 0, len = ranges.length, range,
         _from = from;

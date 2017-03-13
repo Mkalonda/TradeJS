@@ -22,8 +22,8 @@ export default class Cache extends WorkerChild {
     private _brokerApi: BrokerApi = null;
 
     private _dataLayer: CacheDataLayer;
-    private _mapper: Mapper = new Mapper({path: this.settings.path.cache});
-    private _fetcher: Fetcher = new Fetcher({mapper: this._mapper, brokerApi: this._brokerApi});
+    private _mapper: Mapper;
+    private _fetcher: Fetcher;
     private _barCalculator: BarCalculator = new BarCalculator();
     private _instrumentList: Array<any> = [];
 
@@ -39,6 +39,9 @@ export default class Cache extends WorkerChild {
             path: path.join(this.settings.path.cache, 'database.db')
         });
 
+        this._mapper = new Mapper({path: this.settings.path.cache});
+        this._fetcher = new Fetcher({dataLayer: this._dataLayer, mapper: this._mapper, brokerApi: this._brokerApi});
+
         await this._dataLayer.init();
         await this._mapper.init();
         await this._fetcher.init();
@@ -48,51 +51,27 @@ export default class Cache extends WorkerChild {
         await this._ipc.startServer();
     }
 
-    public async read(instrument, timeFrame, from?, until?, count?, bufferOnly?): Promise<any> {
+    public async read(instrument: string, timeFrame: string, from?: number, until?: number, count?: number, bufferOnly = true): Promise<any> {
 
-        await this.fetch(instrument, timeFrame, from, until, count);
+        if (count && from && until)
+            return Promise.reject('Cache->Read : Only from OR until can be given when using count, not both');
+
+        if (!from && !until) {
+            until = Date.now();
+        }
+
+        count = count || 500;
+
+        await this._fetcher.fetch(this._brokerApi, instrument, timeFrame, from, until, count);
 
         return this._dataLayer.read(instrument, timeFrame, from, until, count, bufferOnly);
     }
 
     public async fetch(instrument, timeFrame, from, until, count): Promise<void> {
 
-        // Ensure enough data is loaded
-        // TODO: counting number of bars inside database-map.json is faster
-        if (count) {
-
-            if (!from && !until) {
-                return Promise.reject('Cache->Read : When using count, either from OR until must be set');
-            }
-
-            if (from && until) {
-                return Promise.reject('Cache->Read : Only from OR until can be given when using count, not both');
-            }
-
-            let safeRangeMS = timeFrameSteps[timeFrame] * (count * 2);
-
-            if (typeof from === 'number') {
-                until = from + safeRangeMS;
-            }
-
-            else if (typeof until === 'number') {
-                from = until - safeRangeMS;
-            }
-        } else {
-
-            if (!until) {
-                until = Date.now();
-            }
-        }
-
-        let result = await this._fetcher.fetch(this._brokerApi, instrument, timeFrame, from, until, count);
-
-        // Always write to DB to ensure tablename
-        // TODO: Create tables when booting
-        await this._dataLayer.write(instrument, timeFrame, result.candles);
-
-        // Store in mapper
-        await this._mapper.update(instrument, timeFrame, from, until, result.candles.length);
+        // // Always write to DB to ensure tablename
+        // // TODO: Create tables when booting
+        // await this._dataLayer.write(instrument, timeFrame, result.candles);
     }
 
     public async reset(instrument?: string, timeFrame?: string, from?: number, until?: number) {

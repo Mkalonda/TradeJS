@@ -32,7 +32,6 @@ export class ResizableDirective implements OnInit {
                     restriction: 'parent'
                 },
                 onstart: (event) => {
-                    console.log(event.interaction.prepared.edges);
                     this.onBeforeResize.emit(event.interaction.prepared.edges);
                 },
                 onmove: (event) => {

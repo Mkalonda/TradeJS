@@ -18,24 +18,20 @@ export default class InstrumentCache extends WorkerChild {
     protected until: number;
 
     private _readyHandler = Promise.resolve();
-    private _isReady = false;
-
 
     public async init() {
         await super.init();
 
         await this._ipc.connectTo('cache');
 
-        process.nextTick(async () => {
-            // Fetch data for buffers
+        await this._fetch(1000);
 
-            await this._fetch(500);
+        if (this.options.live) {
+            this._toggleNewTickListener(true);
+        }
 
-            if (this.options.live) {
-                this._toggleNewTickListener(true);
-            }
+        this._readyHandler.then(async () => {
 
-            this._isReady = true;
         });
     }
 
@@ -43,11 +39,13 @@ export default class InstrumentCache extends WorkerChild {
         console.log('super tick function, you should define one in your class!');
     }
 
-    public async read(count = 0, offset = 0, start?: number, until?: number) {
+    public read(count = 0, offset = 0, start?: number, until?: number) {
+        return this._readyHandler.then(async () => {
 
-        await this._fetch(count + offset);
+            await this._fetch(count + offset);
 
-        return this.ticks.slice(this.ticks.length - count - offset, this.ticks.length - offset);
+            return this.ticks.slice(this.ticks.length - count - offset, this.ticks.length - offset);
+        });
     }
 
     public async _fetch(count, backwards = true, from?: number, until?: number) {
@@ -57,7 +55,7 @@ export default class InstrumentCache extends WorkerChild {
             return;
 
         if (backwards) {
-            until = until || (this.ticks.length ? this.ticks[0][0] : Date.now());
+            until = until || (this.ticks.length ? this.ticks[0][0] : undefined);
         } else {
             from = from || this.ticks[0][0];
         }

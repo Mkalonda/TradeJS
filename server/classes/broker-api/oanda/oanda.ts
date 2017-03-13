@@ -71,22 +71,15 @@ export default class BrokerApi extends Base {
         });
     }
 
-    public getCandles(instrument, timeFrame, from, until): Promise<any> {
+    public getCandles(instrument, timeFrame, from, until, count): Promise<any> {
 
         return new Promise((resolve, reject) => {
 
-            if (typeof from != 'string')
-                from = new Date(from).toISOString();
-
-            if (typeof until != 'string')
-                until = new Date(until).toISOString();
-
-            this._client.getCandles(instrument, from, until, timeFrame, (err, candles) => {
+            this._client.getCandles(instrument, from, until, timeFrame, count, (err, candles) => {
                 if (err)
                     return console.log(err) && reject(err);
 
                 this._normalize(candles);
-                //candles = fillGaps(timeFrame, from, until, candles);
 
                 resolve(candles);
             });
