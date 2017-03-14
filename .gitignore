@@ -7,6 +7,7 @@
 
 # compiled output
 /server/**/*.js
+!/server/gulpfile.js
 /server/**/*.map
 /shared/**/*.js
 /shared/**/*.map
