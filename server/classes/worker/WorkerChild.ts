@@ -52,7 +52,7 @@ export default class WorkerChild extends Base {
 
     static _initAsWorker() {
 
-        if (typeof process != 'undefined') {
+        if (typeof process !== 'undefined') {
 
             let mainFile = null,
                 settings = JSON.parse((<any>minimist(process.argv.slice(2))).settings),

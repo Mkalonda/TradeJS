@@ -1,6 +1,6 @@
 import {EventEmitter} from '@angular/core';
 import {BaseModel} from './base.model';
-import {InstrumentSettings} from "../../../shared/interfaces/InstrumentSettings";
+import {InstrumentSettings} from '../../../shared/interfaces/InstrumentSettings';
 
 export class InstrumentModel extends BaseModel {
 
