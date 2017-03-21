@@ -2,7 +2,6 @@
 import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
 import {HttpModule} from '@angular/http';
-import {StoreLogMonitorModule} from '@ngrx/store-log-monitor';
 
 // Pages
 import {HomeComponent}    from './pages/home/home.component';
@@ -48,7 +47,6 @@ import {ChartReportDirective} from './directives/chart/chart-report.directive';
 import {BacktestSettingsComponent} from './common/backtest-settings/backtest-settings.component';
 import {BacktestReportsComponent} from './common/backtest-report/backtest-reports.component';
 
-
 @NgModule({
     declarations: [
         AppComponent,
@@ -88,14 +86,14 @@ import {BacktestReportsComponent} from './common/backtest-report/backtest-report
         MultiselectDropdownModule
     ],
     providers: [
-        CookieService,
-        UserService,
-        SystemService,
-        LoggedInGuard,
-        ConstantsService,
-        SocketService,
-        ModalService,
-        InstrumentsService
+        { provide: CookieService, useClass: CookieService },
+        { provide: UserService, useClass: UserService },
+        { provide: SystemService, useClass: SystemService },
+        { provide: LoggedInGuard, useClass: LoggedInGuard },
+        { provide: ConstantsService, useClass: ConstantsService },
+        { provide: SocketService, useClass: SocketService },
+        { provide: ModalService, useClass: ModalService },
+        { provide: InstrumentsService, useClass: InstrumentsService }
     ],
     bootstrap: [
         AppComponent

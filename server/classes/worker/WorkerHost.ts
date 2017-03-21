@@ -52,7 +52,7 @@ export default class WorkerHost extends Base {
             };
 
         // TODO - FUCKING ELECTRON!
-        //this._child = fork(this.opt.path, [...process.execArgv, `--settings=${childArgv}`], childOpt);
+        // this._child = fork(this.opt.path, [...process.execArgv, `--settings=${childArgv}`], childOpt);
         this._child = spawn('node', [this.opt.path, ...process.execArgv, `--settings=${childArgv}`], childOpt);
 
         this._child.on('close', code => {

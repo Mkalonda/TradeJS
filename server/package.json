@@ -31,7 +31,6 @@
   "author": "Kewin Brandsma",
   "private": false,
   "dependencies": {
-    "@types/node": "^7.0.5",
     "backbone-events-standalone": "0.2.7",
     "body-parser": "1.16.1",
     "cli-table": "0.3.1",
