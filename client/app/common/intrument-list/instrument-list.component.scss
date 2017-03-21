@@ -23,6 +23,7 @@ li {
 
 table {
 
+    width:100%;
     tbody tr {
         border-top: 1px solid #8c8a8a;
         border-bottom: 1px solid #8c8a8a;
@@ -52,6 +53,11 @@ table {
         background: #6f748e;
         cursor: pointer;
     }
+}
+
+.search-instrument-list {
+    width:100%;
+    padding-left: 5px;
 }
 
 .fa {

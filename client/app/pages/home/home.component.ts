@@ -1,4 +1,6 @@
 import {Component, ElementRef} from '@angular/core';
+const interact = require('interactjs');
+
 
 @Component({
     selector: 'page-home',
@@ -13,10 +15,12 @@ export class HomeComponent {
     ) {}
 
     onDrag(event) {
-        event.preventDefault();
 
+        console.log(event);
+        //event.preventDefault();
+        console.log(this._elementRef);
         let target = this._elementRef.nativeElement;
-
+        console.log('test3');
         let // keep the dragged position in the data-x/data-y attributes
             x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
             y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;

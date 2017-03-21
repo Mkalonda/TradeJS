@@ -8,9 +8,9 @@
     "accountId": "1218398"
   },
   "path": {
-    "cache": "C:\\Users\\Kewin\\Projects\\TradeJS\\cache",
-    "custom": "C:\\Users\\Kewin\\Projects\\TradeJS\\custom",
-    "config": "C:\\Users\\Kewin\\Projects\\TradeJS\\server\\config"
+    "cache": "C:\\projecten\\TradeJS-new\\cache",
+    "custom": "C:\\projecten\\TradeJS-new\\custom",
+    "config": "C:\\projecten\\TradeJS-new\\server\\config"
   },
   "system": {
     "port": 3000,

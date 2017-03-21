@@ -1,3 +1,31 @@
+.chart-overview-column {
+    right: 0;
+}
+
+.splitter {
+    position: absolute;
+    top:70%;
+    right: 0;
+}
+
+.fa-rotate-45 {
+    transform: rotate(90deg);
+}
+
+.bottom-block {
+    position: absolute;
+    top: 50%;
+    bottom: 0;
+    border-top: 1px solid white;
+    width: 100%;
+    text-align:center;
+    vertical-align: middle;
+}
+
+.bottom-block-text {
+    margin-top: 50px;
+}
+
 header {
     padding: 1em;
     font-family: Arial, Helvetica, sans-serif;

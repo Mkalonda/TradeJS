@@ -11,6 +11,12 @@
 /server/**/*.map
 /shared/**/*.js
 /shared/**/*.map
+/shared/dist/
+/_builds/
+
+
+
+
 
 # dependencies
 node_modules
@@ -25,6 +31,7 @@ node_modules
 /libpeerconnection.log
 npm-debug.*
 testem.log
+
 
 #System Files
 .DS_Store

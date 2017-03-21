@@ -1,12 +1,12 @@
-<div class="three-column" draggable [restrict]="false" [direction]="x" [onDrag]="onDrag">
-    <span class="splitter" data-drag-handle>X</span>
+<div class="three-column" draggable [restrict]="false"  [direction]="x" [onDrag]="onDrag">
+    <span data-drag-handle class="splitter fa fa-bars fa-rotate-45" ></span>
     <instrument-list (instrumentClicked)="chartOverview.create({instrument: $event})"></instrument-list>
-    <div style="position: absolute; top: 50%; bottom: 0; border-top: 1px solid white; width: 100%; text-align:center; vertical-align: middle">
-        <p style="margin-top: 50px;">Some other block</p>
+    <div class="bottom-block">
+        <p class="bottom-block-text">Some other block</p>
     </div>
 </div>
 
-<chart-overview class="three-column" style="right: 0;" #chartOverview></chart-overview>
+<chart-overview class="three-column chart-overview-column" #chartOverview></chart-overview>
 
 <div class="three-column hide">
 
