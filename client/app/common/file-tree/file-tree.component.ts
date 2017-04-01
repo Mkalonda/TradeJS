@@ -20,7 +20,7 @@ export default class FileTreeComponent implements AfterViewInit, OnDestroy {
     loaded: boolean;
 
     constructor(socketService: SocketService) {
-        this.socket = socket.socket;
+        this.socket = socketService.socket;
 
         this.jstree = null;
         this.loaded = false;
