@@ -1,16 +1,6 @@
-# config
-/config/*
-!/config/tradejs.config.default.ts
-
-# cache
-/cache/
-
-# compiled output
-/server/**/*.js
-!/server/gulpfile.js
-/server/**/*.map
-/shared/**/*.js
-/shared/**/*.map
+/cache
+/_builds
+/shared/dist
 
 # dependencies
 node_modules
@@ -19,10 +9,6 @@ node_modules
 .idea
 
 # misc
-.sass-cache
-/connect.lock
-/coverage/*
-/libpeerconnection.log
 npm-debug.*
 testem.log
 
@@ -32,4 +18,12 @@ Thumbs.db
 
 #electron builds
 TradeJS-darwin-x64
+
+# Server
+/server/config/tradejs.config.json
+/server/**/*.js
+!/server/gulpfile.js
+/server/**/*.map
+/shared/**/*.js
+/shared/**/*.map
 
