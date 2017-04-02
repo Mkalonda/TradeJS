@@ -11,11 +11,11 @@
     "_electron": "electron . --electron=true"
   },
   "dependencies": {
-    "cross-env": "^3.1.4",
+    "cross-env": "^4.0.0",
     "debug": "^2.6.1",
-    "electron": "1.4.15",
-    "electron-builder": "14.1.1",
-    "electron-packager": "8.5.2",
+    "electron": "1.6.2",
+    "electron-builder": "16.6.1",
+    "electron-packager": "8.6.0",
     "electron-prebuilt": "1.4.13",
     "electron-rebuild": "1.5.7"
   },

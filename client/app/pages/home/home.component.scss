@@ -34,6 +34,10 @@ header {
     display: block;
 }
 
+.three-column:nth-child(2) {
+    right: 0;
+}
+
 // Mobile
 @media screen and (max-width: 768px) {
     .three-column:first-child {

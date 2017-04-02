@@ -3,73 +3,79 @@ import OrderManager from "../../modules/order/OrderManager";
 import AccountManager from "../../modules/account/AccountManager";
 
 export interface IEA {
-    orderManager: OrderManager;
-    onTick(timestamp, bid, ask): Promise<void>;
+	orderManager: OrderManager;
+	onTick(timestamp, bid, ask): Promise<void>;
 }
 
 export default class EA extends Instrument implements IEA {
 
-    public tickCount:number = 0;
-    public live: boolean = false;
+	public tickCount = 0;
+	public live = false;
 
-    public accountManager: AccountManager;
-    public orderManager: OrderManager;
+	public accountManager: AccountManager;
+	public orderManager: OrderManager;
 
-    protected from: number;
-    protected until: number;
+	protected from: number;
+	protected until: number;
 
-    async init() {
-        await super.init();
-        console.log(this.options);
-        // TODO: Move to backtest class
-        this.accountManager = new AccountManager({
-            equality: this.options.equality
-        });
+	async init() {
+		await super.init();
 
-        this.orderManager = new OrderManager(this.accountManager, {
-            live: this.live
-        });
+		console.log('this.options this.options', this.options);
 
-        await this.accountManager.init();
-        await this.orderManager.init();
+		// TODO: Move to backtest class
+		this.accountManager = new AccountManager({
+			equality: this.options.equality
+		});
 
-        this._ipc.on('@run', opt => this.runBackTest(opt.from, opt.until));
-        this._ipc.on('@report', (data, cb) => cb(null, this.report()));
-    }
+		this.orderManager = new OrderManager(this.accountManager, {
+			live: this.live
+		});
 
-    async runBackTest(from: number, until: number): Promise<any> {
+		await this.accountManager.init();
+		await this.orderManager.init();
 
-        this.from = from;
-        this.until = until;
+		this._ipc.on('@run', opt => this.runBackTest(opt.from, opt.until));
+		this._ipc.on('@report', (data, cb) => cb(null, this.report()));
+	}
 
-        while (true) {
-            let result = await this._fetch(2000, false, from);
-            console.log(result);
-            if (result === 'end')
-                break;
-        }
+	async runBackTest(from: number, until: number): Promise<any> {
 
-        this._ipc.send('main', '@run:end', undefined, false);
-    }
+		this.from = from;
+		this.until = until;
 
-    report() {
-        return {
-            tickCount: this.tickCount,
-            equality: this.accountManager.equality,
-            orders: this.orderManager.closedOrders
+		let result = await this._fetch(2000, false, from);
 
-        };
-    }
+		// while (true) {
+		//
+		//
+		// 	console.log(result);
+		//
+		// 	if (result === 'end')
+		// 		break;
+		// }
 
-    async onTick(timestamp, bid, ask): Promise<void> {
-        await super.onTick(timestamp, bid, ask);
+		this._ipc.send('main', '@run:end', undefined, false);
+	}
 
-        if (this.live === false) {
-            this.orderManager.tick()
-        }
-    }
+	report() {
+		return {
+			tickCount: this.tickCount,
+			equality: this.accountManager.equality,
+			orders: this.orderManager.closedOrders
 
-    private _fetchAndExecuteTickBatch() {
-        return this._fetch(2000)
-    }
+		};
+	}
+
+	async onTick(timestamp, bid, ask): Promise<void> {
+		await super.onTick(timestamp, bid, ask);
+
+		if (this.live === false) {
+			// this.orderManager.tick()
+		}
+	}
+
+	private _fetchAndExecuteTickBatch() {
+		return this._fetch(2000)
+	}
 }

@@ -5,102 +5,104 @@ const OANDAAdapter = require('./oanda-adapter/index');
 
 export default class BrokerApi extends Base {
 
-    private _client = null;
-    
-    constructor(private _accountSettings: AccountSettings) {
-        super()
-    }
+	private _client = null;
 
-    public async init() {
-        this._client = new OANDAAdapter({
-            // 'live', 'practice' or 'sandbox'
-            environment: this._accountSettings.environment,
-            // Generate your API access in the 'Manage API Access' section of 'My Account' on OANDA's website
-            accessToken: this._accountSettings.token,
-            // Optional. Required only if environment is 'sandbox'
-            username: this._accountSettings.username
-        });
-    }
+	constructor(private _accountSettings: AccountSettings) {
+		super()
+	}
 
-    public async testConnection(): Promise<boolean> {
-        // TODO: Stupid way to check, and should also check heartbeat
-        try {
-            await this.getAccounts();
+	public async init() {
+		this._client = new OANDAAdapter({
+			// 'live', 'practice' or 'sandbox'
+			environment: this._accountSettings.environment,
+			// Generate your API access in the 'Manage API Access' section of 'My Account' on OANDA's website
+			accessToken: this._accountSettings.token,
+			// Optional. Required only if environment is 'sandbox'
+			username: this._accountSettings.username
+		});
+	}
 
-            return true;
-        } catch (error) {
-            return false;
-        }
-    }
+	public async testConnection(): Promise<boolean> {
+		// TODO: Stupid way to check, and should also check heartbeat
+		try {
+			await this.getAccounts();
 
-    public getAccounts(): Promise<any> {
-        return new Promise((resolve, reject) => {
-            this._client.getAccounts(function (err, accounts) {
-                if (err)
-                    return reject(err);
+			return true;
+		} catch (error) {
+			return false;
+		}
+	}
 
-                resolve(accounts);
-            });
-        })
-    }
+	public getAccounts(): Promise<any> {
+		return new Promise((resolve, reject) => {
+			this._client.getAccounts(function (err, accounts) {
+				if (err)
+					return reject(err);
 
-    public subscribeEventStream() {
-        this._client.subscribeEvents(function (event) {
-            console.log(event);
-        }, this);
-    }
+				resolve(accounts);
+			});
+		})
+	}
 
-    public subscribePriceStream(instrument) {
-        this._client.subscribePrice(this._accountSettings.accountId, instrument.toUpperCase(), tick => {
-            this.emit('tick', tick);
-        }, this);
-    }
+	public subscribeEventStream() {
+		this._client.subscribeEvents(function (event) {
+			console.log(event);
+		}, this);
+	}
 
-    public unsubscribePriceStream(instrument) {
+	public subscribePriceStream(instrument) {
+		this._client.subscribePrice(this._accountSettings.accountId, instrument.toUpperCase(), tick => {
+			this.emit('tick', tick);
+		}, this);
+	}
 
-    }
+	public unsubscribePriceStream(instrument) {
 
-    public getInstruments(): any {
-        return new Promise((resolve, reject) => {
-            this._client.getInstruments(this._accountSettings.accountId, (err, instruments) => {
-                if (err)
-                    return reject(err);
+	}
 
-                resolve(instruments);
-            });
-        });
-    }
+	public getInstruments(): any {
+		return new Promise((resolve, reject) => {
+			this._client.getInstruments(this._accountSettings.accountId, (err, instruments) => {
+				if (err)
+					return reject(err);
 
-    public getCandles(instrument, timeFrame, from, until, count): Promise<any> {
+				resolve(instruments);
+			});
+		});
+	}
 
-        return new Promise((resolve, reject) => {
+	public getCandles(instrument, timeFrame, from, until, count): Promise<any> {
 
-            this._client.getCandles(instrument, from, until, timeFrame, count, (err, candles) => {
-                if (err)
-                    return console.log(err) && reject(err);
+		return new Promise((resolve, reject) => {
 
-                this._normalize(candles);
+			this._client.getCandles(instrument, from, until, timeFrame, count, (err, candles) => {
+				if (err) {
+					console.log(err);
+					return reject(err);
+				}
 
-                resolve(candles);
-            });
-        });
-    }
+				this._normalize(candles);
 
-    public async destroy(): Promise<void> {
-        this.removeAllListeners();
+				resolve(candles);
+			});
+		});
+	}
 
-        if (this._client)
-            await this._client.kill();
+	public async destroy(): Promise<void> {
+		this.removeAllListeners();
 
-        this._client = null;
-    }
+		if (this._client)
+			await this._client.kill();
 
-    private _normalize(candles) {
-        let i = 0, len = candles.length;
+		this._client = null;
+	}
 
-        for (; i < len; i++)
-            candles[i].time /= 1000;
+	private _normalize(candles) {
+		let i = 0, len = candles.length;
 
-        return candles;
-    }
+		for (; i < len; i++)
+			candles[i].time /= 1000;
+
+		return candles;
+	}
 }

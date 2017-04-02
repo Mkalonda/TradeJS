@@ -13,7 +13,7 @@
     "NodeJS"
   ],
   "scripts": {
-    "dev": "ng serve",
+    "start": "ng serve",
     "lint": "gulp tslint",
     "build": "ng build --prod --output-path=dist"
   },
