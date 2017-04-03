@@ -9,37 +9,37 @@ import SocketService  from './services/socket.service';
 import SystemService  from './services/system.service';
 
 @Component({
-    selector: 'app-root',
-    templateUrl: './app.component.html',
-    styleUrls: ['./app.component.scss']
+	selector: 'app-root',
+	templateUrl: './app.component.html',
+	styleUrls: ['./app.component.scss']
 })
 
 export class AppComponent implements AfterViewInit {
-    socket: any;
+	socket: any;
 
-    constructor(private element: ElementRef,
-                private constantsService: ConstantsService,
-                private socketService: SocketService,
-                private systemService: SystemService) {
+	constructor(private element: ElementRef,
+				private constantsService: ConstantsService,
+				private socketService: SocketService,
+				private systemService: SystemService) {
 
-        constantsService.init();
-        socketService.init();
-        systemService.init();
-    }
+		constantsService.init();
+		socketService.init();
+		systemService.init();
+	}
 
-    ngAfterViewInit() {
-        let minDiff = 1500,
-            elLoadScreen = <any>document.getElementById('loadScreen');
+	ngAfterViewInit() {
+		let minDiff = 1500,
+			elLoadScreen = <any>document.getElementById('loadScreen');
 
-        document.body.className = 'animate';
+		document.body.className = 'animate';
 
-        window.setTimeout(() => {
-            elLoadScreen.style.opacity = 1;
-            this.element.nativeElement.style.opacity = 1;
+		window.setTimeout(() => {
+			elLoadScreen.style.opacity = 1;
+			this.element.nativeElement.style.opacity = 1;
 
-            window.setTimeout(() => {
-                document.body.removeChild(elLoadScreen);
-            }, 400);
-        }, minDiff);
-    }
+			window.setTimeout(() => {
+				document.body.removeChild(elLoadScreen);
+			}, 400);
+		}, minDiff);
+	}
 }

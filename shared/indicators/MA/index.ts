@@ -1,36 +1,44 @@
-import Indicator from "../Indicator";
+import Indicator from '../Indicator';
 
 export default class MA extends Indicator {
 
-    async init(): Promise<any> {
+	public get value() {
+		return this.getDrawBuffersData(undefined, undefined, false)['MA'].data[0];
+	}
 
-        this.addDrawBuffer({
-            id: 'MA',
-            type: 'line',
-            style: {
-                color: this.options.color
-            }
-        });
-    }
+	public async init(): Promise<any> {
 
-    onTick(bid: number, ask: number, shift:number = 0): Promise<any> | void {
-        super.onTick(bid, ask, shift);
+		this.addDrawBuffer({
+			id: 'MA',
+			type: 'line',
+			style: {
+				color: this.options.color
+			}
+		});
+	}
 
-        let period = this.options.period,
-            ticks = this.ticks.slice((this.ticks.length - shift) - period, this.ticks.length - shift);
+	public onTick(bid: number, ask: number, shift = 0): Promise<any> | void {
+		super.onTick(bid, ask, shift);
 
-        if (!ticks.length || ticks.length < period) {
-            if (this.ticks[this.ticks.length - shift])
-                return this.add('MA', this.ticks[this.ticks.length - shift][0], undefined);
-        }
+		let period = this.options.period,
+			ticks = this.ticks.slice((this.ticks.length - shift) - period, this.ticks.length - shift);
 
-        let time = ticks[ticks.length-1][0],
-            sum = 0, i = 0, len = ticks.length;
+		if (!ticks.length)
+			return;
 
-        for(; i < len; i++) {
-            sum += ticks[i][2];
-        }
+		if (ticks.length < period) {
+			if (this.ticks[this.ticks.length - shift])
+				return this.add('MA', this.ticks[this.ticks.length - shift][0], undefined);
+		}
 
-        this.add('MA', time, Number((sum/len).toFixed(4)));
-    }
+		let time = ticks[ticks.length - 1][0],
+			sum = 0, i = 0, len = ticks.length;
+
+		for (; i < len; i++) {
+			sum += ticks[i][2];
+		}
+
+
+		this.add('MA', time, Number((sum / len).toFixed(4)));
+	}
 }

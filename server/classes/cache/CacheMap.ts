@@ -1,153 +1,163 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as _ from 'lodash';
-import * as util from './util/util';
 import * as mkdirp from 'mkdirp';
 
 const rmdir = require('rmdir');
 
-import {mergeRanges} from "../../util/date";
+import {mergeRanges} from '../../util/date';
+import {getMissingRangeByCount, getMissingRangeByDate} from './util/util';
 
 export default class Mapper {
 
-    public static readonly MODE_PERSISTENT:number = 0;
-    public static readonly MODE_MEMORY:number = 1;
+	public static readonly MODE_PERSISTENT = 0;
+	public static readonly MODE_MEMORY = 1;
 
-    private _map: any = {};
-    private _mode: number;
-    private _pathFile: string;
+	private _map: any = {};
+	private _mode: number;
+	private _pathFile: string;
 
-    public get map() {
-        return this._map;
-    }
+	public get map() {
+		return this._map;
+	}
 
-    public get mode() {
-        return this._mode;
-    }
+	public get mode() {
+		return this._mode;
+	}
 
-    constructor(private options:any = {}) {}
+	constructor(private options: any = {}) {
+	}
 
-    public async init() {
+	public async init() {
+		console.log('this.options.path this.options.path', this.options.path);
 
-        if (this.options.path) {
-            this._mode = Mapper.MODE_PERSISTENT;
-            this._pathFile = path.join(this.options.path, 'database-mapper.json');
-            await this._loadFromFile();
-        } else {
-            this._mode = Mapper.MODE_MEMORY;
-        }
-    }
+		if (this.options.path) {
+			this._mode = Mapper.MODE_PERSISTENT;
+			this._pathFile = path.join(this.options.path, 'database-mapper.json');
+			await this._loadFromFile();
+		} else {
+			this._mode = Mapper.MODE_MEMORY;
+		}
+	}
 
-    public update(instrument, timeFrame, from, until, nrOfBars) {
-        return new Promise((resolve, reject) => {
+	public isComplete(instrument, timeFrame, from, until): boolean {
+		let ranges = this.findByParams(instrument, timeFrame),
+			i = 0, len = ranges.length, _range;
 
-            let map = this.map,
-                ranges = this.findByParams(instrument, timeFrame, true);
+		for (; i < len; ++i) {
+			_range = ranges[i];
+			if (_range[0] < from && _range[1] > until)
+				return true;
+		}
 
-            // Find first index of from date that is higher or equal then new chunk from date
-            // Place it before that, so all dates are aligned in a forward manner
-            let index = _.findIndex(ranges, date => date[0] > from);
+		return false;
+	}
 
-            // If one is higher, prepend
-            if (index > -1)
-                ranges.splice(index, 0, [from, until, nrOfBars]);
+	public update(instrument, timeFrame, from, until, nrOfBars) {
+		return new Promise((resolve, reject) => {
 
-            // Put at end of array, making sure lower from dates stay at the start of array
-            else
-                ranges.push([from, until, nrOfBars]);
+			let map = this.map,
+				ranges = this.findByParams(instrument, timeFrame, true);
 
-            // Glue the cached dates together
-            map[instrument][timeFrame] = mergeRanges(ranges);
+			// Find first index of from date that is higher or equal then new chunk from date
+			// Place it before that, so all dates are aligned in a forward manner
+			let index = _.findIndex(ranges, date => date[0] > from);
 
-            // Persistent mode
-            if (this.mode === Mapper.MODE_PERSISTENT) {
+			// If one is higher, prepend
+			if (index > -1)
+				ranges.splice(index, 0, [from, until, nrOfBars]);
 
-                fs.writeFile(this._pathFile, JSON.stringify(map, null, 2), err => {
-                    if (err)
-                        reject(err);
+			// Put at end of array, making sure lower from dates stay at the start of array
+			else
+				ranges.push([from, until, nrOfBars]);
 
-                    resolve();
-                });
-            }
-            else {
-                resolve();
-            }
-        });
-    }
+			// Glue the cached dates together
+			map[instrument][timeFrame] = mergeRanges(ranges);
 
-    findHoles(instrument, timeFrame, from, until) {
-        return util.getGapsInDateRanges(from, until, this.getMapInstrumentList(instrument, timeFrame));
-    }
+			// Persistent mode
+			if (this.mode === Mapper.MODE_PERSISTENT) {
 
-    public async reset(instrument?:string, timeFrame?:string) {
+				fs.writeFile(this._pathFile, JSON.stringify(map, null, 2), err => {
+					if (err)
+						reject(err);
 
-        return new Promise((resolve, reject) => {
+					resolve();
+				});
+			}
+			else {
+				resolve();
+			}
+		});
+	}
 
-            this._map = {};
+	public async reset(instrument?: string, timeFrame?: string) {
 
-            if (this.mode === Mapper.MODE_PERSISTENT) {
+		return new Promise((resolve, reject) => {
 
-                // Remove cache dir recursive
-                rmdir(this.options.path, () => {
+			this._map = {};
 
-                    // Recreate cache dir
-                    mkdirp(this.options.path, () => {
-                        resolve();
-                    })
-                });
-            }
-        });
-    }
+			if (this.mode === Mapper.MODE_PERSISTENT) {
 
-    public findByParams(instrument: string, timeFrame: string, create = true): Array<any> {
-        let map = this.map;
+				// Remove cache dir recursive
+				rmdir(this.options.path, () => {
 
-        if (map[instrument])
-            if (map[instrument][timeFrame])
-                return map[instrument][timeFrame];
+					// Recreate cache dir
+					mkdirp(this.options.path, () => {
+						resolve();
+					})
+				});
+			}
+		});
+	}
 
-        if (create) {
-            if (!map[instrument])
-                map[instrument] = {};
+	public findByParams(instrument: string, timeFrame: string, create = true): Array<any> {
+		let map = this.map;
 
-            if (!map[instrument][timeFrame])
-                map[instrument][timeFrame] = [];
+		if (map[instrument])
+			if (map[instrument][timeFrame])
+				return map[instrument][timeFrame];
 
-            return map[instrument][timeFrame];
-        }
+		if (create) {
+			if (!map[instrument])
+				map[instrument] = {};
 
-        return null;
-    }
+			if (!map[instrument][timeFrame])
+				map[instrument][timeFrame] = [];
 
-    getMapInstrumentList(instrument, timeFrame) {
-        let map = this.map;
+			return map[instrument][timeFrame];
+		}
 
-        return map[instrument] && map[instrument][timeFrame] ? map[instrument][timeFrame]: [];
-    }
+		return null;
+	}
 
-    private _loadFromFile() {
+	getMapInstrumentList(instrument, timeFrame) {
+		let map = this.map;
 
-        return new Promise((resolve, reject) => {
+		return map[instrument] && map[instrument][timeFrame] ? map[instrument][timeFrame] : [];
+	}
 
-            fs.exists(this._pathFile, (result) => {
+	private _loadFromFile() {
 
-                if (result) {
+		return new Promise((resolve, reject) => {
 
-                    fs.readFile(this._pathFile, (err, content) => {
+			fs.exists(this._pathFile, (result) => {
 
-                        try {
-                            this._map = JSON.parse(content.toString());
-                        } catch (error) {
-                            console.warn('Cache: mapping file corrupted');
-                        }
+				if (result) {
 
-                        resolve();
-                    });
-                } else {
-                    resolve();
-                }
-            });
-        });
+					fs.readFile(this._pathFile, (err, content) => {
 
-    }
+						try {
+							this._map = JSON.parse(content.toString());
+						} catch (error) {
+							console.warn('Cache: mapping file corrupted');
+						}
+
+						resolve();
+					});
+				} else {
+					resolve();
+				}
+			});
+		});
+	}
 }

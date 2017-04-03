@@ -18,9 +18,9 @@
     "NodeJS"
   ],
   "scripts": {
+    "start": "cross-env DEBUG=TradeJS:* gulp server:dev --web",
     "lint": "gulp tslint",
     "dist": "build",
-    "dev": "cross-env DEBUG=TradeJS:* gulp server:dev --web",
     "build": "gulp server:build",
     "prod": "cross-env NODE_ENV=production node dist/server/bin/www.js",
     "_server:run": "tsc -p ./tsconfig.json | cross-env DEBUG=TradeJS* nodemon bin/www.js --web --delay 3",

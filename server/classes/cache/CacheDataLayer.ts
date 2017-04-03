@@ -2,192 +2,210 @@ import * as fs          from 'fs';
 import * as sqLite      from 'sqlite3';
 
 const debug = require('debug')('TradeJS:DataLayer');
-const TransactionDatabase   = require("sqlite3-transactions").TransactionDatabase;
+const TransactionDatabase = require('sqlite3-transactions').TransactionDatabase;
 
 export default class CacheDataLayer {
 
-    private _db: any;
+	private _db: any;
+	private _tableList = [];
 
-    constructor(protected options) {}
+	constructor(protected options) {
+	}
 
-    public async init() {
-        return this._openDb();
-    }
+	public async init() {
+		await this._openDb();
+		return this._setTableList();
+	}
 
-    public read(instrument: string, timeFrame: string, from: number, until: number, count = 500, bufferOnly?: boolean, completeOnly: boolean = true) {
+	public read(instrument: string, timeFrame: string, from: number, until: number, count = 500, bufferOnly?: boolean): Promise<Array<any>> {
 
-        return new Promise((resolve, reject) => {
+		return this
+			._createInstrumentTableIfNotExists(instrument, timeFrame)
+			.then(() => {
 
-            let tableName = this._getTableName(instrument, timeFrame),
-                columns = ['time', 'openBid', 'highBid', 'lowBid', 'closeBid', 'volume'],
-                queryString;
+				return new Promise((resolve, reject) => {
 
-            debug(`DataLayer: Read ${tableName} from ${new Date(from)} until ${new Date(until)} count ${count}`);
+					let tableName = this._getTableName(instrument, timeFrame),
+						columns = ['time', 'openBid', 'highBid', 'lowBid', 'closeBid', 'volume'],
+						queryString;
 
-            queryString = `SELECT ${columns.join(',')}  FROM ${tableName} `;
+					debug(`DataLayer: Read ${tableName} from ${new Date(from)} until ${new Date(until)} count ${count}`);
 
-            if (count) {
-                if (typeof until === 'number') {
-                    queryString += `WHERE time <= ${until} ORDER BY time DESC LIMIT ${count} `;
-                } else {
-                    queryString += `WHERE time >= ${from} ORDER BY time ASC LIMIT ${count} `;
-                }
-            } else {
-                count = 300;
+					queryString = `SELECT ${columns.join(',')}  FROM ${tableName} `;
 
-                if (from && until) {
-                    queryString += `WHERE time >= ${from} AND time <= ${until} ORDER BY time DESC LIMIT ${count}`;
-                }
-                else if (from) {
-                    queryString += `WHERE time >= ${from} ORDER BY time DESC LIMIT ${count}`;
-                }
-                else {
+					if (count) {
+						if (typeof until === 'number') {
+							queryString += `WHERE time <= ${until} ORDER BY time DESC LIMIT ${count} `;
+						} else {
+							queryString += `WHERE time >= ${from} ORDER BY time ASC LIMIT ${count} `;
+						}
+					} else {
+						count = 300;
 
-                }
-            }
+						if (from && until) {
+							queryString += `WHERE time >= ${from} AND time <= ${until} ORDER BY time DESC LIMIT ${count}`;
+						}
+						else if (from) {
+							queryString += `WHERE time >= ${from} ORDER BY time DESC LIMIT ${count}`;
+						}
+						else {
 
-            this._db.all(queryString, (err, rows) => {
+						}
+					}
 
-                if (err) {
-                    return reject(err);
-                }
+					this._db.all(queryString, (err, rows) => {
 
-                let i = 0, len = rows.length,
-                    row, returnArr = new Float64Array(rows.length * columns.length);
+						if (err) {
+							return reject(err);
+						}
 
-                for (; i < len; i++) {
-                    row = rows[i];
-                    returnArr.set(columns.map(v => row[v]), 6 * i);
-                    //returnArr.set(Object.values(rows[i]), 6 * i); // Not yet supported
-                }
+						let i = 0, len = rows.length,
+							row, returnArr = new Float64Array(rows.length * columns.length);
 
-                if (bufferOnly) {
-                    //resolve(returnArr.buffer);
-                    resolve(Array.from(returnArr));
-                } else {
-                    resolve(Array.from(returnArr));
-                }
-            });
-        });
-    }
+						for (; i < len; i++) {
+							row = rows[i];
+							returnArr.set(columns.map(v => row[v]), 6 * i);
+							// returnArr.set(Object.values(rows[i]), 6 * i); // Not yet supported
+						}
 
-    public async write(instrument, timeFrame, candles) {
+						if (bufferOnly) {
+							// resolve(returnArr.buffer);
+							resolve(Array.from(returnArr));
+						} else {
+							resolve(Array.from(returnArr));
+						}
+					});
 
-        return new Promise((resolve, reject) => {
+				});
+			});
+	}
 
-            this._createInstrumentTableIfNotExists(instrument, timeFrame)
-                .then(tableName => {
+	public async write(instrument, timeFrame, candles) {
 
-                    debug('DataLayer: Write ' + candles.length + ' candles to ' + tableName);
+		return new Promise((resolve, reject) => {
 
-                    if (!candles.length)
-                        return resolve();
+			this._createInstrumentTableIfNotExists(instrument, timeFrame)
+				.then(tableName => {
 
-                    this._db.beginTransaction((err, transaction) => {
+					debug('DataLayer: Write ' + candles.length + ' candles to ' + tableName);
 
-                        let stmt = transaction.prepare(`INSERT OR REPLACE INTO ${tableName} VALUES (?,?,?,?,?,?,?,?,?,?,?)`),
-                            i = 0, len = candles.length, candle;
+					if (!candles.length)
+						return resolve();
 
-                        for (; i < len; i++) {
-                            candle = candles[i];
+					this._db.beginTransaction((err, transaction) => {
 
-                            stmt.run([
-                                candle.time,
-                                candle.openBid,
-                                candle.openAsk,
-                                candle.highBid,
-                                candle.highAsk,
-                                candle.lowBid,
-                                candle.lowAsk,
-                                candle.closeBid,
-                                candle.closeAsk,
-                                candle.volume,
-                                candle.complete
-                            ]);
+						let stmt = transaction.prepare(`INSERT OR REPLACE INTO ${tableName} VALUES (?,?,?,?,?,?,?,?,?,?,?)`),
+							i = 0, len = candles.length, candle;
 
-                            if (!candle.complete) {
-                                //console.log(candle.time)
-                            }
-                        }
+						for (; i < len; i++) {
+							candle = candles[i];
 
-                        stmt.finalize();
+							stmt.run([
+								candle.time,
+								candle.openBid,
+								candle.openAsk,
+								candle.highBid,
+								candle.highAsk,
+								candle.lowBid,
+								candle.lowAsk,
+								candle.closeBid,
+								candle.closeAsk,
+								candle.volume,
+								candle.complete
+							]);
 
-                        transaction.commit(function (err) {
-                            if (err) return reject(err);
+							if (!candle.complete) {
+								// console.log(candle.time)
+							}
+						}
 
-                            resolve();
-                        });
-                    });
-                })
-                .catch(reject);
-        });
-    }
+						stmt.finalize();
 
-    /**
-     *
-     * @param instrument {string}
-     * @param timeFrame {string}
-     * @returns {Promise}
-     * @private
-     */
+						transaction.commit(function (tErr: any) {
+							if (tErr) return reject(tErr);
 
-    private _createInstrumentTableIfNotExists(instrument, timeFrame) {
-        return new Promise((resolve, reject) => {
+							resolve();
+						});
+					});
+				})
+				.catch(reject);
+		});
+	}
 
-            this._db.serialize(() => {
-                let tableName = this._getTableName(instrument, timeFrame),
-                    fields = [
-                        'time int PRIMARY KEY',
-                        'openBid double',
-                        'openAsk double',
-                        'highBid double',
-                        'highAsk double',
-                        'lowBid double',
-                        'lowAsk double',
-                        'closeBid double',
-                        'closeAsk double',
-                        'volume int',
-                        'complete bool'
-                    ];
+	/**
+	 *
+	 * @param instrument {string}
+	 * @param timeFrame {string}
+	 * @returns {Promise}
+	 * @private
+	 */
+	private _createInstrumentTableIfNotExists(instrument, timeFrame) {
+		return new Promise((resolve, reject) => {
 
-                this._db.run(`CREATE TABLE IF NOT EXISTS ${tableName} (${fields.join(',')})`, function () {
-                    resolve(tableName);
-                });
-            });
-        })
-    }
+			this._db.serialize(() => {
+				let tableName = this._getTableName(instrument, timeFrame),
+					fields = [
+						'time int PRIMARY KEY',
+						'openBid double',
+						'openAsk double',
+						'highBid double',
+						'highAsk double',
+						'lowBid double',
+						'lowAsk double',
+						'closeBid double',
+						'closeAsk double',
+						'volume int',
+						'complete bool'
+					];
 
-    public async reset(instrument?: string, timeFrame?: string, from?: number, until?: number): Promise<void> {
-        await this._closeDb();
+				this._db.run(`CREATE TABLE IF NOT EXISTS ${tableName} (${fields.join(',')})`, function () {
+					resolve(tableName);
+				});
+			});
+		})
+	}
 
-        if (fs.existsSync(this.options.path))
-            fs.unlinkSync(this.options.path);
+	public async reset(instrument?: string, timeFrame?: string, from?: number, until?: number): Promise<void> {
+		await this._closeDb();
 
-        await this._openDb();
-    }
+		if (fs.existsSync(this.options.path))
+			fs.unlinkSync(this.options.path);
 
-    // public readLast2() {
-    //     setTimeout(() => {
-    //         this._db.run(`SELECT * FROM ${tableName} LIMIT 10 OFFSET (SELECT COUNT(*) FROM ${tableName})-10;  (${fields.join(',')})`, function () {
-    //            console.log()
-    //         });
-    //     }, 500);
-    // }
+		await this._openDb();
+	}
 
-    private _getTableName(instrument, timeFrame): string {
-        return instrument.toLowerCase() + '_' + timeFrame.toLowerCase();
-    }
+	// public readLast2() {
+	//     setTimeout(() => {
+	//         this._db.run(`SELECT * FROM ${tableName} LIMIT 10 OFFSET (SELECT COUNT(*) FROM ${tableName})-10; (${fields.join(',')})`, function () {
+	//            console.log()
+	//         });
+	//     }, 500);
+	// }
 
-    private async _openDb() {
-        return this._db = new TransactionDatabase(
-            new sqLite.Database(this.options.path)
-        );
-        //this._db = new sqlLite.Database('database.db');
-        //this._db = new sqLite.Database(this._pathDb);
-        //this._db = new sqlLite.Database(':memory:');
-    }
+	private _setTableList() {
+		return new Promise((resolve, reject) => {
+			this._db.run(`.tables`, (err: any, tableList: Array<any>) => {
+				console.log('tableList', tableList);
+				this._tableList = tableList;
+				resolve();
+			});
+		});
+	}
 
-    private _closeDb() {
-        this._db.close();
-    }
+	private _getTableName(instrument, timeFrame): string {
+		return instrument.toLowerCase() + '_' + timeFrame.toLowerCase();
+	}
+
+	private async _openDb() {
+		return this._db = new TransactionDatabase(
+			new sqLite.Database(this.options.path)
+		);
+		// this._db = new sqlLite.Database('database.db');
+		// this._db = new sqLite.Database(this._pathDb);
+		// this._db = new sqlLite.Database(':memory:');
+	}
+
+	private _closeDb() {
+		this._db.close();
+	}
 }

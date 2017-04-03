@@ -6,90 +6,89 @@ const PATH_INDICATORS = path.join(__dirname, '../../../shared/indicators');
 
 export default class Instrument extends InstrumentCache {
 
-    private _unique: number = 0;
+	private _unique: number = 0;
 
-    indicators = {};
+	indicators = {};
 
-    async init() {
-        await super.init();
-        await this._setIPCEvents();
-    }
+	async init() {
+		await super.init();
+		await this._setIPCEvents();
+	}
 
-    async onTick(timestamp, bid, ask): Promise<void> {
+	async onTick(timestamp, bid, ask): Promise<void> {
+		// Tick indicators
+		for (let name in this.indicators) {
+			this.indicators[name].onTick(bid, ask);
+		}
+	}
 
-        // Tick indicators
-        for (let name in this.indicators) {
-            this.indicators[name].onTick(bid, ask);
-        }
-    }
+	addIndicator(name, options): any {
+		let indicator = null;
 
-    addIndicator(name, options): any {
-        let indicator = null;
+		try {
+			let id = name + '_' + ++this._unique;
+			let indicatorPath = path.join(PATH_INDICATORS, name, 'index.js');
+			indicator = new (require(indicatorPath).default)(this.ticks, options);
+			this.indicators[id] = indicator;
 
-        try {
-            let id = name + '_' + ++this._unique;
-            let indicatorPath = path.join(PATH_INDICATORS, name, 'index.js');
-            let indicator: Indicator = new (require(indicatorPath).default)(this.ticks, options);
-            this.indicators[id] = indicator;
+			indicator._doCatchUp();
+		} catch (err) {
+			console.log('Could not add indicator', err);
+		}
 
-            indicator._doCatchUp();
-        } catch (err) {
-            console.log('Could not add indicator', err);
-        }
+		return indicator;
+	}
 
-        return indicator;
-    }
+	getIndicatorData(id: string, count?: number, shift?: number) {
+		return this.indicators[id].getDrawBuffersData(count, shift);
+	}
 
-    getIndicatorData(id:string, count:number, shift?:number) {
-        return this.indicators[id].getDrawBuffersData(count, shift);
-    }
+	getIndicatorsData(count: number, shift?: number) {
+		let data = {};
 
-    getIndicatorsData(count:number, shift?:number) {
-        let data = {};
+		for (let id in this.indicators) {
+			data[id] = this.getIndicatorData(id, count, shift);
+		}
 
-        for (let id in this.indicators) {
-            data[id] = this.getIndicatorData(id, count, shift);
-        }
+		return data;
+	}
 
-        return data;
-    }
+	async _setIPCEvents() {
+		this._ipc.on('read', async (data, cb: Function) => {
 
-    async _setIPCEvents() {
-        this._ipc.on('read', async (data, cb:Function) => {
+			try {
+				let returnObj = <any>{
+					candles: await this.read(data.count, data.offset, data.from, data.until)
+				};
 
-            try {
-                let returnObj = <any>{
-                    candles: await this.read(data.count, data.offset, data.from, data.until)
-                };
+				if (data.indicators) {
+					returnObj.indicators = await this.getIndicatorsData(data.count, data.offset)
+				}
 
-                if (data.indicators) {
-                    returnObj.indicators = await this.getIndicatorsData(data.count, data.offset)
-                }
+				cb(null, returnObj);
+			} catch (error) {
+				console.log('Error:', error);
+				cb(error);
+			}
+		});
 
-                cb(null, returnObj);
-            } catch (error) {
-                console.log('Error:', error);
-                cb(error);
-            }
-        });
+		this._ipc.on('get-data', async (data: any, cb: Function) => {
+			try {
+				cb(null, await this.getIndicatorsData(data.count, data.shift));
+			} catch (error) {
+				console.log('Error:', error);
+				cb(error);
+			}
+		});
 
-        this._ipc.on('get-data', async (data:any, cb:Function) => {
-            try {
-                cb(null, await this.getIndicatorsData(data.count, data.shift));
-            } catch (error) {
-                console.log('Error:', error);
-                cb(error);
-            }
-        });
-
-        this._ipc.on('indicator:add', async (data:any, cb:Function) => {
-            try {
-                this.addIndicator(data.name, data.options);
-                cb(null, await this.getIndicatorsData(data.count, data.shift));
-            } catch (error) {
-                console.log('Error:', error);
-                cb(error);
-            }
-        });
-    }
+		this._ipc.on('indicator:add', async (data: any, cb: Function) => {
+			try {
+				this.addIndicator(data.name, data.options);
+				cb(null, await this.getIndicatorsData(data.count, data.shift));
+			} catch (error) {
+				console.log('Error:', error);
+				cb(error);
+			}
+		});
+	}
 }
