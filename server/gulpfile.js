@@ -37,8 +37,10 @@ gulp.task('tslint', () => {
 
 gulp.task('server:dev', callback => runSequence(
     ['copy-shared-assets', 'server:build'],
-    ['custom:watch', 'server:watch'],
     'server:run',
+	'server:watch',
+	'custom:build',
+    'custom:watch',
     callback
 ))
 ;

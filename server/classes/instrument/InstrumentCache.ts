@@ -24,7 +24,7 @@ export default class InstrumentCache extends WorkerChild {
 
 		await this._ipc.connectTo('cache');
 
-		await this._fetch(1000);
+		// await this._fetch(1000);
 
 		if (this.options.live) {
 			this._toggleNewTickListener(true);
@@ -48,11 +48,11 @@ export default class InstrumentCache extends WorkerChild {
 		});
 	}
 
-	public async _fetch(count, backwards = true, from?: number, until?: number) {
+	public async _fetch(count, backwards = true, from?: number, until?: number, set = true) {
 		let nrMissing = count - this.ticks.length;
 
 		if (nrMissing < 0)
-			return;
+			return [];
 
 		if (backwards) {
 			until = until || (this.ticks.length ? this.ticks[0][0] : undefined);
@@ -69,7 +69,10 @@ export default class InstrumentCache extends WorkerChild {
 			bufferOnly: true
 		});
 
-		return this._set(resultArr);
+		if (set)
+			await this._set(resultArr);
+
+		return resultArr;
 	}
 
 	private _set(candles) {
@@ -80,7 +83,7 @@ export default class InstrumentCache extends WorkerChild {
 				candle;
 
 			if (!candles.length) {
-				return resolve('end');
+				return resolve();
 			}
 
 			this._map.update(this.instrument, this.timeFrame, candles[0], candles[candles.length - 6], candles.length);
@@ -119,8 +122,8 @@ export default class InstrumentCache extends WorkerChild {
 		});
 	}
 
-	private _doTickLoop() {
-
+	protected inject(candles) {
+		return this._set(candles);
 	}
 
 	private async _ensureDataLoaded(count, dir = 'back') {
