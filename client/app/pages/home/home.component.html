@@ -1,5 +1,5 @@
-<div class="three-column" draggable [restrict]="false"  [direction]="x" [onDrag]="onDrag">
-    <span data-drag-handle class="splitter fa fa-bars fa-rotate-45" ></span>
+<div data-drag-handle class="three-column" draggable [restrict]="false" [direction]="x" [onDrag]="onDrag">
+    <span  class="splitter fa fa-bars fa-rotate-45" ></span>
     <instrument-list (instrumentClicked)="chartOverview.create({instrument: $event})"></instrument-list>
     <div class="bottom-block">
         <p class="bottom-block-text">Some other block</p>

@@ -4,7 +4,7 @@
 
 .splitter {
     position: absolute;
-    top:70%;
+    top:50%;
     right: 0;
 }
 
@@ -39,7 +39,6 @@ header {
     .three-column:first-child {
         left: -100%;
     }
-
     .three-column:nth-child(2) {
         left: 0;
     }
