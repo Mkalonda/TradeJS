@@ -17,9 +17,9 @@ export default class MyEA extends EA implements IEA {
 	public async onTick(timestamp, bid, ask): Promise<void> {
 		await super.onTick(timestamp, bid, ask);
 
-		console.log('this.MA1.value this.MA1.value ', this.MA1.value);
+		// console.log('this.MA1.value this.MA1.value ', this.MA1.value);
 
-		console.log(this.MA1.value);
+		// console.log(this.MA1.value);
 
 		if (this.count++ < 2) {
 

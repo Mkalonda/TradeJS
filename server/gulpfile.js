@@ -150,8 +150,6 @@ function buildCustom(rootPath, callback = () => {
     let inputPath = rootPath ? _getInputAbsoluteRootFolder(rootPath) : path.resolve('..', 'custom'),
         outputPath = rootPath ? _getOutputAbsoluteRootFolder(rootPath) : path.resolve('..', '_builds');
 
-    console.log('outputPath', 'outputPath', 'outputPath', 'outputPath', 'outputPath', outputPath);
-
     let tsProject = ts.createProject(path.resolve('../custom/tsconfig.json')),
         tsResult = gulp.src(`${inputPath}/**/*.ts`)
             .pipe(sourcemaps.init()) // This means sourcemaps will be generated
@@ -169,7 +167,6 @@ function _getFileRelativeRootFolder(filePath) {
 }
 
 function _getInputAbsoluteRootFolder(filePath) {
-    console.log('filePath', 'filePath', filePath)
     return path.resolve('..', 'custom', _getFileRelativeRootFolder(filePath));
 }
 

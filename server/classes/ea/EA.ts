@@ -36,8 +36,6 @@ export default class EA extends Instrument implements IEA {
 
 		console.log('this.options this.options', this.options);
 
-		// TODO: Move to backtest class
-
 
 		this._ipc.on('@run', opt => this.runBackTest(opt.from, opt.until));
 		this._ipc.on('@report', (data, cb) => cb(null, this.report()));
@@ -78,7 +76,7 @@ export default class EA extends Instrument implements IEA {
 			if (candles.length * 6 < count)
 				break;
 
-			from = lastTime;
+			from = lastTime + 1;
 		}
 
 		this._ipc.send('main', '@run:end', undefined, false);
@@ -97,11 +95,7 @@ export default class EA extends Instrument implements IEA {
 		await super.onTick(timestamp, bid, ask);
 
 		if (this.live === false) {
-			// this.orderManager.tick()
+			this.orderManager.tick()
 		}
-	}
-
-	private _fetchAndExecuteTickBatch() {
-		return this._fetch(2000)
 	}
 }

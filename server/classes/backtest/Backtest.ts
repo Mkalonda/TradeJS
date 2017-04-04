@@ -175,8 +175,8 @@ export default class BackTest extends EventEmitter {
 		// table is an Array, so you can `push`, `unshift`, `splice` and friends
 		table.push(...this.report.instruments.map(instrumentReport => [
 			instrumentReport.instrument,
-			instrumentReport.diff || '?',
-			instrumentReport.nrOfTrades || '?',
+			instrumentReport.diff,
+			instrumentReport.nrOfTrades,
 			instrumentReport.ticksPretty
 		]));
 

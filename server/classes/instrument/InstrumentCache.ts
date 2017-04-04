@@ -23,8 +23,7 @@ export default class InstrumentCache extends WorkerChild {
 		await super.init();
 
 		await this._ipc.connectTo('cache');
-
-		// await this._fetch(1000);
+		await this._doPreFetch();
 
 		if (this.options.live) {
 			this._toggleNewTickListener(true);
@@ -42,40 +41,35 @@ export default class InstrumentCache extends WorkerChild {
 	public read(count = 0, offset = 0, start?: number, until?: number) {
 		return this._readyHandler.then(async () => {
 
-			await this._fetch(count + offset);
+			let candles = this.ticks.slice(this.ticks.length - count - offset, this.ticks.length - offset);
 
-			return this.ticks.slice(this.ticks.length - count - offset, this.ticks.length - offset);
+			return candles;
 		});
 	}
 
-	public async _fetch(count, backwards = true, from?: number, until?: number, set = true) {
-		let nrMissing = count - this.ticks.length;
-
-		if (nrMissing < 0)
-			return [];
-
-		if (backwards) {
-			until = until || (this.ticks.length ? this.ticks[0][0] : undefined);
-		} else {
-			from = from || this.ticks[0][0];
-		}
-
-		let resultArr = await this._ipc.send('cache', 'read', {
+	private async _doPreFetch() {
+		let ticks = await this._ipc.send('cache', 'read', {
 			instrument: this.instrument,
 			timeFrame: this.timeFrame,
-			from: from,
-			until: until,
-			count: nrMissing,
+			until: this.until,
+			count: 1000,
 			bufferOnly: true
 		});
 
-		if (set)
-			await this._set(resultArr);
+		await this._doTickLoop(ticks);
 
-		return resultArr;
+		// if (this.options.live) {
+		// 	// First set data without triggering 'onTick'
+		//
+		//
+		// 	// Then set the last 500 while triggering onTick
+		// 	await this._doTickLoop(ticks.slice(4500, 500), true);
+		// } else {
+		// 	await this._doTickLoop(ticks, true);
+		// }
 	}
 
-	private _set(candles) {
+	private _doTickLoop(candles, tick = true) {
 
 		return new Promise((resolve, reject) => {
 			let from = this.from,
@@ -94,6 +88,13 @@ export default class InstrumentCache extends WorkerChild {
 
 					candle = candles.slice(i, i + 6);
 
+					// Quality check, make sure every tick has a timestamp AFTER the previous tick
+					// (Just to be sure)
+					if (this.ticks.length && this.ticks[this.ticks.length - 1][0] >= candle[0]) {
+						console.log('TIME STAMP DIFF', this.ticks[this.ticks.length - 1][0], candle[0], 'TICK COUNT', this.tickCount);
+						throw new Error('Candle timestamp is not after previous timestamp');
+					}
+
 					if (until && candle[0] > until) {
 						return resolve('end');
 					}
@@ -102,8 +103,9 @@ export default class InstrumentCache extends WorkerChild {
 
 					this.ticks.push(candle);
 
-
-					await this.onTick(candle[0], candle[1], candle[2]);
+					if (tick) {
+						await this.onTick(candle[0], candle[1], candle[2]);
+					}
 
 					i = i + 6;
 
@@ -123,31 +125,7 @@ export default class InstrumentCache extends WorkerChild {
 	}
 
 	protected inject(candles) {
-		return this._set(candles);
-	}
-
-	private async _ensureDataLoaded(count, dir = 'back') {
-
-		let max = 50;
-
-		while (this.ticks.length < count && --max) {
-
-			let first = this.ticks[0][0];
-
-
-			// await this._fetch(null, null, );
-		}
-
-
-		if (this.ticks.length < count) {
-
-			if (this.ticks.length) {
-				// Get first timestamp
-
-			}
-
-
-		}
+		return this._doTickLoop(candles);
 	}
 
 	private async _toggleNewTickListener(state: boolean) {

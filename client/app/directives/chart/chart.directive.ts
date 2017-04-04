@@ -150,8 +150,6 @@ export class ChartDirective implements OnInit, AfterViewInit {
 
 				let drawBuffer = indicators[id][drawBufferName];
 
-				drawBuffer.data = drawBuffer.data.reverse();
-
 				let unique = id + '_' + drawBuffer.id;
 
 				// New series
@@ -179,8 +177,6 @@ export class ChartDirective implements OnInit, AfterViewInit {
 	}
 
 	prepareData(data: any) {
-		data = data.reverse();
-
 		let length = data.length,
 			volume = new Array(length),
 			i = 0;

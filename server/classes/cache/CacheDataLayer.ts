@@ -35,9 +35,9 @@ export default class CacheDataLayer {
 
 					if (count) {
 						if (typeof until === 'number') {
-							queryString += `WHERE time <= ${until} ORDER BY time DESC LIMIT ${count} `;
+							queryString += `WHERE time <= ${until} ORDER BY time LIMIT ${count} `;
 						} else {
-							queryString += `WHERE time >= ${from} ORDER BY time ASC LIMIT ${count} `;
+							queryString += `WHERE time >= ${from} ORDER BY time LIMIT ${count} `;
 						}
 					} else {
 						count = 300;

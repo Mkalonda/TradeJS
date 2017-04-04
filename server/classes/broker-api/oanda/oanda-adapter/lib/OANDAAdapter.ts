@@ -238,7 +238,8 @@ OandaAdapter.prototype._onPricesResponse = function (accountId, body) {
 	this.pricesTimeout = setTimeout(this._pricesHeartbeatTimeout.bind(this), 10000);
 };
 OandaAdapter.prototype._onPricesData = function (data) {
-	// Single data chunks sometimes contain more than one tick. Each always end with /r/n. Whole chunk therefore not JSON parsable, so must split.
+	// Single data chunks sometimes contain more than one tick.
+	// Each always end with /r/n. Whole chunk therefore not JSON parsable, so must split.
 	// A tick may also be split accross data chunks, so must buffer
 	data.split(/\r\n/).forEach(function (line) {
 		var update;
@@ -290,7 +291,8 @@ OandaAdapter.prototype.getCandles = function (symbol, start, end, granularity, c
 			end: end || undefined,
 			granularity: granularity,
 			alignmentTimezone: 'GMT0',
-			dailyAlignment: 0
+			dailyAlignment: 0,
+			// includeFirst: false
 		}))),
 		headers: {
 			Authorization: 'Bearer ' + this.accessToken,

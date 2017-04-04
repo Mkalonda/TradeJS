@@ -33,6 +33,18 @@ export default class Fetcher {
 
 		return brokerApi.getCandles(instrument, timeFrame, from, until, count).then(async candles => {
 
+			// Quality check, make sure every tick has a timestamp AFTER the previous tick
+			// (Just to be sure)
+			let i = 0, len = candles.length,
+				lastT;
+
+			for (; i < len; i++) {
+				if (lastT && lastT >= candles[i].time) {
+					throw new Error('Candle timestamp is not after previous timestamp')
+				}
+				lastT = candles[i].time;
+			}
+
 			// Write to database
 			await this._dataLayer.write(instrument, timeFrame, candles);
 

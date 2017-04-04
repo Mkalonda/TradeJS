@@ -29,8 +29,6 @@ export default class Mapper {
 	}
 
 	public async init() {
-		console.log('this.options.path this.options.path', this.options.path);
-
 		if (this.options.path) {
 			this._mode = Mapper.MODE_PERSISTENT;
 			this._pathFile = path.join(this.options.path, 'database-mapper.json');
