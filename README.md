@@ -22,17 +22,19 @@ Can be run as
  
   #### How to start (temp, this will be normalized in the future)
   
+  Make sure you have a **practise** account on Oanda (https://www.oanda.com/).
+  
   ```
- 
-     npm install --save tradejs
      
      # terminal 1
-     cd node_modules/tradejs
-     npm run client:dev
+     cd [PATH_TO_TRADEJS]/client
+     npm i
+     npm start
      
      # terminal 2
-     cd node_modules/tradejs
-     npm run server:dev
+     cd [PATH_TO_TRADEJS]/server
+     npm i
+     npm start
      
      ### For native desktop app (electron), replace terminal 2 with ->
      # terminal 2
@@ -40,8 +42,6 @@ Can be run as
      npm run electron:dev
     
  ```
- 
- Make sure you have a **practise** account on Oanda (https://www.oanda.com/).
  
  * Optional - Not needed when using electron. Go to http://localhost:4200 in Chrome
  * Click on login and fill in Oanda credentials
