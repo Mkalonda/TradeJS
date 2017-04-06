@@ -5,34 +5,45 @@ export default class MyEA extends EA implements IEA {
 
 	count = 0;
 	MA1: any;
+	MA2: any;
+	MA3: any;
+	MA4: any;
 
-	public async init(): Promise<any> {
-		await super.init();
+	public async onInit(): Promise<any> {
 
 		this.MA1 = this.addIndicator('MA', {
-			color: 'blue'
+			color: 'yellow',
+			period: 30
+		});
+
+		this.MA2 = this.addIndicator('MA', {
+			color: 'red',
+			period: 20
+		});
+
+		this.MA3 = this.addIndicator('MA', {
+			color: 'purple',
+			period: 10
+		});
+
+		this.MA4 = this.addIndicator('MA', {
+			color: 'orange',
+			period: 50
 		});
 	}
 
 	public async onTick(timestamp, bid, ask): Promise<void> {
-		await super.onTick(timestamp, bid, ask);
-
-		// console.log('this.MA1.value this.MA1.value ', this.MA1.value);
-
-		// console.log(this.MA1.value);
-
-		if (this.count++ < 2) {
-
-			await this.orderManager.add({
-				instrument: this.instrument,
-				count: 1,
-				type: 'se',
-				bid: bid,
-				ask: ask
-			});
-		}
-
-		if (this.count > 1440) {
+		if (this.MA1.value > bid) {
+			if (!this.orderManager.orders.length) {
+				await this.orderManager.add({
+					instrument: this.instrument,
+					count: 1,
+					type: 'se',
+					bid: bid,
+					ask: ask
+				});
+			}
+		} else {
 			if (this.orderManager.orders.length)
 				await this.orderManager.close(this.orderManager.orders[0].id, bid, ask);
 		}

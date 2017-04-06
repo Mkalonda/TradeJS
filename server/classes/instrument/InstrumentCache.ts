@@ -26,15 +26,11 @@ export default class InstrumentCache extends WorkerChild {
 		await this._doPreFetch();
 
 		if (this.options.live) {
-			this._toggleNewTickListener(true);
+			await this._toggleNewTickListener(true);
 		}
-
-		this._readyHandler.then(async () => {
-
-		});
 	}
 
-	public onTick(timestamp, bid, ask) {
+	public tick(timestamp, bid, ask) {
 		console.log('super tick function, you should define one in your class!');
 	}
 
@@ -48,34 +44,21 @@ export default class InstrumentCache extends WorkerChild {
 	}
 
 	private async _doPreFetch() {
+
 		let ticks = await this._ipc.send('cache', 'read', {
-			instrument: this.instrument,
-			timeFrame: this.timeFrame,
-			until: this.until,
-			count: 1000,
-			bufferOnly: true
-		});
+				instrument: this.instrument,
+				timeFrame: this.timeFrame,
+				until: this.options.live ? this.options.until :  this.options.from,
+				count: 1000,
+				bufferOnly: true
+			});
 
-		await this._doTickLoop(ticks);
-
-		// if (this.options.live) {
-		// 	// First set data without triggering 'onTick'
-		//
-		//
-		// 	// Then set the last 500 while triggering onTick
-		// 	await this._doTickLoop(ticks.slice(4500, 500), true);
-		// } else {
-		// 	await this._doTickLoop(ticks, true);
-		// }
+		await this._doTickLoop(ticks, false);
 	}
 
 	private _doTickLoop(candles, tick = true) {
 
 		return new Promise((resolve, reject) => {
-			let from = this.from,
-				until = this.until,
-				candle;
-
 			if (!candles.length) {
 				return resolve();
 			}
@@ -86,33 +69,35 @@ export default class InstrumentCache extends WorkerChild {
 
 				process.nextTick(async () => {
 
-					candle = candles.slice(i, i + 6);
+					let candle = candles.slice(i, i = i + 6);
 
 					// Quality check, make sure every tick has a timestamp AFTER the previous tick
 					// (Just to be sure)
 					if (this.ticks.length && this.ticks[this.ticks.length - 1][0] >= candle[0]) {
-						console.log('TIME STAMP DIFF', this.ticks[this.ticks.length - 1][0], candle[0], 'TICK COUNT', this.tickCount);
+						console.log('TIME STAMP DIFF', this.ticks[this.ticks.length - 1][0], candle[0], 'TICK COUNT', this.ticks.length);
 						throw new Error('Candle timestamp is not after previous timestamp');
 					}
 
-					if (until && candle[0] > until) {
-						return resolve('end');
+					// uncompleted candles (last one)
+					// TODO: What to do in this situation?
+					if (candle.length !== 6) {
+						resolve();
+						return;
 					}
-
-					++this.tickCount;
 
 					this.ticks.push(candle);
 
 					if (tick) {
-						await this.onTick(candle[0], candle[1], candle[2]);
-					}
+						++this.tickCount;
 
-					i = i + 6;
+						await this.tick(candle[0], candle[1], candle[2]);
+					}
 
 					if (candles[i + 1]) {
 						loop(i);
 					} else {
 						resolve();
+						return;
 					}
 				});
 			};

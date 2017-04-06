@@ -59,7 +59,9 @@ export default class BackTest extends EventEmitter {
 		// Create instrument instances
 		this.EAs = await Promise.all(this.instruments.map(instrument => {
 			return this.app.controllers.instrument.create(instrument, this.timeFrame, false, EAPath, {
-				equality: this.opt.equality
+				equality: this.opt.equality,
+				from: this.from,
+				until: this.until
 			});
 		}));
 
@@ -70,10 +72,7 @@ export default class BackTest extends EventEmitter {
 
 				EA.worker._ipc.on('@run:end', resolve);
 
-				EA.worker.send('@run', {
-					from: this.from,
-					until: this.until
-				}, false);
+				EA.worker.send('@run', undefined, false);
 			});
 		}));
 

@@ -34,7 +34,7 @@ export default class CacheDataLayer {
 					queryString = `SELECT ${columns.join(',')}  FROM ${tableName} `;
 
 					if (count) {
-						if (typeof until === 'number') {
+						if (until) {
 							queryString += `WHERE time <= ${until} ORDER BY time LIMIT ${count} `;
 						} else {
 							queryString += `WHERE time >= ${from} ORDER BY time LIMIT ${count} `;

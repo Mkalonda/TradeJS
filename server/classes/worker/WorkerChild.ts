@@ -83,6 +83,7 @@ export default class WorkerChild extends Base {
 					return;
 
 				const instance = new mainFile(settings.classArguments, settings.workerOptions);
+
 				await instance.init();
 
 				process.send('__ready');

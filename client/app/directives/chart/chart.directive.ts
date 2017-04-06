@@ -20,7 +20,7 @@ export class ChartDirective implements OnInit, AfterViewInit {
 	@Input() model: InstrumentModel;
 	@Input() height: number;
 	@Input() offset = 0;
-	@Input() chunkLength = 500;
+	@Input() chunkLength = 1500;
 
 	public loading = true;
 	public chart: any;
@@ -157,7 +157,6 @@ export class ChartDirective implements OnInit, AfterViewInit {
 
 				// Update
 				if (series) {
-					alert('series exists!');
 					console.log('SERIES!!!!', series);
 				}
 
@@ -169,7 +168,10 @@ export class ChartDirective implements OnInit, AfterViewInit {
 						// id: unique,
 						data: drawBuffer.data,
 						color: drawBuffer.style.color,
-						yAxis: 0
+						yAxis: 0,
+						dataGrouping: {
+							enabled: false
+						}
 					});
 				}
 			}

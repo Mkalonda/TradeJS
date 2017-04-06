@@ -80,6 +80,25 @@ export default class InstrumentController extends Base {
 		return this.instruments[id].worker.send('read', {from, until, count, indicators, bufferOnly});
 	}
 
+	public async addIndicator(params) {
+		let id, data;
+
+		id = await this.instruments[params.id].worker.send('indicator:add', {
+			name: params.name,
+			options: params.options
+		});
+
+		if (params.readCount) {
+			data = await this.getIndicatorData({
+				id: params.id,
+				name: params.name,
+				count: params.readCount
+			});
+		}
+
+		return {id, data};
+	}
+
 	public getIndicatorData(params) {
 		if (!this._instruments[params.id])
 			return Promise.reject(`Reject: Instrument '${params.id}' does not exist`);
@@ -106,26 +125,6 @@ export default class InstrumentController extends Base {
 				reject(err);
 			}
 		});
-	}
-
-
-	public async addIndicator(params) {
-		let id, data;
-
-		id = await this.instruments[params.id].worker.send('indicator:add', {
-			name: params.name,
-			options: params.options
-		});
-
-		if (params.readCount) {
-			data = await this.getIndicatorData({
-				id: params.id,
-				name: params.name,
-				count: params.readCount
-			});
-		}
-
-		return {id, data};
 	}
 
 	public destroy(id: string): void {

@@ -73,10 +73,7 @@ export class ChartReportDirective implements OnInit, AfterViewInit {
 
 		settings.series = [{
 			name: 'base',
-			data: data,
-			dataGrouping: {
-				enabled: false
-			}
+			data: data
 		}];
 
 		settings.tooltip = {
@@ -92,7 +89,12 @@ export class ChartReportDirective implements OnInit, AfterViewInit {
 
 		settings.xAxis[0].tickInterval = 1;
 		settings.xAxis[0].gridLineWidth = 0;
-		settings.xAxis[0].labels.step = 1;
+		settings.xAxis[0].labels = {
+			formatter: function () {
+				return this.value;
+			}
+		};
+		// settings.xAxis[0].dataGrouping.enabled = false;
 
 		settings.yAxis = <any>[
 			{

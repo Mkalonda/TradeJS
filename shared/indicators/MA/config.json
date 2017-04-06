@@ -4,12 +4,14 @@
     {
       "name": "period",
       "type": "number",
-      "value": 14
+      "value": 14,
+      "required": true
     },
     {
       "name": "color",
       "type": "color",
-      "value": "#ff0000"
+      "value": "#ff0000",
+      "required": true
     }
   ]
 }

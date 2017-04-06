@@ -1,10 +1,11 @@
 import Instrument from '../instrument/Instrument';
 import OrderManager from '../../modules/order/OrderManager';
 import AccountManager from '../../modules/account/AccountManager';
+import {isForwardDirection} from "../../../shared/tools/candles/util.candles";
 
 export interface IEA {
 	orderManager: OrderManager;
-	onTick(timestamp, bid, ask): Promise<void>;
+	onTick(timestamp, bid, ask): Promise<any>|void;
 }
 
 export default class EA extends Instrument implements IEA {
@@ -15,10 +16,9 @@ export default class EA extends Instrument implements IEA {
 	public accountManager: AccountManager;
 	public orderManager: OrderManager;
 
-	protected from: number;
-	protected until: number;
+	constructor(...args) {
+		super(args[0], args[1]);
 
-	public async init() {
 		this.accountManager = new AccountManager({
 			equality: this.options.equality
 		});
@@ -26,30 +26,32 @@ export default class EA extends Instrument implements IEA {
 		this.orderManager = new OrderManager(this.accountManager, {
 			live: this.live
 		});
+	}
+
+	public async init() {
+		await super.init();
 
 		await this.accountManager.init();
 		await this.orderManager.init();
 
 		console.log('this.options this.options', this.options);
-
-		await super.init();
-
 		console.log('this.options this.options', this.options);
 
-
-		this._ipc.on('@run', opt => this.runBackTest(opt.from, opt.until));
+		this._ipc.on('@run', opt => this.runBackTest());
 		this._ipc.on('@report', (data, cb) => cb(null, this.report()));
+
+		this.onInit();
 	}
 
-	async runBackTest(from: number, until: number): Promise<any> {
+	async runBackTest(): Promise<any> {
 
 		let count = 2000,
-			candles, lastTime;
-
-		this.from = from;
-		this.until = until;
+			candles, lastTime, lastBatch = false,
+			from = this.options.from,
+			until = this.options.until;
 
 		while (true) {
+			console.log('his.option his.optionhis.option', from);
 
 			candles = await this._ipc.send('cache', 'read', {
 				instrument: this.instrument,
@@ -67,13 +69,21 @@ export default class EA extends Instrument implements IEA {
 
 			// See if until is reached in this batch
 			if (lastTime > until) {
-				break;
+
+				// Loop to find index of last candle
+				for (let i = 0, len = candles.length; i < len; i = i + 6) {
+					if (candles[i] >= until) {
+						candles = candles.splice(0, i - 1);
+						lastBatch = true;
+						break;
+					}
+				}
 			}
 
 			await this.inject(candles);
 
 			// There are no more candles to end
-			if (candles.length * 6 < count)
+			if (lastBatch || candles.length * 6 < count)
 				break;
 
 			from = lastTime + 1;
@@ -91,11 +101,20 @@ export default class EA extends Instrument implements IEA {
 		};
 	}
 
-	async onTick(timestamp, bid, ask): Promise<void> {
-		await super.onTick(timestamp, bid, ask);
+	async tick(timestamp, bid, ask): Promise<void> {
+		await super.tick(timestamp, bid, ask);
 
 		if (this.live === false) {
 			this.orderManager.tick()
 		}
+
+		await this.onTick(timestamp, bid, ask);
+	}
+
+	public onTick(timestamp, bid, ask) {
+		console.log('CUSTOM ONTICK SHOULD BE CALLED')
+	}
+
+	public async onInit() {
 	}
 }

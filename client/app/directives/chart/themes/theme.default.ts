@@ -169,7 +169,7 @@ export default {
 			data: [],
 			// minPointLength: 1,
 			dataGrouping: {
-				enabled: true
+				enabled: false
 			}
 		},
 		{
@@ -179,7 +179,7 @@ export default {
 			// minPointLength: 1,
 			yAxis: 1,
 			dataGrouping: {
-				enabled: true
+				enabled: false
 			}
 		}
 	]

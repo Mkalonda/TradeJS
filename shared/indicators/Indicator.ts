@@ -7,23 +7,13 @@ interface IDrawBufferSettings {
 
 export default class Indicator {
 
-	options: any = {};
-	drawBuffers: Object = {};
+	protected drawBuffers: Object = {};
 
-	constructor(protected ticks, private _inputs = <any>{}) {
-		this._setInputs(_inputs);
-
+	constructor(protected ticks, protected options = <any>{}) {
 		this.init();
 	}
 
-	private _setInputs(inputs) {
-		for (let i = 0, len = inputs.length; i < len; i++) {
-			this.options[inputs[i].name] = inputs[i].value;
-		}
-	}
-
-	async init(): Promise<any> {
-	}
+	async init(): Promise<any> {}
 
 	add(id, time, data): void {
 		this.drawBuffers[id].data.push([time, data]);
@@ -70,6 +60,5 @@ export default class Indicator {
 	}
 
 	onTick(bid: number, ask: number, shift: number = 0): Promise<any> | void {
-
 	}
 }
