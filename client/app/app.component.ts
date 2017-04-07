@@ -5,8 +5,8 @@ import {Component, AfterViewInit, ElementRef} from '@angular/core';
 
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/map';
-import SocketService  from './services/socket.service';
-import SystemService  from './services/system.service';
+import {SocketService}  from './services/socket.service';
+import {SystemService}  from './services/system.service';
 
 @Component({
 	selector: 'app-root',

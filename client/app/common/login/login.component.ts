@@ -1,38 +1,39 @@
 import {Component, AfterViewInit, ElementRef} from '@angular/core';
 
 @Component({
-    selector: 'login',
-    templateUrl: './login.component.html',
-    styleUrls: ['./login.component.scss']
+	selector: 'login',
+	templateUrl: './login.component.html',
+	styleUrls: ['./login.component.scss']
 })
 
-export default class LoginComponent implements AfterViewInit {
-    public isLoading = true;
-    public options: any = {};
+export class LoginComponent implements AfterViewInit {
+	public isLoading = true;
+	public options: any = {buttons: {}};
 
-    constructor(public elementRef: ElementRef) {
+	constructor(public elementRef: ElementRef) {
 
-    }
+	}
 
-    ngAfterViewInit() {}
+	ngAfterViewInit() {
+	}
 
-    onClickButton(value) {
-        if (typeof this.options.onClickButton === 'function' && this.options.onClickButton(value) === false)
-            return;
+	onClickButton(value) {
+		if (typeof this.options.onClickButton === 'function' && this.options.onClickButton(value) === false)
+			return;
 
-        // this.button.emit(value);
-        // this.close.emit(value);
-    }
+		// this.button.emit(value);
+		// this.close.emit(value);
+	}
 
-    async onSubmit(event: Event) {
-        event.preventDefault();
+	async onSubmit(event: Event) {
+		event.preventDefault();
 
-        this.isLoading = true;
+		this.isLoading = true;
 
-        // let result = await this._userService.login();
-        //
-        // this.isLoading = false;
-        //
-        // console.log('LOGIN RESULT', result);
-    }
+		// let result = await this._userService.login();
+		//
+		// this.isLoading = false;
+		//
+		// console.log('LOGIN RESULT', result);
+	}
 }

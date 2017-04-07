@@ -30,12 +30,14 @@
     </div>
 
     <div class="dialog-footer">
-        <button *ngFor="let button of options.buttons"
-                value="{{button.value}}"
-                class="btn btn-sm btn-{{button.type || 'primary'}} pull-right"
-                (click)="onClickButton($event.srcElement.getAttribute('value'))"
-        >
-            {{button.text}}
-        </button>
+        <ng-template *ngIf="options.buttons">
+            <button *ngFor="let button of options.buttons"
+                    value="{{button.value}}"
+                    class="btn btn-sm btn-{{button.type || 'primary'}} pull-right"
+                    (click)="onClickButton($event.srcElement.getAttribute('value'))"
+            >
+                {{button.text}}
+            </button>
+        </ng-template>
     </div>
 </div>

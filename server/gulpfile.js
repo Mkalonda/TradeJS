@@ -36,7 +36,7 @@ gulp.task('tslint', () => {
 });
 
 gulp.task('server:dev', callback => runSequence(
-    ['copy-shared-assets', 'server:build'],
+    'server:build',
     'server:run',
 	'server:watch',
 	'custom:build',
@@ -50,7 +50,7 @@ gulp.task('server:watch', () => {
     gulp.watch(['./**/*.ts', '!./node_modules/',  '!node_modules/**/*.*'], () => runSequence('server:kill', 'server:build', 'custom:build', 'server:run'));
 });
 
-gulp.task('server:build', () => {
+gulp.task('server:build', ['copy-shared-assets'], () => {
 
     // Server
     let server, shared,

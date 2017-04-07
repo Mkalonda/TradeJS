@@ -3,9 +3,9 @@ import {Directive, ElementRef, OnInit, Input, AfterViewInit} from '@angular/core
 import {InstrumentModel} from '../../models/instrument.model';
 
 // Themes
-import ThemeDefault from './themes/theme.default';
+import {HighchartsDefaultTheme} from './themes/theme.default';
 // import './themes/theme.dark';
-import InstrumentsService from '../../services/instruments.service';
+import {InstrumentsService} from '../../services/instruments.service';
 
 const HighStock = require('highcharts/highstock');
 
@@ -81,7 +81,7 @@ export class ChartDirective implements OnInit, AfterViewInit {
 
 	private _createChart(): void {
 		// Clone a new settings object
-		let settings = _.cloneDeep(ThemeDefault);
+		let settings = _.cloneDeep(HighchartsDefaultTheme);
 
 		if (this.type === 'stock') {
 			// create the chart

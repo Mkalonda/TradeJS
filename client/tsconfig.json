@@ -2,9 +2,9 @@
   "compilerOptions": {
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "lib": ["es6", "dom"],
+    "lib": ["es6", "es2016", "dom"],
     "sourceMap": true,
-    "target": "es6",
+    "target": "es5",
     "mapRoot": "./app",
     "baseUrl": "./",
     "module": "commonjs",

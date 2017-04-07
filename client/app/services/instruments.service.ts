@@ -2,11 +2,11 @@ import * as _           from 'lodash';
 import {Injectable, Output, EventEmitter} from '@angular/core';
 import {InstrumentModel} from '../models/instrument.model';
 import {InstrumentSettings} from '../../../shared/interfaces/InstrumentSettings';
-import SocketService from './socket.service';
+import {SocketService} from './socket.service';
 import {BehaviorSubject} from 'rxjs';
 
 @Injectable()
-export default class InstrumentsService {
+export class InstrumentsService {
 
 	@Output() changed = new EventEmitter();
 
@@ -64,7 +64,7 @@ export default class InstrumentsService {
 
 		let startTime = Date.now();
 
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve) => {
 
 			this._socketService.socket.emit('instrument:read', {
 				id: model.data.id,

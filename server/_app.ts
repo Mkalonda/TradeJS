@@ -27,8 +27,8 @@ const
 	debug = require('debug')('TradeJS:App'),
 
 	DEFAULT_TIMEZONE = 'America/New_York',
-	PATH_PUBLIC_DEV = path.join(__dirname, '../client'),
-	PATH_PUBLIC_PROD = path.join(__dirname, '../client');
+	PATH_PUBLIC_DEV = path.join(__dirname, '../client/dist'),
+	PATH_PUBLIC_PROD = path.join(__dirname, '../client/dist');
 
 /**
  * @class App
@@ -55,6 +55,7 @@ export default class App extends Base {
 	}
 
 	public async init(): Promise<any> {
+
 		// Make sure the app can be cleaned up on termination
 		this._setProcessListeners();
 
@@ -132,7 +133,13 @@ export default class App extends Base {
 			this._http = http.createServer(this._httpApi);
 			this._io = io.listen(this._http);
 
-			this._httpApi.use(cors({origin: 'http://localhost:4200'}));
+			this._httpApi.use(function(req, res, next) {
+				res.header('Access-Control-Allow-Origin', '*');
+				res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+				next();
+			});
+
+			// this._httpApi.use(cors({origin: 'http://localhost:4200'}));
 			this._httpApi.use(express.static(process.env.NODE_ENV === 'production' ? PATH_PUBLIC_PROD : PATH_PUBLIC_DEV));
 
 			this._httpApi.use(json());
@@ -140,15 +147,13 @@ export default class App extends Base {
 
 			// Index root
 			this._httpApi.get('/', (req, res) => {
-				console.log('asdasdasdasd', path.join(__dirname, '../client/index.html'));
-
-				res.sendFile(path.join(__dirname, '../client/index.html'));
+				res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 			});
 
 			// Authentication routes
 			this._httpApi.use('/', require('./api/http/auth')(this));
 
-			// Application routes
+			// Application routes (WebSockets)
 			this._io.on('connection', socket => {
 				debug('a websocket connected');
 

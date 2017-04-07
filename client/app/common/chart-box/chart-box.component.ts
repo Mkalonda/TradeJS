@@ -5,13 +5,11 @@ import {
 	OnInit, AfterViewInit
 } from '@angular/core';
 
-import SocketService      from '../../services/socket.service';
-
-// Load themes
+import {SocketService}      from '../../services/socket.service';
 import {DialogComponent} from '../dialog/dialog.component';
-import IndicatorModel from '../../models/indicator';
+import {IndicatorModel} from '../../models/indicator';
 import {InstrumentModel} from '../../models/instrument.model';
-import InstrumentsService from '../../services/instruments.service';
+import {InstrumentsService} from '../../services/instruments.service';
 import {ChartDirective} from '../../directives/chart/chart.directive';
 
 declare let $: any;

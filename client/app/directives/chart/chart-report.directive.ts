@@ -4,9 +4,8 @@ import {Directive, ElementRef, OnInit, Input, AfterViewInit} from '@angular/core
 const Highcharts = require('highcharts');
 
 // Themes
-import ThemeDefault from './themes/theme.default';
+import {HighchartsDefaultTheme} from './themes/theme.default';
 import './themes/theme.dark';
-import InstrumentsService from '../../services/instruments.service';
 
 @Directive({
 	selector: '[chart-report]',
@@ -21,9 +20,7 @@ export class ChartReportDirective implements OnInit, AfterViewInit {
 	public loading: true;
 	public chart: any;
 
-	constructor(public elementRef: ElementRef,
-				private _instrumentsService: InstrumentsService) {
-	}
+	constructor(public elementRef: ElementRef) {}
 
 	ngOnInit() {
 	}
@@ -66,7 +63,7 @@ export class ChartReportDirective implements OnInit, AfterViewInit {
 		let data = this._prepareData(this.data);
 
 		// Clone a new settings object
-		let settings = <any>_.cloneDeep(ThemeDefault);
+		let settings = <any>_.cloneDeep(HighchartsDefaultTheme);
 
 		delete settings.chart;
 		// settings.chart.marginLeft = 100;

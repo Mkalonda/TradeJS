@@ -1,66 +1,28 @@
 {
-  "name": "TradeJS",
-  "version": "0.0.11",
-  "description": "Javascript Trading Client",
-  "main": "index.js",
-  "license": "Apache License 2.0",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/DutchKevv/TradeJS.git"
-  },
-  "keywords": [
-    "TradeJS",
-    "Stock",
-    "Forex",
-    "Trade",
-    "Trading",
-    "Node",
-    "Trading",
-    "NodeJS"
-  ],
+  "name": "tradejs-desktop",
+  "description": "TradeJS desktop wrapper",
+  "main": "electron/main",
   "scripts": {
-    "_postinstall": "electron-rebuild",
-    "install": "cd ./server && npm i && cd ../client && npm i",
-    "client:dev": "cd ./client && npm run dev",
-    "client:build": "cd ./client && npm run build",
-    "server:dev": "cd ./server && npm run dev",
-    "server:build": "cd ./server && npm run build",
-    "server:prod": "cd ./server && npm run prod",
-    "electron:build": "electron-packager ./ TradeJS --platform=darwin --overwrite --ignore=/e2e --ignore=/src/client",
-    "electron:rebuild": "electron-rebuild ./ TradeJS --platform=darwin --overwrite --ignore=/e2e --ignore=/src/client -f -w sqlite3",
-    "electron:dev": "npm run _electron",
-    "electron:prod": "npm run build && NODE_ENV=production npm run _electron",
-    "_electron": "DEBUG=TradeJS:* electron --js-flags=\"--harmony_async_await\" ./ --electron=true"
+    "postinstall": "electron-rebuild",
+    "start": "electron . --electron=true",
+    "build:windows": "node packager --platform=win32",
+    "build:mac": "electron-packager ./ TradeJS --platform=darwin --overwrite --ignore=/e2e --ignore=/src/client",
+    "build:linux": "electron-packager ./ TradeJS --platform=linux --overwrite --ignore=/e2e --ignore=/src/client",
+    "rebuild": "electron-rebuild ./ TradeJS --platform=darwin --overwrite --ignore=/e2e --ignore=/src/client -f -w sqlite3"
+  },
+  "dependencies": {
+    "electron": "1.6.2",
+    "electron-prebuilt-compile": "^1.6.2"
+  },
+  "devDependencies": {
+    "cross-env": "^4.0.0",
+    "debug": "^2.6.1",
+    "electron": "1.6.2",
+    "electron-builder": "16.6.1",
+    "electron-packager": "8.6.0",
+    "electron-prebuilt": "1.4.13",
+    "electron-rebuild": "1.5.7"
   },
   "author": "Kewin Brandsma",
-  "private": false,
-  "directories": {
-    "app": "./",
-    "out": "/Users/kewinbrandsma/Desktop",
-    "buildResources": "./"
-  },
-  "build": {
-    "npmRebuild": false,
-    "productName": "TradeJS",
-    "appId": "tradejs",
-    "mac": {
-      "category": "your.app.category.type"
-    },
-    "win": {
-      "iconUrl": "(windows-only) https link to icon"
-    },
-    "files": [
-      "dist/**/*",
-      "config/**/*",
-      "src/**/*",
-      "!src/client${/*}",
-      "_npm_module_backup",
-      "doc/**/*",
-      "gulpfile.js",
-      "readmy.md",
-      "tsconfig.json",
-      "tslint.json",
-      "index.js"
-    ]
-  }
+  "private": false
 }

@@ -1,14 +1,15 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import * as io from 'socket.io-client';
 
 @Injectable()
-export default class SocketService {
+export class SocketService {
 
-    socket: any;
+	socket: any;
 
-    constructor() {}
+	constructor() {
+	}
 
-    init() {
-        this.socket = io('localhost:3000');
-    }
+	init() {
+		this.socket = io('http://localhost:3000');
+	}
 }

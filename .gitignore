@@ -19,6 +19,9 @@ Thumbs.db
 #electron builds
 TradeJS-darwin-x64
 
+# Client
+client/dist/
+
 # Server
 /server/config/tradejs.config.json
 /server/**/*.js
@@ -26,4 +29,8 @@ TradeJS-darwin-x64
 /server/**/*.map
 /shared/**/*.js
 /shared/**/*.map
+
+# Electron
+/electron/builds
+/electron/tmp
 

@@ -1,8 +1,8 @@
-import {CookieService} from 'angular2-cookie/core';
+import {CookieService} from 'ngx-cookie';
 declare var $: any;
 
 import * as _ from 'lodash';
-import SocketService from '../../services/socket.service';
+import {SocketService} from '../../services/socket.service';
 import {Component, ElementRef, OnInit, OnDestroy} from '@angular/core';
 import 'jquery-resizable-dom';
 
@@ -12,7 +12,7 @@ import 'jquery-resizable-dom';
 	styleUrls: ['./debugger.component.scss']
 })
 
-export default class DebuggerComponent implements OnInit, OnDestroy {
+export class DebuggerComponent implements OnInit, OnDestroy {
 
 	private _maxResizeHeight: number = window.document.body.clientHeight - 100;
 

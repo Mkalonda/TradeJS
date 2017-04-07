@@ -1,4 +1,4 @@
-export default {
+export const HighchartsDefaultTheme = {
 
 	title: {
 		text: null

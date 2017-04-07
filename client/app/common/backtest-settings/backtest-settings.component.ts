@@ -1,9 +1,9 @@
 import {Component, AfterViewInit, OnInit, ElementRef, Output} from '@angular/core';
-import {CookieService}              from 'angular2-cookie/core';
+import {CookieService} 				from 'ngx-cookie';
 import {FormBuilder, FormGroup}     from '@angular/forms';
 import {IMultiSelectOption, IMultiSelectSettings}   from 'angular-2-dropdown-multiselect/src/multiselect-dropdown';
 import {BacktestSettingsModel}      from './backtest-settings.model';
-import SocketService                from '../../services/socket.service';
+import {SocketService}              from '../../services/socket.service';
 import * as moment                  from 'moment';
 
 @Component({

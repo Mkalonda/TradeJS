@@ -1,4 +1,4 @@
-export default class IndicatorModel {
+export class IndicatorModel {
 
 	public name: string;
 	public inputs = <any>{};

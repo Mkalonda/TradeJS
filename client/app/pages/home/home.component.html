@@ -1,4 +1,4 @@
-<div data-drag-handle class="three-column" draggable [restrict]="false" [direction]="x" [onDrag]="onDrag">
+<div data-drag-handle class="three-column" draggable [restrict]="false" [direction]="'x'" [onDrag]="onDrag">
     <span  class="splitter fa fa-bars fa-rotate-45" ></span>
     <instrument-list (instrumentClicked)="chartOverview.create({instrument: $event})"></instrument-list>
     <div class="bottom-block">

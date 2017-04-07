@@ -6,4 +6,4 @@ import { Component } from '@angular/core';
     styleUrls: ['./report.component.css']
 })
 
-export default class ReportComponent {}
+export class ReportComponent {}

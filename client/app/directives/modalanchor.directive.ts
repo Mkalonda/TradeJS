@@ -2,54 +2,52 @@ import {Directive, ComponentFactoryResolver, ComponentRef} from '@angular/core';
 
 import {ViewContainerRef} from '@angular/core';
 import {ModalComponent} from '../common/modal/modal.component';
-import ModalService from '../services/modal.service';
+import {ModalService} from '../services/modal.service';
 
 declare let $: any;
 
 @Directive({
-    selector: '[modalAnchor]'
+	selector: '[modalAnchor]'
 })
 
 export class ModalAnchorDirective {
-    
-    public modalComponentRef;
 
-    constructor(
-        private viewContainer: ViewContainerRef,
-        private componentFactoryResolver: ComponentFactoryResolver,
-        private _modalService: ModalService
-    ) {
-        _modalService.directive = this;
-    }
+	public modalComponentRef;
 
-    create(modalComponent: any, options = <any>{}): ComponentRef<ModalComponent> {
-        this.viewContainer.clear();
+	constructor(private viewContainer: ViewContainerRef,
+				private componentFactoryResolver: ComponentFactoryResolver,
+				private _modalService: ModalService) {
+		_modalService.directive = this;
+	}
 
-        let modalComponentFactory = this.componentFactoryResolver.resolveComponentFactory(modalComponent);
-        this.modalComponentRef = <any>this.viewContainer.createComponent(modalComponentFactory);
+	create(modalComponent: any, options = <any>{}): ComponentRef<ModalComponent> {
+		this.viewContainer.clear();
 
-        this.modalComponentRef.instance.options = options;
+		let modalComponentFactory = this.componentFactoryResolver.resolveComponentFactory(modalComponent);
+		this.modalComponentRef = <any>this.viewContainer.createComponent(modalComponentFactory);
 
-        this.modalComponentRef.changeDetectorRef.detectChanges();
+		this.modalComponentRef.instance.options = options;
 
-        this.show();
+		this.modalComponentRef.changeDetectorRef.detectChanges();
 
-        return this.modalComponentRef;
-    }
+		this.show();
 
-    show() {
-        $(this.modalComponentRef.instance.elementRef.nativeElement.firstElementChild).modal('show');
-    }
+		return this.modalComponentRef;
+	}
 
-    hide() {
+	show() {
+		$(this.modalComponentRef.instance.elementRef.nativeElement.firstElementChild).modal('show');
+	}
 
-    }
+	hide() {
 
-    destroy(modalComponentRef) {
-        let $el = $(modalComponentRef._nativeElement.firstElementChild);
+	}
 
-        $el.on('hidden.bs.modal', function() {
-            modalComponentRef.destroy();
-        }).modal('hide');
-    }
+	destroy(modalComponentRef) {
+		let $el = $(modalComponentRef._nativeElement.firstElementChild);
+
+		$el.on('hidden.bs.modal', function () {
+			modalComponentRef.destroy();
+		}).modal('hide');
+	}
 }

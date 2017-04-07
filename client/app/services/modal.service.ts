@@ -1,27 +1,28 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {ModalAnchorDirective} from '../directives/modalanchor.directive';
 
 interface IModal {
-    showClose?: boolean;
-    model?: any;
+	showClose?: boolean;
+	model?: any;
 }
 
 @Injectable()
-export default class ModalService {
+export class ModalService {
 
-    public directive: ModalAnchorDirective = null;
+	public directive: ModalAnchorDirective = null;
 
-    constructor() {}
+	constructor() {
+	}
 
-    init() {
+	init() {
 
-    }
+	}
 
-    create(Component: any, options?: any) {
-        return this.directive.create(Component, options);
-    }
+	create(Component: any, options?: any) {
+		return this.directive.create(Component, options);
+	}
 
-    destroy(component) {
-        return this.directive.destroy(component);
-    }
+	destroy(component) {
+		return this.directive.destroy(component);
+	}
 }

@@ -1,41 +1,42 @@
 import {Component, OnInit, OnDestroy} from '@angular/core';
-import SocketService from '../../services/socket.service';
-import InstrumentsService from '../../services/instruments.service';
+import {SocketService} from '../../services/socket.service';
+import {InstrumentsService} from '../../services/instruments.service';
 
 @Component({
-    selector: 'instrument-list',
-    templateUrl: './instrument-list.component.html',
-    styleUrls: ['./instrument-list.component.scss']
+	selector: 'instrument-list',
+	templateUrl: './instrument-list.component.html',
+	styleUrls: ['./instrument-list.component.scss']
 })
 
-export default class InstrumentListComponent implements OnInit, OnDestroy {
+export class InstrumentListComponent implements OnInit, OnDestroy {
 
-    private instruments: Array<string>;
-    private data: any = {};
+	public instruments: Array<string>;
 
-    constructor(protected socketService: SocketService,
-                protected instrumentsService: InstrumentsService) {
-    }
+	private data: any = {};
 
-    ngOnInit() {
-        this.onTick = this.onTick.bind(this);
+	constructor(protected socketService: SocketService,
+				protected instrumentsService: InstrumentsService) {
+	}
 
-        this.socketService.socket.on('tick', this.onTick.bind(this));
+	ngOnInit() {
+		this.onTick = this.onTick.bind(this);
 
-        this.socketService.socket.emit('instrument:list', {}, (err, instrumentList) => {
-            if (instrumentList)
-                this.instruments = instrumentList.map(instrument => instrument.instrument);
-        });
-        this.onTick = this.onTick.bind(this);
-    }
+		this.socketService.socket.on('tick', this.onTick.bind(this));
 
-    onTick(tick) {
-        tick.direction = this.data[tick.instrument] && this.data[tick.instrument].bid > tick.bid ? 'down' : 'up';
+		this.socketService.socket.emit('instrument:list', {}, (err, instrumentList) => {
+			if (instrumentList)
+				this.instruments = instrumentList.map(instrument => instrument.instrument);
+		});
+		this.onTick = this.onTick.bind(this);
+	}
 
-        this.data[tick.instrument] = tick;
-    }
+	onTick(tick) {
+		tick.direction = this.data[tick.instrument] && this.data[tick.instrument].bid > tick.bid ? 'down' : 'up';
 
-    ngOnDestroy() {
-        this.socketService.socket.off('tick', this.onTick);
-    }
+		this.data[tick.instrument] = tick;
+	}
+
+	ngOnDestroy() {
+		this.socketService.socket.off('tick', this.onTick);
+	}
 }

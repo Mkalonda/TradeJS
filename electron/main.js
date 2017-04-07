@@ -1,5 +1,10 @@
 'use strict';
 
+if (process.argv[0].indexOf('.exe') > -1) {
+	process.env.NODE_ENV = 'production';
+}
+
+
 const url = require('url');
 const path = require('path');
 
@@ -7,20 +12,27 @@ const {app, BrowserWindow, Menu} = require('electron');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let win;
-console.log(app);
+let win, server;
 
 function createWindow() {
     // Create the browser window.
-    win = new BrowserWindow({backgroundColor: '#2d2d2d', show: true});
-    //win.setFullScreen(true);
-    console.log('CREATE WINDOW');
+    win = new BrowserWindow({
+        backgroundColor: '#2d2d2d',
+        show: true
+    });
+
+    // win.setFullScreen(true);
+
+    console.log('__dirname', path.join(__dirname, '..', 'client', 'dist').replace(/\\/g,"/") + '/index.html');
 
     if (process.env.NODE_ENV === 'production') {
-        win.loadURL('http://localhost:3000');
+        win.loadURL(`file://${path.join(__dirname, '..', 'client', 'dist').replace(/\\/g,"/")}/index.html`);
+		win.webContents.openDevTools();
+
+		server = require('../server/app').default;
     } else {
         win.loadURL('http://localhost:4200');
-        //win.webContents.openDevTools();
+        // win.webContents.openDevTools();
     }
 
     // Emitted when the window is closed.
@@ -32,7 +44,8 @@ function createWindow() {
     });
 
     win.on('open', () => {
-       require('../server/app').default;
+        console.log('OPEN EOPFDSSDFSDFDF');
+
     });
 
     // const template = [
@@ -215,8 +228,6 @@ app.on('window-all-closed', () => {
         app.quit();
     }
 });
-
-console.log('Electron app path: ', app.getAppPath());
 
 app.on('activate', () => {
     // On macOS it's common to re-create a window in the app when the
