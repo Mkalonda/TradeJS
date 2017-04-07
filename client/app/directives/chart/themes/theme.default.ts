@@ -8,20 +8,26 @@ export const HighchartsDefaultTheme = {
 		enabled: false
 	},
 
+	tooltip: {
+		animation: false,
+		shadow: false,
+		followTouchMove: false
+	},
+
 	chart: {
 		type: 'candlestick',
 
 		/** TEMP STYLING **/
-		// spacingTop: 0,
-		// spacingRight: 10,
-		// // spacingRight: 60,
-		// // spacingBottom: 0,
-		// // spacingLeft: 0,
-		// plotBorderWidth: 0,
-		// // marginRight: 0,//-60, //this does move the chart but you'll need to recompute it
+		spacingTop: 0,
+		spacingRight: 10,
+		spacingLeft: 0,
+		spacingBottom: 0,
+		// plotBorderWidth: 1,
+		// marginRight: 0,//-60, //this does move the chart but you'll need to recompute it
 		// marginLeft: 0, // -60,  //whenever the page changes width
 		// marginTop: 0,
 		marginBottom: 20,
+		animation: false
 		//
 		// /** TURN OFF ALL ANIMATIONS **/
 		// animation: false
@@ -65,58 +71,37 @@ export const HighchartsDefaultTheme = {
 		}]
 	},
 
-	plotOptions: {
-		bar: {
-			minPointLength: 5
-		},
-		series: {
-			gapSize: 10,
-			lineWidth: 1,
-			marker: {
-				lineColor: null,
-				states: {
-					hover: {
-						radius: 3
-					}
-				}
-			},
-			states: {
-				hover: {
-					lineWidth: 1,
-					halo: !1
-				}
-			}
-		}
-	},
-
 	xAxis: [
 		{
 			labels: {
 				step: 1, // Disable label rotating when there is not enough space
-				style: {
-					fontSize: '8px',
-					rotation: 0
-				}
+				staggerLines: false,
+				format: '{value:%d-%m %H:%M}',
+				// formatter: (val) => {
+				// 	console.log(val);
+				//
+				// 	return 'asdfasf';
+				// }
 			},
-			lineColor: '#707073',
+			minorGridLineWidth: 0,
+			lineColor: '#d2d2d5',
+			lineWidth: 1,
 			gridLineWidth: 1,
-			gridLineDashStyle: 'ShortDash',
+			gridLineDashStyle: 'dot',
 			gridZIndex: -1,
-			tickPixelInterval: 60
+			tickPixelInterval: 80,
+			minorTickLength: 0,
+			tickLength: 0
 		},
 		{
 			labels: {
 				step: 1, // Disable label rotating when there is not enough space
-				style: {
-					fontSize: '8px',
-					rotation: 0
-				}
+				staggerLines: false,
 			},
-			lineColor: '#707073',
+			lineColor: '#d2d2d5',
 			gridLineWidth: 1,
-			gridLineDashStyle: 'ShortDash',
-			gridZIndex: -1,
-			tickPixelInterval: 60
+			gridLineDashStyle: 'dot',
+			gridZIndex: -1
 		}
 	],
 
@@ -124,43 +109,38 @@ export const HighchartsDefaultTheme = {
 		{
 			labels: {
 				align: 'left',
+				y: 3,
 				x: 5,
-				format: '{value:.5f}'
+				format: '{value:.5f}',
+				staggerLines: false,
 			},
-			gridLineWidth: 1,
-			gridLineDashStyle: 'ShortDash',
-			gridZIndex: -1,
-			tickPixelInterval: 30,
+			showFirstLabel: false,
+			tickPixelInterval: 50,
 			height: '70%',
-			lineWidth: 1,
-			borderWidth: 3,
-			borderColor: '#FF0000',
-			plotLines: [
-				{
-					color: 'red', // Color value
-					dashStyle: 'longdashdot', // Style of the plot line. Default to solid
-				}
-			]
+			minorTickLength: 0,
+			tickLength: 0
 		},
 		{
 			labels: {
 				align: 'left',
-				x: 5
+				y: 3,
+				x: 5,
+				formatter: function () {
+					if (this.isFirst === true || this.isLast === true) {
+						return this.value;
+					}
+				}
 			},
+			showLastLabel: true,
 			title: {
 				text: 'Volume'
 			},
-			gridLineWidth: 1,
-			gridLineDashStyle: 'ShortDash',
-			gridZIndex: -1,
+			gridLineWidth: 0,
 			tickPixelInterval: 30,
 			top: '70%',
-			offset: 0,
 			height: '30%',
-			lineWidth: 1,
-			style: {
-				fontSize: '10px'
-			}
+			minorTickLength: 0,
+			tickLength: 0
 		}
 	],
 
@@ -182,5 +162,185 @@ export const HighchartsDefaultTheme = {
 				enabled: false
 			}
 		}
-	]
+	],
+	plotOptions: {
+		bar: {
+			minPointLength: 5,
+			animation: false,
+			enableMouseTracking: false,
+			stickyTracking: true,
+			shadow: false,
+			dataLabels: {style: {textShadow: false}}
+		},
+		series: {
+			gapSize: 10,
+			lineWidth: 1,
+			marker: {
+				lineColor: null,
+				states: {
+					hover: {
+						radius: 3
+					}
+				}
+			},
+			states: {
+				hover: {
+					lineWidth: 1,
+					halo: !1
+				}
+			},
+			animation: false,
+			stickyTracking: true,
+			shadow: false,
+			dataLabels: {style: {textShadow: false}}
+		},
+
+		area: {
+			animation: false,
+			enableMouseTracking: false,
+			stickyTracking: true,
+			shadow: false,
+			dataLabels: {style: {textShadow: false}}
+		},
+		arearange: {
+			animation: false,
+			enableMouseTracking: false,
+			stickyTracking: true,
+			shadow: false,
+			dataLabels: {style: {textShadow: false}}
+		},
+		areaspline: {
+			animation: false,
+			enableMouseTracking: false,
+			stickyTracking: true,
+			shadow: false,
+			dataLabels: {style: {textShadow: false}}
+		},
+		areasplinerange: {
+			animation: false,
+			enableMouseTracking: false,
+			stickyTracking: true,
+			shadow: false,
+			dataLabels: {style: {textShadow: false}}
+		},
+		boxplot: {
+			animation: false,
+			enableMouseTracking: false,
+			stickyTracking: true,
+			shadow: false,
+			dataLabels: {style: {textShadow: false}}
+		},
+		bubble: {
+			animation: false,
+			enableMouseTracking: false,
+			stickyTracking: true,
+			shadow: false,
+			dataLabels: {style: {textShadow: false}}
+		},
+		column: {
+			animation: false,
+			enableMouseTracking: false,
+			stickyTracking: true,
+			shadow: false,
+			dataLabels: {style: {textShadow: false}}
+		},
+		columnrange: {
+			animation: false,
+			enableMouseTracking: false,
+			stickyTracking: true,
+			shadow: false,
+			dataLabels: {style: {textShadow: false}}
+		},
+		errorbar: {
+			animation: false,
+			enableMouseTracking: false,
+			stickyTracking: true,
+			shadow: false,
+			dataLabels: {style: {textShadow: false}}
+		},
+		funnel: {
+			animation: false,
+			enableMouseTracking: false,
+			stickyTracking: true,
+			shadow: false,
+			dataLabels: {style: {textShadow: false}}
+		},
+		gauge: {
+			animation: false,
+			enableMouseTracking: false,
+			stickyTracking: true,
+			shadow: false,
+			dataLabels: {style: {textShadow: false}}
+		},
+		heatmap: {
+			animation: false,
+			enableMouseTracking: false,
+			stickyTracking: true,
+			shadow: false,
+			dataLabels: {style: {textShadow: false}}
+		},
+		line: {
+			animation: false,
+			enableMouseTracking: false,
+			stickyTracking: true,
+			shadow: false,
+			dataLabels: {style: {textShadow: false}}
+		},
+		pie: {
+			animation: false,
+			enableMouseTracking: false,
+			stickyTracking: true,
+			shadow: false,
+			dataLabels: {style: {textShadow: false}}
+		},
+		polygon: {
+			animation: false,
+			enableMouseTracking: false,
+			stickyTracking: true,
+			shadow: false,
+			dataLabels: {style: {textShadow: false}}
+		},
+		pyramid: {
+			animation: false,
+			enableMouseTracking: false,
+			stickyTracking: true,
+			shadow: false,
+			dataLabels: {style: {textShadow: false}}
+		},
+		scatter: {
+			animation: false,
+			enableMouseTracking: false,
+			stickyTracking: true,
+			shadow: false,
+			dataLabels: {style: {textShadow: false}}
+		},
+		solidgauge: {
+			animation: false,
+			enableMouseTracking: false,
+			stickyTracking: true,
+			shadow: false,
+			dataLabels: {style: {textShadow: false}}
+		},
+		spline: {
+			animation: false,
+			enableMouseTracking: false,
+			stickyTracking: true,
+			shadow: false,
+			dataLabels: {style: {textShadow: false}}
+		},
+		treemap: {
+			animation: false,
+			enableMouseTracking: false,
+			stickyTracking: true,
+			shadow: false,
+			dataLabels: {style: {textShadow: false}}
+		},
+		waterfall: {
+			animation: false,
+			enableMouseTracking: false,
+			stickyTracking: true,
+			shadow: false,
+			dataLabels: {style: {textShadow: false}}
+		},
+	},
 };

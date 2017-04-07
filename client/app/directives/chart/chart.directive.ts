@@ -30,13 +30,11 @@ export class ChartDirective implements OnInit, AfterViewInit {
 	}
 
 	ngOnInit() {
-	}
-
-	ngAfterViewInit() {
 		if (this.height)
 			this.setHeight(this.height);
 
 		this._createChart();
+		this._setScrollListener();
 
 		if (!this.model)
 			return;
@@ -52,6 +50,10 @@ export class ChartDirective implements OnInit, AfterViewInit {
 		}
 	}
 
+	ngAfterViewInit() {
+
+	}
+
 
 	public setHeight(height: number): void {
 		height = height || this.elementRef.nativeElement.parentNode.clientHeight;
@@ -65,6 +67,33 @@ export class ChartDirective implements OnInit, AfterViewInit {
 			this._updateZoom();
 			// requestAnimationFrame(() => this.chart.reflow())
 		});
+	}
+
+	private _setScrollListener() {
+		$(this.elementRef.nativeElement).bind('mousewheel DOMMouseScroll', event => this._onScroll(event));
+	}
+
+	private _unsetScrollListener() {
+
+	}
+
+	private _onScroll(event) {
+		let chart = this.chart,
+			delta, extr, step, newMin, newMax, _event, axis = chart.xAxis[0];
+
+		_event = chart.pointer.normalize(event);
+
+		// Firefox uses e.detail, WebKit and IE uses wheelDelta
+		delta = (-event.originalEvent.detail || event.originalEvent.wheelDelta);
+		delta = delta < 0 ? 1 : -1;
+
+		if (chart.isInsidePlot(_event.chartX - chart.plotLeft, _event.chartY - chart.plotTop)) {
+			extr = axis.getExtremes();
+			step = (extr.max - extr.min) / 10 * delta;
+			axis.setExtremes(extr.min + step, extr.max + step, true, false);
+		}
+
+		return false;
 	}
 
 	private _updateZoom(redraw = true) {
@@ -122,7 +151,7 @@ export class ChartDirective implements OnInit, AfterViewInit {
 
 		this.chart.yAxis[0].addPlotLine({
 			value: bar[1],
-			color: '#939293',
+			color: '#646467',
 			width: 1,
 			id: 'current-price',
 			label: {

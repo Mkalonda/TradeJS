@@ -175,10 +175,17 @@ export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
 
 		if (await this.showIndicatorOptionsMenu(indicatorModel))
 
-			// Normalize model
+			// Normalize model and values
 			_.forEach(indicatorModel.inputs, (input) => {
-				console.log('input ', input);
-				
+				switch (input.type) {
+					case 'number':
+						input.value = parseInt(input.value, 10);
+						break;
+					case 'text':
+						input.value = String.prototype.toString.call(input.value);
+						break;
+				}
+
 				inputs[input.name] = input.value;
 			});
 
