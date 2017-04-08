@@ -41,8 +41,8 @@ import {InstrumentsService} from './services/instruments.service';
 import {DraggableDirective} from './directives/draggable.directive';
 import {ResizableDirective} from './directives/resizable.directive';
 import {ChartBoxComponent} from './common/chart-box/chart-box.component';
-import {ChartDirective} from './directives/chart/chart.directive';
-import {ChartReportDirective} from './directives/chart/chart-report.directive';
+import {ChartComponent} from './common/chart/chart.component';
+import {ChartReportDirective} from './common/chart/chart-report.directive';
 import {BacktestSettingsComponent} from './common/backtest-settings/backtest-settings.component';
 import {BacktestReportsComponent} from './common/backtest-report/backtest-reports.component';
 
@@ -59,9 +59,10 @@ import {BacktestReportsComponent} from './common/backtest-report/backtest-report
 		BacktestReportsComponent,
 		JSEditorComponent,
 		FileTreeComponent,
-		ChartBoxComponent,
 		InstrumentListComponent,
 		ChartOverviewComponent,
+		ChartBoxComponent,
+		ChartComponent,
 		ReportComponent,
 		StatusComponent,
 		DialogComponent,
@@ -70,7 +71,6 @@ import {BacktestReportsComponent} from './common/backtest-report/backtest-report
 		ModalAnchorDirective,
 		DraggableDirective,
 		ResizableDirective,
-		ChartDirective,
 		ChartReportDirective
 	],
 	imports: [

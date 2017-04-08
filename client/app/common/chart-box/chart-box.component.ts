@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 import {DialogAnchorDirective} from '../../directives/dialoganchor.directive';
 import {
 	Component, OnDestroy, ElementRef, Input, Output, EventEmitter, ViewChild,
-	OnInit, AfterViewInit
+	OnInit, AfterViewInit, ChangeDetectionStrategy
 } from '@angular/core';
 
 import {SocketService}      from '../../services/socket.service';
@@ -10,7 +10,7 @@ import {DialogComponent} from '../dialog/dialog.component';
 import {IndicatorModel} from '../../models/indicator';
 import {InstrumentModel} from '../../models/instrument.model';
 import {InstrumentsService} from '../../services/instruments.service';
-import {ChartDirective} from '../../directives/chart/chart.directive';
+import {ChartComponent} from '../../common/chart/chart.component';
 
 declare let $: any;
 
@@ -18,13 +18,14 @@ declare let $: any;
 	selector: 'chart-box',
 	templateUrl: './chart-box.component.html',
 	styleUrls: ['./chart-box.component.scss'],
+	// changeDetection: ChangeDetectionStrategy.OnPush,
 	entryComponents: [DialogComponent]
 })
 
 export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
 
 	@ViewChild(DialogAnchorDirective) private _dialogAnchor: DialogAnchorDirective;
-	@ViewChild(ChartDirective) public chart: ChartDirective;
+	@ViewChild(ChartComponent) public chart: ChartComponent;
 
 	@Input() model: InstrumentModel;
 	@Input() focus = true;

@@ -185,7 +185,6 @@ export default class CacheDataLayer {
 	private _setTableList() {
 		return new Promise((resolve, reject) => {
 			this._db.run(`.tables`, (err: any, tableList: Array<any>) => {
-				console.log('tableList', tableList);
 				this._tableList = tableList;
 				resolve();
 			});

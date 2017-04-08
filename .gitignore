@@ -1,32 +1,30 @@
-/cache
-/_builds
-/shared/dist
-
-# dependencies
-node_modules
-
-# IDEs and editors
+# IDEs
 .idea
 
 # misc
 npm-debug.*
+node_modules
 testem.log
 
 #System Files
 .DS_Store
 Thumbs.db
 
-#electron builds
-TradeJS-darwin-x64
+#### App ####
+/_cache
+/_builds
 
 # Client
-client/dist/
+/client/dist/
 
 # Server
 /server/config/tradejs.config.json
 /server/**/*.js
 !/server/gulpfile.js
 /server/**/*.map
+
+# Shared
+/shared/dist
 /shared/**/*.js
 /shared/**/*.map
 

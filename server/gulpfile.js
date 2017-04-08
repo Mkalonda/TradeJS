@@ -37,10 +37,10 @@ gulp.task('tslint', () => {
 
 gulp.task('server:dev', callback => runSequence(
     'server:build',
-    'server:run',
 	'server:watch',
 	'custom:build',
-    'custom:watch',
+	'server:run',
+	'custom:watch',
     callback
 ))
 ;
@@ -50,7 +50,7 @@ gulp.task('server:watch', () => {
     gulp.watch(['./**/*.ts', '!./node_modules/',  '!node_modules/**/*.*'], () => runSequence('server:kill', 'server:build', 'custom:build', 'server:run'));
 });
 
-gulp.task('server:build', ['copy-shared-assets'], () => {
+gulp.task('server:build', ['shared:copy-assets'], () => {
 
     // Server
     let server, shared,
@@ -77,7 +77,7 @@ gulp.task('server:build', ['copy-shared-assets'], () => {
 });
 
 gulp.task('server:build:run', ['server:kill'], callback => {
-    runSequence(['copy-shared-assets', 'server:build'], () => {
+    runSequence(['shared:copy-assets', 'server:build'], () => {
         buildCustom(null, () => {
             runSequence('server:run', callback);
         });
@@ -85,7 +85,7 @@ gulp.task('server:build:run', ['server:kill'], callback => {
 });
 
 /** NEEDED TO COPY OVER JSON FILES TO DIST FOLDER **/
-gulp.task('copy-shared-assets', () => {
+gulp.task('shared:copy-assets', () => {
     gulp.src(['../shared/**/*.json', '!**/tsconfig.json'])
         .pipe(gulp.dest(path.resolve(__dirname, '../shared/dist/')));
 });

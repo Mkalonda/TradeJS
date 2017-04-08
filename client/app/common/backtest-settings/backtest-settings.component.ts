@@ -16,7 +16,7 @@ export class BacktestSettingsComponent implements OnInit, AfterViewInit {
 
 	static defaults = {
 		EA: '',
-		instruments: [],
+		instruments: ['EUR_USD'],
 		timeFrame: 'M15',
 		from: new Date(),
 		until: new Date(),
@@ -26,6 +26,8 @@ export class BacktestSettingsComponent implements OnInit, AfterViewInit {
 	};
 
 	@Output() isRunning = false;
+
+	public optionsModel: number[] = [1, 2]; // Default selection
 
 	public multiSelectOptions: IMultiSelectOption[] = [
 		<any>{id: 'EUR_USD', name: 'EUR_USD'},

@@ -69,7 +69,7 @@
 
 .chart-content {
     position: relative;
-    height:100%;
+    height: calc(100% - 25px);
 }
 
 .chart-container {
@@ -148,9 +148,4 @@
     -webkit-border-radius: 6px 0 6px 6px;
     -moz-border-radius: 6px 0 6px 6px;
     border-radius: 6px 0 6px 6px;
-}
-
-/** The chart **/
-.chart {
-    height: calc(100% - 30px);
 }
