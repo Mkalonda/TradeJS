@@ -25,15 +25,13 @@ declare let $: any;
 export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
 
 	@ViewChild(DialogAnchorDirective) private _dialogAnchor: DialogAnchorDirective;
-	@ViewChild(ChartComponent) public chart: ChartComponent;
+	@ViewChild(ChartComponent) private _chartComponent: ChartComponent;
 
 	@Input() model: InstrumentModel;
 	@Input() focus = true;
 	@Input() mode = 'windowed';
 	@Input() startRandomized = true;
 
-	@Output() closed = new EventEmitter();
-	@Output() focused = new EventEmitter();
 	@Output() resize = new EventEmitter();
 
 	socket: any;
@@ -46,10 +44,6 @@ export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
 	}
 
 	ngOnInit() {
-
-	}
-
-	ngAfterViewInit() {
 		this.socket = this._socketService.socket;
 		this.$el = $(this._elementRef.nativeElement);
 		this.$elLoadingOverlay = this.$el.find('.chart-loading-overlay');
@@ -65,16 +59,38 @@ export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
 				this.restorePosition();
 			}
 			else {
-				this.chart.reflow();
+				this._chartComponent.reflow();
 			}
 		});
 
 		if (this.startRandomized)
 			this.setRandomPosition();
 
-		this.putOnTop();
-
 		this.model.changed.subscribe(() => {
+		});
+	}
+
+	ngAfterViewInit() {
+		this.putOnTop();
+	}
+
+	public showIndicatorOptionsMenu(indicatorModel: IndicatorModel): Promise<boolean> {
+		return new Promise((resolve) => {
+
+			this._dialogAnchor.createDialog(DialogComponent, {
+				title: indicatorModel.name,
+				model: indicatorModel,
+				buttons: [
+					{value: 'add', text: 'Add', type: 'primary'},
+					{text: 'Cancel', type: 'default'}
+				],
+				onClickButton(value) {
+					if (value === 'add') {
+						resolve(true);
+					} else
+						resolve(false);
+				}
+			});
 		});
 	}
 
@@ -91,7 +107,9 @@ export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
 	}
 
 	public forceChartInCorner(edges): void {
-		let el = this.chart.elementRef.nativeElement;
+		console.log(this._chartComponent);
+
+		let el = this._chartComponent.chart.container;
 
 		el.style.position = 'absolute';
 
@@ -102,14 +120,14 @@ export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
 	}
 
 	public unlockChartFromCorner(): void {
-		let el = this.chart.elementRef.nativeElement;
+		let el = this._chartComponent.chart.container;
 
 		el.style.position = 'static';
 
-		this.chart.reflow();
+		this._chartComponent.reflow();
 	}
 
-	toggleFocus(state: boolean): void {
+	public toggleFocus(state: boolean): void {
 		if (this.focus === state)
 			return;
 
@@ -118,8 +136,6 @@ export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
 		if (state) {
 			this.putOnTop();
 		}
-
-		// this.focused.next()
 	}
 
 	public putOnTop() {
@@ -139,7 +155,7 @@ export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
 	public setSize(width: number | string, height: number | string): void {
 		this.$el.width(width).height(height);
 
-		this.chart.reflow();
+		this._chartComponent.reflow();
 	}
 
 	public setPosition(top: number | string, left: number | string): void {
@@ -166,41 +182,33 @@ export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
 		if (old)
 			this.$el[0].style.cssText = old;
 
-		this.chart.reflow();
+		this._chartComponent.reflow();
 	}
 
-	async addIndicator(name) {
-		let length = this.chart.chart.series[0].xData.length,
-			indicatorModel = await this.getIndicatorOptions(name),
-			inputs = {};
+	public async addIndicator(name) {
+		let indicatorModel = await this.getIndicatorOptions(name),
+			options = {};
 
-		if (await this.showIndicatorOptionsMenu(indicatorModel))
+		if (await this.showIndicatorOptionsMenu(indicatorModel) === false)
+			return;
 
-			// Normalize model and values
-			_.forEach(indicatorModel.inputs, (input) => {
-				switch (input.type) {
-					case 'number':
-						input.value = parseInt(input.value, 10);
-						break;
-					case 'text':
-						input.value = String.prototype.toString.call(input.value);
-						break;
-				}
+		// Normalize model values
+		_.forEach(indicatorModel.inputs, input => {
+			switch (input.type) {
+				case 'number':
+					input.value = parseInt(input.value, 10);
+					break;
+				case 'text':
+					input.value = String.prototype.toString.call(input.value);
+					break;
+			}
 
-				inputs[input.name] = input.value;
-			});
+			options[input.name] = input.value
+		});
 
-			indicatorModel.inputs = inputs;
+		indicatorModel.inputs = options;
 
-			this.socket.emit('instrument:indicator:add', {
-				id: this.model.data.id,
-				name: name,
-				options: indicatorModel.inputs,
-				readCount: length,
-				shift: 0
-			}, (err, data) => {
-				this.chart.updateIndicators(data.data);
-			});
+		this._chartComponent.addIndicator(indicatorModel);
 	}
 
 	getIndicatorOptions(name: string): Promise<IndicatorModel> {
@@ -219,26 +227,6 @@ export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
 			chartW = el.clientWidth;
 
 		return [_.random(0, containerH - chartH), _.random(0, containerW - chartW)];
-	}
-
-	public showIndicatorOptionsMenu(indicatorModel: IndicatorModel): Promise<IndicatorModel> {
-		return new Promise((resolve) => {
-
-			this._dialogAnchor.createDialog(DialogComponent, {
-				title: indicatorModel.name,
-				model: indicatorModel,
-				buttons: [
-					{value: 'add', text: 'Add', type: 'primary'},
-					{text: 'Cancel', type: 'default'}
-				],
-				onClickButton(value) {
-					if (value === 'add') {
-						resolve(true);
-					} else
-						resolve(false);
-				}
-			});
-		});
 	}
 
 	destroy() {

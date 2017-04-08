@@ -148,7 +148,7 @@ export const HighchartsDefaultTheme = {
 	series: [
 		{
 			data: [],
-			// minPointLength: 1,
+			minPointLength: 1,
 			dataGrouping: {
 				enabled: false
 			},

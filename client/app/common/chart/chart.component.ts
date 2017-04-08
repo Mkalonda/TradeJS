@@ -1,14 +1,13 @@
+'use strict';
+
 import * as _               from 'lodash';
-import {
-	ElementRef, OnInit, Input, AfterViewInit, NgZone, Component, ChangeDetectionStrategy,
-	ChangeDetectorRef
-} from '@angular/core';
+import {ElementRef, OnInit, Input, NgZone, Component, ChangeDetectionStrategy, OnDestroy} from '@angular/core';
 import {InstrumentModel} from '../../models/instrument.model';
 
-// Themes
 import {HighchartsDefaultTheme} from './themes/theme.default';
-// import './themes/theme.dark';
 import {InstrumentsService} from '../../services/instruments.service';
+import {IndicatorModel} from '../../models/indicator';
+import {SocketService} from '../../services/socket.service';
 
 const HighStock = require('highcharts/highstock');
 
@@ -16,10 +15,11 @@ const HighStock = require('highcharts/highstock');
 	selector: 'chart',
 	exportAs: 'chart',
 	styleUrls: ['./chart.component.scss'],
-	template: ''
+	templateUrl: './chart.component.html',
+	changeDetection: ChangeDetectionStrategy.OnPush
 })
 
-export class ChartComponent implements OnInit, AfterViewInit {
+export class ChartComponent implements OnInit, OnDestroy {
 
 	@Input() type = 'stock';
 	@Input() model: InstrumentModel;
@@ -27,25 +27,18 @@ export class ChartComponent implements OnInit, AfterViewInit {
 	@Input() offset = 0;
 	@Input() chunkLength = 1500;
 
-	public loading = true;
 	public chart: any;
-	public chartEl: any;
 
-	public last;
-	public first;
+	private _currentOffset = 0;
 
-	constructor(public elementRef: ElementRef,
-				private changeDetectorRef: ChangeDetectorRef,
-				private zone: NgZone,
+	constructor(private _elementRef: ElementRef,
+				private _socketService: SocketService,
+				private _zone: NgZone,
 				private _instrumentsService: InstrumentsService) {
 	}
 
 	ngOnInit() {
-		this.changeDetectorRef.detach();
-	}
-
-	async ngAfterViewInit() {
-		await this._createChart();
+		this._createChart();
 		this._setScrollListener();
 
 		if (!this.model)
@@ -62,87 +55,43 @@ export class ChartComponent implements OnInit, AfterViewInit {
 		}
 	}
 
+	public addIndicator(indicatorModel: IndicatorModel) {
+		return new Promise((resolve, reject) => {
+			this._socketService.socket.emit('instrument:indicator:add', {
+				id: this.model.data.id,
+				name: indicatorModel.name,
+				options: indicatorModel.inputs,
+				readCount: this.chart.series[0].xData.length,
+				shift: 0
+			}, (err, data) => {
+				if (err)
+					return reject(err);
 
-	public setHeight(height?: number): void {
-		height = height || this.elementRef.nativeElement.parentNode.clientHeight;
+				this._updateIndicators(data.data);
 
-		this.chartEl.style.height = height + 'px';
+				resolve();
+			});
+		});
 	}
 
 	public reflow() {
-		requestAnimationFrame(() => {
-			this.chart.reflow();
-			this._updateZoom();
-		});
-	}
-
-	private _createChart(): Promise<any> {
-		return new Promise((resolve, reject) => {
-
-			this.zone.runOutsideAngular(() => {
-				// Clone a new settings object
-				let settings = _.cloneDeep(HighchartsDefaultTheme),
-					div = document.createElement('div');
-
-				div.style.height = '100%';
-				window['test'] = this.chartEl = div;
-				this.elementRef.nativeElement.appendChild(div);
-				// this.setHeight();
-
-				requestAnimationFrame(() => {
-					if (this.type === 'stock') {
-						// create the chart
-						this.chart = HighStock.stockChart(div, settings);
-					}
-					else if (this.type === 'line') {
-
-					}
-
-					resolve();
-				});
+		this._zone.runOutsideAngular(() => {
+			requestAnimationFrame(() => {
+				this.chart.reflow();
+				this._updateZoom();
 			});
 		});
 	}
 
-	private _setScrollListener() {
-		let ready = true;
-
-		$(this.chartEl).bind('mousewheel DOMMouseScroll', (event: any) => {
-			if (ready === false)
-				return false;
-
-			ready = false;
-			this.zone.runOutsideAngular(() => {
-				requestAnimationFrame(() => {
-					let chart = this.chart,
-						delta, extr, step, newMin, newMax, _event, axis = chart.xAxis[0];
-
-					_event = chart.pointer.normalize(event);
-
-					// Firefox uses e.detail, WebKit and IE uses wheelDelta
-					delta = (-event.originalEvent.detail || event.originalEvent.wheelDelta);
-					delta = delta < 0 ? 1 : -1;
-
-					if (chart.isInsidePlot(_event.chartX - chart.plotLeft, _event.chartY - chart.plotTop)) {
-						extr = axis.getExtremes();
-
-						let min = this.chart.xAxis[0].series[0].data;
-
-						step = (extr.max - extr.min) / 10 * delta;
-						axis.setExtremes(extr.min + step, extr.max + step, true, false);
-					}
-
-					ready = true;
-				});
-			});
-
-			return  false;
+	private _createChart(): Promise<any> | void {
+		this._zone.runOutsideAngular(() => {
+			this.chart = HighStock.stockChart(this._elementRef.nativeElement.firstElementChild, _.cloneDeep(HighchartsDefaultTheme));
 		});
 	}
 
 	private _updateZoom(redraw = true) {
-		this.zone.runOutsideAngular(() => {
-			let parentW = this.elementRef.nativeElement.parentNode.clientWidth,
+		this._zone.runOutsideAngular(() => {
+			let parentW = this._elementRef.nativeElement.parentNode.clientWidth,
 				data = this.chart.xAxis[0].series[0].data,
 				barW = 12.5,
 				barsToShow = Math.ceil(parentW / barW),
@@ -155,20 +104,18 @@ export class ChartComponent implements OnInit, AfterViewInit {
 	}
 
 	private async _fetch(count: number, offset: number) {
-		this.loading = true;
-
 		let {candles, indicators} = await this._instrumentsService.fetch(this.model, count, offset);
 
 		this._updateBars(candles);
-		this.updateIndicators(indicators);
+		this._updateIndicators(indicators);
 	}
 
 	private _updateBars(_data: any[] = []) {
-		this.zone.runOutsideAngular(() => {
+		this._zone.runOutsideAngular(() => {
 			if (!_data || !_data.length)
 				return;
 
-			let data = this.prepareData(_data),
+			let data = ChartComponent._prepareData(_data),
 				last = data.candles[data.candles.length - 1];
 
 			this.chart.series[0].setData(data.candles);
@@ -176,8 +123,6 @@ export class ChartComponent implements OnInit, AfterViewInit {
 
 			this._updateZoom();
 			this._setCurrentPricePlot(last);
-
-			this.loading = false;
 		});
 	}
 
@@ -203,46 +148,107 @@ export class ChartComponent implements OnInit, AfterViewInit {
 		});
 	}
 
-	updateIndicators(indicators) {
-		for (let id in indicators) {
-			if (!indicators.hasOwnProperty(id))
-				return;
+	private _updateIndicators(indicators) {
+		this._zone.runOutsideAngular(() => {
+			for (let id in indicators) {
+				if (indicators.hasOwnProperty(id)) {
+					for (let drawBufferName in indicators[id]) {
+						if (indicators[id].hasOwnProperty(drawBufferName)) {
+							let drawBuffer = indicators[id][drawBufferName];
 
-			for (let drawBufferName in indicators[id]) {
-				if (!indicators[id].hasOwnProperty(drawBufferName))
-					return;
+							let unique = id + '_' + drawBuffer.id;
 
-				let drawBuffer = indicators[id][drawBufferName];
+							// New series
+							let series = this.chart.get(unique);
 
-				let unique = id + '_' + drawBuffer.id;
+							// Update
+							if (series) {
+								console.log('SERIES!!!!', series);
+							}
 
-				// New series
-				let series = this.chart.get(unique);
-
-				// Update
-				if (series) {
-					console.log('SERIES!!!!', series);
-				}
-
-				// Create
-				else {
-					this.chart.addSeries({
-						type: 'line',
-						name: id,
-						// id: unique,
-						data: drawBuffer.data,
-						color: drawBuffer.style.color,
-						yAxis: 0,
-						dataGrouping: {
-							enabled: false
+							// Create
+							else {
+								this.chart.addSeries({
+									type: 'line',
+									name: id,
+									// id: unique,
+									data: drawBuffer.data,
+									color: drawBuffer.style.color,
+									yAxis: 0,
+									dataGrouping: {
+										enabled: false
+									}
+								});
+							}
 						}
-					});
+					}
 				}
 			}
-		}
+		});
 	}
 
-	prepareData(data: any) {
+	private _setScrollListener() {
+		let ready = true,
+			data = this.chart.series[0].xData,
+			chart = this.chart;
+
+		$(this.chart.container).bind('mousewheel DOMMouseScroll', (event: any) => {
+			if (ready === false)
+				return false;
+
+			ready = false;
+
+			this._zone.runOutsideAngular(() => {
+				let // _event = chart.pointer.normalize(event),
+					min, max, barsLength, diff;
+
+				// if (!chart.isInsidePlot(_event.chartX - chart.plotLeft, _event.chartY - chart.plotTop))
+				// 	return;
+
+				barsLength = this._calculateViewableBars();
+				diff = Math.ceil(barsLength / 10);
+
+				// Up
+				if (-event.originalEvent.detail || event.originalEvent.wheelDelta < 0) {
+					this._currentOffset += diff;
+
+					if (this._currentOffset > data.length - 1)
+						this._currentOffset = data.length - 1;
+				}
+				// Down
+				else {
+					this._currentOffset -= diff;
+
+					if (this._currentOffset < 0)
+						this._currentOffset = 0;
+				}
+
+				min = data[data.length - 1 - this._currentOffset - barsLength];
+				max = data[data.length - 1 - this._currentOffset];
+
+				// Could be first or last bar
+				if (min && max) {
+					requestAnimationFrame(() => {
+						chart.xAxis[0].setExtremes(min, max, true, false);
+						ready = true;
+					});
+				} else {
+					ready = true;
+				}
+			});
+
+			return false;
+		});
+	}
+
+	private _calculateViewableBars() {
+		let parentW = this.chart.container.clientWidth,
+			barW = 12.5;
+
+		return Math.ceil(parentW / barW)
+	}
+
+	static _prepareData(data: any) {
 		let length = data.length,
 			volume = new Array(length),
 			i = 0;
@@ -257,5 +263,16 @@ export class ChartComponent implements OnInit, AfterViewInit {
 			candles: data,
 			volume: volume
 		};
+	}
+
+	ngOnDestroy() {
+		// Unbind scroll
+		$(this.chart.container).off('mousewheel DOMMouseScroll');
+
+		// Destroy chart
+		this.chart.destroy();
+		this.chart = null;
+
+		// Destroy data;
 	}
 }
