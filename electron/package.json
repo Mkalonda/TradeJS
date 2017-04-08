@@ -4,15 +4,16 @@
   "main": "main",
   "scripts": {
     "postinstall": "electron-rebuild",
-    "start": "electron . --electron=true",
+    "start": "electron ../",
+    "build": "node packager",
     "build:windows": "node packager --platform=win32",
-    "build:mac": "electron-packager ./ TradeJS --platform=darwin --overwrite --ignore=/e2e --ignore=/src/client",
-    "build:linux": "electron-packager ./ TradeJS --platform=linux --overwrite --ignore=/e2e --ignore=/src/client",
-    "rebuild": "electron-rebuild ./ TradeJS --platform=darwin --overwrite --ignore=/e2e --ignore=/src/client -f -w sqlite3"
+    "build:mac": "node packager --platform=darwin",
+    "build:linux": "node packager --platform=linux"
   },
   "dependencies": {
     "electron": "1.6.2",
-    "electron-prebuilt-compile": "^1.6.2"
+    "electron-prebuilt-compile": "^1.6.2",
+    "minimist": "^1.2.0"
   },
   "devDependencies": {
     "cross-env": "^4.0.0",

@@ -18,16 +18,15 @@ export class BacktestSettingsComponent implements OnInit, AfterViewInit {
 		EA: '',
 		instruments: ['EUR_USD'],
 		timeFrame: 'M15',
-		from: new Date(),
+		from: new Date(Date.now() - 1000000000),
 		until: new Date(),
 		equality: 10000,
 		currency: 'euro',
 		pips: '10'
 	};
 
-	@Output() isRunning = false;
 
-	public optionsModel: number[] = [1, 2]; // Default selection
+	@Output() isRunning = false;
 
 	public multiSelectOptions: IMultiSelectOption[] = [
 		<any>{id: 'EUR_USD', name: 'EUR_USD'},
