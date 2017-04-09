@@ -58,7 +58,7 @@ export default class WorkerChild extends Base {
 				settings = JSON.parse((<any>minimist(process.argv.slice(2))).settings),
 				id = settings.workerOptions.id,
 
-				exitHandler = (code?: number) => {
+				exitHandler = (code = 0) => {
 					debug(`${id} exit: ${code}`);
 					process.exit(code);
 				};

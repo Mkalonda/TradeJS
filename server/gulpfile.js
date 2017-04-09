@@ -100,9 +100,9 @@ gulp.task('custom:build', ['custom:copy-assets'], callback => {
 });
 
 gulp.task('custom:watch', (callback) => {
-    const watcher = gulp.watch('../custom/**/*.*');
+    gulp.watch('../custom/**/*.*', event => buildCustom(event.path));
 
-    watcher.on('change', event => buildCustom(event.path));
+   // watcher.on('change', event => buildCustom(event.path));
 
     callback();
 });

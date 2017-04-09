@@ -48,7 +48,6 @@ export class ChartComponent implements OnInit, OnDestroy {
 		// Bouncer func to limit onScroll calls
 		this._onScrollBounced = _.throttle(this._onScroll.bind(this), 33);
 
-
 		this._createChart();
 	}
 

@@ -15,6 +15,12 @@ export default class EA extends Instrument implements IEA {
 	public accountManager: AccountManager;
 	public orderManager: OrderManager;
 
+	private _backtestData = {
+		totalFetchTime: 0,
+		startTime: null,
+		endTime: null
+	};
+
 	constructor(...args) {
 		super(args[0], args[1]);
 
@@ -44,10 +50,14 @@ export default class EA extends Instrument implements IEA {
 		let count = 2000,
 			candles, lastTime, lastBatch = false,
 			from = this.options.from,
-			until = this.options.until;
+			until = this.options.until,
+			startFetchTime;
+
+		this._backtestData.startTime = Date.now();
 
 		while (true) {
-			console.log('his.option his.optionhis.option', from);
+
+			startFetchTime = Date.now();
 
 			candles = await this._ipc.send('cache', 'read', {
 				instrument: this.instrument,
@@ -56,6 +66,8 @@ export default class EA extends Instrument implements IEA {
 				count: count,
 				bufferOnly: true
 			});
+
+			this._backtestData.totalFetchTime = Date.now() - startFetchTime;
 
 			// There is no more data, so stop
 			if (!candles.length)
@@ -85,6 +97,8 @@ export default class EA extends Instrument implements IEA {
 			from = lastTime + 1;
 		}
 
+		this._backtestData.endTime = Date.now();
+
 		this._ipc.send('main', '@run:end', undefined, false);
 	}
 
@@ -92,8 +106,8 @@ export default class EA extends Instrument implements IEA {
 		return {
 			tickCount: this.tickCount,
 			equality: this.accountManager.equality,
-			orders: this.orderManager.closedOrders
-
+			orders: this.orderManager.closedOrders,
+			data: this._backtestData
 		};
 	}
 

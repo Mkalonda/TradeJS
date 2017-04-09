@@ -49,12 +49,9 @@ export default class BackTest extends EventEmitter {
 
 		this.startTime = Date.now();
 
-		// Prefetch data
-		this.startFetchingTime = Date.now();
 		await Promise.all(this.instruments.map(instrument => {
 			return this.app.controllers.cache.fetch(instrument, this.timeFrame, this.from, this.until);
 		}));
-		this.endFetchingTime = Date.now();
 
 		// Create instrument instances
 		this.EAs = await Promise.all(this.instruments.map(instrument => {
@@ -76,7 +73,6 @@ export default class BackTest extends EventEmitter {
 			});
 		}));
 
-		// Log finish time
 		this.endTime = Date.now();
 
 		this.report = await this.getReport();
@@ -88,7 +84,7 @@ export default class BackTest extends EventEmitter {
 
 	async getReport() {
 		let totalTime = this.endTime - this.startTime,
-			totalFetchTime = this.endFetchingTime - this.startFetchingTime,
+			totalFetchTime = 0,
 			totalTestTime = 0,
 			totalTicks = 0,
 			totalTicksPerSecond = 0,
@@ -98,7 +94,8 @@ export default class BackTest extends EventEmitter {
 		instrumentReports.forEach(report => {
 			totalTicks += report.ticks;
 			totalTicksPerSecond += report.ticksPerSecond;
-			totalTestTime += report.time.total
+			totalFetchTime += report.time.fetch;
+			totalTestTime += report.time.test;
 		});
 
 		ticksPerSecond = Math.round(totalTicks / (totalTestTime / 1000));
@@ -134,7 +131,7 @@ export default class BackTest extends EventEmitter {
 
 			let report = await EA.worker.send('@report');
 
-			let totalTime = (this.endTime - this.startTime) - (this.endFetchingTime - this.startFetchingTime),
+			let totalTime = (report.data.endTime - report.data.startTime),
 				ticksPerSecond = Math.round(report.tickCount / (totalTime / 1000));
 
 			return {
@@ -154,8 +151,10 @@ export default class BackTest extends EventEmitter {
 				ticksPerSecond: ticksPerSecond,
 				ticksPerSecondPretty: ticksPerSecond.toLocaleString(),
 				time: {
-					start: this.startTime,
-					end: this.endTime,
+					start: report.data.startTime,
+					end: report.data.endTime,
+					fetch: report.data.totalFetchTime,
+					test: totalTime - report.data.totalFetchTime,
 					total: totalTime,
 					totalPretty: timeSpan.parse(totalTime)
 				}
