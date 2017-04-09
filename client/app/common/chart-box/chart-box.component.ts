@@ -24,13 +24,14 @@ declare let $: any;
 
 export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
 
-	@ViewChild(ChartComponent) protected _chartComponent: ChartComponent;
+	@ViewChild(ChartComponent) public _chartComponent: ChartComponent;
 	@ViewChild(DialogAnchorDirective) private _dialogAnchor: DialogAnchorDirective;
 
 	@Input() model: InstrumentModel;
 	@Input() focus = true;
 	@Input() mode = 'windowed';
 	@Input() startRandomized = true;
+
 
 	@Output() resize = new EventEmitter();
 

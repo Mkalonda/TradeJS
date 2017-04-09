@@ -173,7 +173,7 @@ export const HighchartsDefaultTheme = {
 		bar: {
 			minPointLength: 1,
 			pointWidth: 5,
-			maxPointWidth: 5,
+			// maxPointWidth: 5,
 			animation: false,
 			enableMouseTracking: false,
 			stickyTracking: true,

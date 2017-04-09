@@ -1,7 +1,5 @@
-'use strict';
-
 import * as _               from 'lodash';
-import {ElementRef, OnInit, Input, NgZone, Component, ChangeDetectionStrategy, OnDestroy} from '@angular/core';
+import {ElementRef, OnInit, Input, Component, ChangeDetectionStrategy, OnDestroy} from '@angular/core';
 import {InstrumentModel} from '../../models/instrument.model';
 
 import {HighchartsDefaultTheme} from './themes/theme.default';
@@ -30,11 +28,14 @@ export class ChartComponent implements OnInit, OnDestroy {
 	private _chart: any;
 	private _onScrollBounced: Function = null;
 
-	private _scrollSpeedStep = 100;
-	private _scrollSpeedMin = 2;
-	private _scrollSpeedMax = 20;
-
 	private _scrollOffset = -1;
+	private _scrollSpeedStep = 10;
+	private _scrollSpeedMin = 2;
+	private _scrollSpeedMax = 15;
+
+	private _zoom = 5;
+	private _zoomMax = 10;
+	private _zoomMin = 1;
 
 	constructor(private _elementRef: ElementRef,
 				private _socketService: SocketService,
@@ -43,7 +44,7 @@ export class ChartComponent implements OnInit, OnDestroy {
 
 	public ngOnInit() {
 		// Bouncer func to limit onScroll calls
-		this._onScrollBounced = _.throttle(this._onScroll.bind(this), 33);
+		this._onScrollBounced = _.throttle(this._onScroll.bind(this), 25);
 
 		// HighStock instance
 		this._chart = HighStock.stockChart(this._elementRef.nativeElement.firstElementChild, _.cloneDeep(HighchartsDefaultTheme));
@@ -105,11 +106,46 @@ export class ChartComponent implements OnInit, OnDestroy {
 	}
 
 	public reflow() {
+		// Sync
 		this._updateViewPort(false);
 
-		requestAnimationFrame(() => {
-			this._chart.reflow();
-		});
+		// Async
+		requestAnimationFrame(() => this._chart.reflow());
+	}
+
+	public zoom(step) {
+		if (this._zoom + step > this._zoomMax || this._zoom + step < this._zoomMin)
+			return;
+
+		this._zoom += step;
+		requestAnimationFrame(() => this._updateViewPort());
+	}
+
+	public toggleTimeFrame(timeFrame) {
+
+	}
+
+
+
+	private _updateViewPort(redraw = true, shift = 0) {
+		let data = this._chart.series[0].xData,
+			offset = this._scrollOffset + shift,
+			viewable = this._calculateViewableBars(),
+			minOffset = 0,
+			maxOffset = data.length - 1 - viewable,
+			min, max;
+
+		if (offset > maxOffset)
+			offset = maxOffset;
+		else if (offset < minOffset)
+			offset = minOffset;
+
+		this._scrollOffset = offset;
+
+		max = data[data.length - offset];
+		min = data[data.length - offset - viewable];
+
+		this._chart.xAxis[0].setExtremes(min, max, redraw, false);
 	}
 
 	private async _fetch(count: number, offset: number) {
@@ -119,15 +155,12 @@ export class ChartComponent implements OnInit, OnDestroy {
 		this._updateIndicators(indicators);
 	}
 
-	private _updateBars(_data: any[] = []) {
-		if (!_data || !_data.length)
-			return;
+	private _updateBars(data: any[] = []) {
+		let {candles, volume} = ChartComponent._prepareData(data),
+			last = candles[candles.length - 1];
 
-		let data = ChartComponent._prepareData(_data),
-			last = data.candles[data.candles.length - 1];
-
-		this._chart.series[0].setData(data.candles, false, false);
-		this._chart.series[1].setData(data.volume, false, false);
+		this._chart.series[0].setData(candles, false, false);
+		this._chart.series[1].setData(volume, false, false);
 
 		// Re-update viewport needed for initial batch of bars
 		this._updateViewPort();
@@ -196,32 +229,37 @@ export class ChartComponent implements OnInit, OnDestroy {
 		}
 	}
 
-	private _updateViewPort(redraw = true, shift = 0) {
-		let data = this._chart.series[0].xData,
-			offset = this._scrollOffset + shift,
-			viewable = this._calculateViewableBars(),
-			minOffset = 0,
-			maxOffset = data.length - 1 - viewable,
-			min, max;
+	/*
+		Stop highchart from moving the Y axis so much
+		TODO: improve
+	 */
+	private _getSurroundingPriceRange(padding = 200, viewable) {
+		let data = this._chart.series[0].yData,
+			i = data.length - this._scrollOffset - viewable - padding,
+			len = (data.length - this._scrollOffset) + padding,
+			price, low, high;
 
-		if (offset > maxOffset)
-			offset = maxOffset;
-		else if (offset < minOffset)
-			offset = minOffset;
+		if (i < 0)
+			i = 0;
 
-		this._scrollOffset = offset;
+		if (len > data.length)
+			len = data.length;
 
-		max = data[data.length - offset];
-		min = data[data.length - offset - viewable];
+		for (; i < len; ++i) {
+			price = data[i][0];
+			if (!high || price > high) {
+				high = price;
+			} else if (!low || price < low) {
+				low = price;
+			}
+		}
 
-		requestAnimationFrame(() => {
-			this._chart.xAxis[0].setExtremes(min, max, redraw, false);
-		});
+		return {low, high};
 	}
 
 	private _calculateViewableBars(checkParent = true) {
 		let el = this._elementRef.nativeElement,
-			barW = 12.5;
+			barW = 3 * this._zoom;
 
 		if (checkParent)
 			el = el.parentNode;
@@ -233,7 +271,7 @@ export class ChartComponent implements OnInit, OnDestroy {
 		event.stopPropagation();
 		event.preventDefault();
 
-		let shift = Math.ceil(this._chart.container.clientWidth / this._scrollSpeedStep);
+		let shift = Math.ceil(this._calculateViewableBars() / this._scrollSpeedStep);
 
 		if (shift < this._scrollSpeedMin)
 			shift = this._scrollSpeedMin;

@@ -32,14 +32,20 @@
             <li role="separator" class="divider"></li>
             <li><a href="#">Separated link</a></li>
         </ul>
-        <button type="button" class="dropdown-toggle text-dark" data-toggle="dropdown" aria-haspopup="true"
+        <button type="button" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
                 aria-expanded="false">
-            <i class="fa fa-chevron-down"></i>
+            15M <span class="caret"></span>
         </button>
-        <button type="button" class="dropdown-toggle text-dark" data-toggle="dropdown" aria-haspopup="true"
-                aria-expanded="false">
-            <i class="fa fa-chevron-up"></i>
-        </button>
+        <ul class="dropdown-menu">
+            <li><a (click)="_chartComponent.toggleTimeFrame('1M')">1M</a></li>
+            <li><a (click)="_chartComponent.toggleTimeFrame('5M')">5M</a></li>
+            <li><a (click)="_chartComponent.toggleTimeFrame('15M')">15M</a></li>
+            <li><a (click)="_chartComponent.toggleTimeFrame('30M')">30M</a></li>
+            <li><a (click)="_chartComponent.toggleTimeFrame('1H')">1H</a></li>
+            <li><a (click)="_chartComponent.toggleTimeFrame('4H')">4H</a></li>
+            <li><a (click)="_chartComponent.toggleTimeFrame('1D')">1D</a></li>
+        </ul>
+
         <button type="button" class="dropdown-toggle text-dark" data-toggle="dropdown" aria-haspopup="true"
                 aria-expanded="false">
             <i class="fa fa-bar-chart"></i>
@@ -51,6 +57,24 @@
                 data-toggle="dropdown" aria-haspopup="true"
                 aria-expanded="false">
             <i class="fa fa-compress"></i>
+        </button>
+        <button (click)="_chartComponent.zoom(-1)"
+                type="button"
+                class="dropdown-toggle text-dark"
+                aria-expanded="false">
+            <i class="fa fa-search-minus">
+            </i>
+        </button>
+        <button (click)="_chartComponent.zoom(1)"
+                type="button"
+                class="dropdown-toggle text-dark"
+                aria-expanded="false">
+            <i class="fa fa-search-plus"></i>
+        </button>
+        <button type="button" class="dropdown-toggle text-dark"
+                data-toggle="dropdown" aria-haspopup="true"
+                aria-expanded="false">
+            <i class="fa fa-window-minimize"></i>
         </button>
         <button *ngIf="mode === 'windowed'"
                 (click)="resize.emit('stretched')"

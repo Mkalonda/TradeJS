@@ -1,7 +1,6 @@
 import Instrument from '../instrument/Instrument';
 import OrderManager from '../../modules/order/OrderManager';
 import AccountManager from '../../modules/account/AccountManager';
-import {isForwardDirection} from "../../../shared/tools/candles/util.candles";
 
 export interface IEA {
 	orderManager: OrderManager;
@@ -33,9 +32,6 @@ export default class EA extends Instrument implements IEA {
 
 		await this.accountManager.init();
 		await this.orderManager.init();
-
-		console.log('this.options this.options', this.options);
-		console.log('this.options this.options', this.options);
 
 		this._ipc.on('@run', opt => this.runBackTest());
 		this._ipc.on('@report', (data, cb) => cb(null, this.report()));
