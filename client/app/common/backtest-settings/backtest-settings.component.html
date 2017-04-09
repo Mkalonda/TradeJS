@@ -14,7 +14,7 @@
                 [settings]="multiSelectSettings"
                 (change)="onChange()"
                 formControlName="instruments"
-                (ngModel)="selectedOptions"></ss-multiselect-dropdown>
+                [(ngModel)]="selectedOptions"></ss-multiselect-dropdown>
     </div>
     <div class="form-input-block">
         <label>Time frame *</label>

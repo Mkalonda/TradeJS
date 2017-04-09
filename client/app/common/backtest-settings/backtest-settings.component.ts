@@ -31,6 +31,7 @@ export class BacktestSettingsComponent implements OnInit, AfterViewInit {
 	public multiSelectOptions: IMultiSelectOption[] = [
 		<any>{id: 'EUR_USD', name: 'EUR_USD'},
 		<any>{id: 'USD_CAD', name: 'USD_CAD'}
+
 	];
 
 	public multiSelectSettings: IMultiSelectSettings = {

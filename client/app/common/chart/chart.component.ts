@@ -32,9 +32,9 @@ export class ChartComponent implements OnInit, OnDestroy {
 	private _zoomMin = 1;
 
 	private _scrollOffset = -1;
-	private _scrollSpeedStep = 10;
+	private _scrollSpeedStep = 8;
 	private _scrollSpeedMin = 1;
-	private _scrollSpeedMax = 25;
+	private _scrollSpeedMax = 20;
 
 	private _chart: any;
 	private _onScrollBounced: Function = null;
