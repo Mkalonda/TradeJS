@@ -19,11 +19,14 @@
 }
 
 :host.stretched {
-    height: 100%;
+    transfrom: translate(0, 0) !important;
+    -webkit-transform: translate(0, 0) !important;
+    height: 100% !important;
+    width: 100% !important;
 }
 
-:host.windowed {
-
+:host.minimized {
+    display: none !important;
 }
 
 :host table th,
@@ -37,9 +40,14 @@
     border-color: #ad8f79;
 
     .chart-header {
-        background: $general-primary;
+        background: $chart-header-background-focus;
+    }
+
+    .chart-title {
+        color: $font-color-light;
     }
 }
+
 
 .chart-header {
     background: $chart-header-background-blur;
@@ -47,7 +55,8 @@
 }
 
 .chart-title {
-    color: $font-color-light;
+    
+    color: $font-color-dark;
     line-height: 18px;
     margin-bottom: 0;
     margin-top: 0;
@@ -62,9 +71,14 @@
     button {
         padding: 0 2px;
         font-size: 12px;
+        font-weight: bold;
+
+        background: -moz-linear-gradient(top,  #F0F0F0 50%, #D4D4D4 50%);
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(50%,#F0F0F0), color-stop(50%,#D4D4D4));
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#F0F0F0', endColorstr='#D4D4D4',GradientType=0 );
+
         i {
             font-size: 14px;
-
         }
     }
 }

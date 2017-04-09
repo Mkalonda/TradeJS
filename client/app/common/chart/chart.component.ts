@@ -25,19 +25,19 @@ export class ChartComponent implements OnInit, OnDestroy {
 	@Input() offset = 0;
 	@Input() chunkLength = 1500;
 
-	private _chart: any;
-	private _onScrollBounced: Function = null;
-
-	private _scrollOffset = -1;
-	private _scrollSpeedStep = 10;
-	private _scrollSpeedMin = 2;
-	private _scrollSpeedMax = 15;
+	private _chartType = 'candleStick';
 
 	private _zoom = 5;
 	private _zoomMax = 10;
 	private _zoomMin = 1;
 
-	private _loadingEl = null;
+	private _scrollOffset = -1;
+	private _scrollSpeedStep = 10;
+	private _scrollSpeedMin = 1;
+	private _scrollSpeedMax = 25;
+
+	private _chart: any;
+	private _onScrollBounced: Function = null;
 
 	constructor(private _elementRef: ElementRef,
 				private _socketService: SocketService,
@@ -48,7 +48,6 @@ export class ChartComponent implements OnInit, OnDestroy {
 		// Bouncer func to limit onScroll calls
 		this._onScrollBounced = _.throttle(this._onScroll.bind(this), 33);
 
-		this._loadingEl = this._elementRef.nativeElement.querySelector('.chart-loading-overlay');
 
 		this._createChart();
 	}
@@ -116,7 +115,19 @@ export class ChartComponent implements OnInit, OnDestroy {
 		this._createChart();
 	}
 
+	public toggleGraphType(type) {
+		this._chartType = type;
+
+		this._chart.series[0].update({
+			type: type
+		});
+	}
+
 	private _createChart() {
+		let settings =_.cloneDeep(HighchartsDefaultTheme);
+
+		settings.series[0]['type'] = this._chartType;
+
 		// HighStock instance
 		this._chart = HighStock.stockChart(this._elementRef.nativeElement.firstElementChild, _.cloneDeep(HighchartsDefaultTheme));
 
@@ -140,6 +151,9 @@ export class ChartComponent implements OnInit, OnDestroy {
 	}
 
 	private _updateViewPort(redraw = true, shift = 0) {
+		if (!this._chart || !this._chart.series || !this._chart.series.length || !this._chart.series[0].xData.length)
+			return;
+
 		let data = this._chart.series[0].xData,
 			offset = this._scrollOffset + shift,
 			viewable = this._calculateViewableBars(),
@@ -294,13 +308,13 @@ export class ChartComponent implements OnInit, OnDestroy {
 		else if (shift > this._scrollSpeedMax)
 			shift = this._scrollSpeedMax;
 
-		this._updateViewPort(true, event.wheelDelta > 0 ? -shift : shift);
+		requestAnimationFrame(() => this._updateViewPort(true, event.wheelDelta > 0 ? -shift : shift));
 
 		return false;
 	}
 
-	private _toggleLoading(state = false) {
-		requestAnimationFrame(() => this._loadingEl.style.display = state ? 'block' : 'none');
+	private _toggleLoading(state) {
+		requestAnimationFrame(() => this._elementRef.nativeElement.classList.toggle('loading', !!state));
 	}
 
 	static _prepareData(data: any) {

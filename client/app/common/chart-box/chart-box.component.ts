@@ -1,8 +1,7 @@
 import * as _ from 'lodash';
-import {DialogAnchorDirective} from '../../directives/dialoganchor.directive';
 import {
 	Component, OnDestroy, ElementRef, Input, Output, EventEmitter, ViewChild,
-	OnInit, AfterViewInit, ChangeDetectionStrategy
+	OnInit, AfterViewInit, ChangeDetectionStrategy, ContentChild
 } from '@angular/core';
 
 import {SocketService}      from '../../services/socket.service';
@@ -11,6 +10,10 @@ import {IndicatorModel} from '../../models/indicator';
 import {InstrumentModel} from '../../models/instrument.model';
 import {InstrumentsService} from '../../services/instruments.service';
 import {ChartComponent} from '../../common/chart/chart.component';
+import {CookieService} from 'ngx-cookie';
+import {ResizableDirective} from '../../directives/resizable.directive';
+import {DraggableDirective} from '../../directives/draggable.directive';
+import {DialogAnchorDirective} from '../../directives/dialoganchor.directive';
 
 declare let $: any;
 
@@ -24,58 +27,44 @@ declare let $: any;
 
 export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
 
-	@ViewChild(ChartComponent) public _chartComponent: ChartComponent;
-	@ViewChild(DialogAnchorDirective) private _dialogAnchor: DialogAnchorDirective;
-
 	@Input() model: InstrumentModel;
 	@Input() focus = true;
-	@Input() mode = 'windowed';
-	@Input() startRandomized = true;
+	@Input() viewState = 'windowed';
+	@Input() minimized = false;
 
-
-	@Output() resize = new EventEmitter();
+	@ViewChild(ChartComponent) public _chartComponent: ChartComponent;
+	@ViewChild(DialogAnchorDirective) private _dialogAnchor: DialogAnchorDirective;
+	@ViewChild(ResizableDirective) private _resizableDirective: ResizableDirective;
+	@ViewChild(DraggableDirective) private _draggableDirective: DraggableDirective;
 
 	socket: any;
 	$el: any;
-	$elLoadingOverlay: any;
 
 	constructor(private _instrumentsService: InstrumentsService,
 				private _socketService: SocketService,
+				private _cookieService: CookieService,
 				private _elementRef: ElementRef) {
 	}
 
 	ngOnInit() {
 		this.socket = this._socketService.socket;
 		this.$el = $(this._elementRef.nativeElement);
-		this.$elLoadingOverlay = this.$el.find('.chart-loading-overlay');
 
-		if (this.startRandomized)
-			this.setRandomPosition();
+		if (this.viewState === 'windowed')
+			this.restorePosition();
 
-		this.resize.subscribe(mode => {
-			this.mode = mode || this.mode;
-
-			if (mode === 'stretched') {
-				this.clearPosition();
-				this.setSize('100%', '100%');
-			}
-			else if (mode === 'windowed') {
-				this.restorePosition();
-			}
-			else {
-				// this._chartComponent.reflow();
-			}
-		});
-
-		this.model.changed.subscribe(() => {
-		});
+		this.toggleViewState(this.viewState, false);
 	}
 
 	ngAfterViewInit() {
+		this._resizableDirective.changed.subscribe(() => this.storePosition());
+		this._draggableDirective.changed.subscribe(() => this.storePosition());
+
 		this.putOnTop();
 	}
 
 	public showIndicatorOptionsMenu(indicatorModel: IndicatorModel): Promise<boolean> {
+
 		return new Promise((resolve) => {
 
 			this._dialogAnchor.createDialog(DialogComponent, {
@@ -108,13 +97,11 @@ export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
 	}
 
 	public toggleFocus(state: boolean): void {
-		if (this.focus === state)
-			return;
-
 		this.focus = state;
 
 		if (state) {
 			this.putOnTop();
+			this.toggleViewState(true);
 		}
 	}
 
@@ -138,31 +125,40 @@ export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
 		this._chartComponent.reflow();
 	}
 
-	public setPosition(top: number | string, left: number | string): void {
-		this._elementRef.nativeElement.style.transform = `translate(${left}px, ${top}px)`;
-		this._elementRef.nativeElement.setAttribute('data-x', left);
-		this._elementRef.nativeElement.setAttribute('data-y', top);
+	public getPosition(): any {
+		let position = {
+			x: parseInt(this._elementRef.nativeElement.getAttribute('data-x'), 10),
+			y: parseInt(this._elementRef.nativeElement.getAttribute('data-y'), 10),
+			w: this._elementRef.nativeElement.clientWidth,
+			h: this._elementRef.nativeElement.clientHeight
+		};
+
+		console.log('position', position);
+
+		return position;
 	}
 
-	public clearPosition(): void {
-		this.storeCurrentPosition();
-
-		this.$el.css({top: 0, left: 0, bottom: 0, transform: 'none'});
+	public setPosition(y: number | string, x: number | string): void {
+		this._elementRef.nativeElement.style.transform = `translate(${x}px, ${y}px)`;
+		this._elementRef.nativeElement.setAttribute('data-x', x);
+		this._elementRef.nativeElement.setAttribute('data-y', y);
 	}
 
-	public storeCurrentPosition() {
-		this._elementRef.nativeElement.setAttribute('data-o-style',
-			this._elementRef.nativeElement.getAttribute('style')
-		);
+	public storePosition() {
+		this._cookieService.putObject(`instrument-${this.model.data.id}`, this.getPosition())
 	}
 
-	public restorePosition(): void {
-		let old = this.$el.attr('data-o-style');
+	public restorePosition(position?: any): void {
+		position = position || <any>this._cookieService.getObject(`instrument-${this.model.data.id}`);
 
-		if (old)
-			this.$el[0].style.cssText = old;
-
-		this._chartComponent.reflow();
+		if (position) {
+			this.setPosition(position.y, position.x);
+			this.setSize(position.w, position.h);
+		}
+		else {
+			this.setRandomPosition();
+			this.storePosition();
+		}
 	}
 
 	public async addIndicator(name) {
@@ -191,12 +187,33 @@ export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
 		this._chartComponent.addIndicator(indicatorModel);
 	}
 
-	getIndicatorOptions(name: string): Promise<IndicatorModel> {
+	public getIndicatorOptions(name: string): Promise<IndicatorModel> {
 		return new Promise((resolve, reject) => {
 			this.socket.emit('instrument:indicator:options', {name: name}, (err, data) => {
 				err ? reject(err) : resolve(new IndicatorModel(data));
 			});
 		});
+	}
+
+	public toggleViewState(viewState: string | boolean, reflow = true) {
+		let elClassList = this._elementRef.nativeElement.classList;
+
+		if (typeof viewState === 'string') {
+
+			if (this.viewState !== viewState) {
+
+				elClassList.remove(this.viewState);
+				elClassList.add(viewState);
+
+				this.viewState = viewState;
+
+				if (reflow) {
+					this._chartComponent.reflow();
+				}
+			}
+		} else {
+			elClassList.toggle('minimized', !viewState);
+		}
 	}
 
 	private _getRandomPosition() {

@@ -73,6 +73,12 @@ export class ChartReportDirective implements OnInit, AfterViewInit {
 			data: data
 		}];
 
+		settings.plotOptions.line = {
+			marker: {
+				enabled: false
+			}
+		};
+
 		settings.tooltip = {
 			useHTML: true,
 			formatter: function () {

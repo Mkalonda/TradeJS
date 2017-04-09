@@ -27,7 +27,9 @@ $input-color-border                 : #474747;
 $input-color-glyphicon-background   : #888;
 
 // Chart
-$chart-header-background-blur       : #6d6d6d;
+$chart-header-background-blur       : -webkit-gradient(linear, left top, left bottom, color-stop(50%,#F0F0F0), color-stop(50%,#D4D4D4));;
+$chart-header-background-focus      : -webkit-gradient(linear, left top, left bottom, color-stop(50%,#085963), color-stop(50%,$general-primary));;
+
 
 // Panel
 $panel-heading                      : #12132d;

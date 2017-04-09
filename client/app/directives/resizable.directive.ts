@@ -1,4 +1,4 @@
-import {Directive, ElementRef, OnInit, Output, EventEmitter, Input} from '@angular/core';
+import {Directive, ElementRef, Output, EventEmitter, Input, AfterViewInit} from '@angular/core';
 
 const interact = require('interactjs');
 
@@ -7,24 +7,34 @@ const interact = require('interactjs');
 	exportAs: 'resizable'
 })
 
-export class ResizableDirective implements OnInit {
+export class ResizableDirective implements AfterViewInit {
 
 	@Output() resized: EventEmitter<string> = new EventEmitter();
 	@Output() onBeforeResize: EventEmitter<string> = new EventEmitter();
 	@Output() onAfterResize: EventEmitter<string> = new EventEmitter();
 
+	@Output() changed = new EventEmitter();
+
 	@Input() _resizeHandle: HTMLElement;
+	@Input() bindParent = true;
+
+	private _rootEl;
 
 	constructor(private _elementRef: ElementRef) {
 	}
 
-	ngOnInit() {
+	ngAfterViewInit() {
+		this._rootEl = this._elementRef.nativeElement;
+
+		if (this.bindParent)
+			this._rootEl = this._rootEl.parentNode;
+
 		this._setUIHandles();
 	}
 
 	private _setUIHandles() {
 
-		interact(this._elementRef.nativeElement)
+		interact(this._rootEl)
 			.resizable({
 				preserveAspectRatio: false,
 				edges: {left: true, right: true, bottom: true, top: true},
@@ -66,8 +76,9 @@ export class ResizableDirective implements OnInit {
 					target.setAttribute('data-y', y);
 				},
 				onend: () => {
-					this.onAfterResize.next();
-				},
+					this.onAfterResize.emit();
+					this.changed.emit();
+				}
 			});
 		// .allowFrom(this._elementRef.nativeElement);
 		// .actionChecker((pointer, event, action, interactable, element) => {

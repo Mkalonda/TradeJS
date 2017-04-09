@@ -121,7 +121,6 @@ export default class Instrument extends InstrumentCache {
 
 		await super.reset();
 
-		console.log('3333333');
 		for (let i = 0; i < indicators.length; ++i) {
 			this.addIndicator(indicators[i].name, indicators[i]);
 		}

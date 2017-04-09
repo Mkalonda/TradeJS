@@ -2,7 +2,12 @@
     height: 100%;
 }
 
+:host.loading .chart-loading-overlay {
+    display: block;
+}
+
 .chart-loading-overlay {
+    display: none;
     position: absolute;
     top: 0;
     background: black;

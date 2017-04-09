@@ -1,11 +1,17 @@
-<div data-drag-handle class="chart-header clearfix">
+<div data-drag-handle
+	 class="chart-header clearfix"
+	 draggable
+	 resizable
+	 (onBeforeResize)="_chartComponent.pinToCorner($event)"
+	 (onAfterResize)="_chartComponent.unpinFromCorner()"
+>
 
-    <h6 class="chart-title pull-left">{{model.data.instrument}} - {{model.data.timeFrame}}</h6>
-    <div class="chart-options btn-group pull-right">
+	<h6 class="chart-title pull-left">{{model.data.instrument}} - {{model.data.timeFrame}}</h6>
+	<div class="chart-options btn-group pull-right">
         <span>
                  <!-- Single button -->
             <button type="button" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
-                    aria-expanded="false">
+					aria-expanded="false">
                 Indicator <span class="caret"></span>
             </button>
             <ul class="dropdown-menu">
@@ -35,70 +41,74 @@
             </ul>
         </span>
 
-        <button type="button" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
-                aria-expanded="false">
-            {{model.data.timeFrame}} <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu">
-            <li><a (click)="_chartComponent.toggleTimeFrame('M1')">M1</a></li>
-            <li><a (click)="_chartComponent.toggleTimeFrame('M5')">M5</a></li>
-            <li><a (click)="_chartComponent.toggleTimeFrame('M15')">M15</a></li>
-            <li><a (click)="_chartComponent.toggleTimeFrame('M30')">M30</a></li>
-            <li><a (click)="_chartComponent.toggleTimeFrame('H1')">H1</a></li>
-            <li><a (click)="_chartComponent.toggleTimeFrame('H4')">H4</a></li>
-            <li><a (click)="_chartComponent.toggleTimeFrame('D')">D</a></li>
-            <li><a (click)="_chartComponent.toggleTimeFrame('W')">W</a></li>
-        </ul>
+		<button type="button" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+				aria-expanded="false">
+			{{model.data.timeFrame}} <span class="caret"></span>
+		</button>
+		<ul class="dropdown-menu">
+			<li><a (click)="_chartComponent.toggleTimeFrame('M1')">M1</a></li>
+			<li><a (click)="_chartComponent.toggleTimeFrame('M5')">M5</a></li>
+			<li><a (click)="_chartComponent.toggleTimeFrame('M15')">M15</a></li>
+			<li><a (click)="_chartComponent.toggleTimeFrame('M30')">M30</a></li>
+			<li><a (click)="_chartComponent.toggleTimeFrame('H1')">H1</a></li>
+			<li><a (click)="_chartComponent.toggleTimeFrame('H4')">H4</a></li>
+			<li><a (click)="_chartComponent.toggleTimeFrame('D')">D</a></li>
+			<li><a (click)="_chartComponent.toggleTimeFrame('W')">W</a></li>
+		</ul>
 
-        <button type="button" class="dropdown-toggle text-dark" data-toggle="dropdown" aria-haspopup="true"
-                aria-expanded="false">
-            <i class="fa fa-bar-chart"></i>
-        </button>
+		<button (click)="_chartComponent.toggleGraphType('ohlc')"
+				type="button" class="dropdown-toggle text-dark"
+				aria-expanded="false">
+			<i class="fa fa-line-chart"></i>
+		</button>
+		<button (click)="_chartComponent.toggleGraphType('candlestick')"
+				type="button"
+				class="dropdown-toggle text-dark"
+				aria-expanded="false">
+			<i class="fa fa-bar-chart"></i>
+		</button>
 
-        <button (click)="_chartComponent.zoom(-1)"
-                type="button"
-                class="dropdown-toggle text-dark"
-                aria-expanded="false">
-            <i class="fa fa-search-minus">
-            </i>
-        </button>
-        <button (click)="_chartComponent.zoom(1)"
-                type="button"
-                class="dropdown-toggle text-dark"
-                aria-expanded="false">
-            <i class="fa fa-search-plus"></i>
-        </button>
-        <button type="button" class="dropdown-toggle text-dark"
-                data-toggle="dropdown" aria-haspopup="true"
-                aria-expanded="false">
-            <i class="fa fa-window-minimize"></i>
-        </button>
-        <button *ngIf="mode === 'windowed'"
-                (click)="resize.emit('stretched')"
+		<button (click)="_chartComponent.zoom(-1)"
+				type="button"
+				class="dropdown-toggle text-dark"
+				aria-expanded="false">
+			<i class="fa fa-search-minus">
+			</i>
+		</button>
+		<button (click)="_chartComponent.zoom(1)"
+				type="button"
+				class="dropdown-toggle text-dark"
+				aria-expanded="false">
+			<i class="fa fa-search-plus"></i>
+		</button>
 
-                type="button" class="dropdown-toggle text-dark" data-toggle="dropdown"
-                aria-haspopup="true"
-                aria-expanded="false">
-            <i class="fa fa-expand"></i>
-        </button>
-        <button *ngIf="mode === 'stretched'"
-                (click)="resize.emit('windowed')"
-                type="button"
-                class="dropdown-toggle text-dark"
-                data-toggle="dropdown" aria-haspopup="true"
-                aria-expanded="false">
-            <i class="fa fa-compress"></i>
-        </button>
-
-        <button (click)="destroy()" type="button" class="dropdown-toggle text-dark"
-                data-toggle="dropdown" aria-haspopup="true"
-                aria-expanded="false">
-            <i class="fa fa-close"></i>
-        </button>
-    </div>
+		<button (click)="!$event.stopPropagation() && toggleViewState(false)"
+				type="button" class="dropdown-toggle text-dark"
+				aria-expanded="false">
+			<i class="fa fa-window-minimize"></i>
+		</button>
+		<button *ngIf="viewState === 'windowed'"
+				(click)="toggleViewState('stretched')"
+				type="button" class="dropdown-toggle text-dark"
+				aria-expanded="false">
+			<i class="fa fa-expand"></i>
+		</button>
+		<button *ngIf="viewState === 'stretched'"
+				(click)="toggleViewState('windowed')"
+				type="button"
+				class="dropdown-toggle text-dark"
+				aria-expanded="false">
+			<i class="fa fa-compress"></i>
+		</button>
+		<button (click)="destroy()" type="button" class="dropdown-toggle text-dark"
+				data-toggle="dropdown" aria-haspopup="true"
+				aria-expanded="false">
+			<i class="fa fa-close"></i>
+		</button>
+	</div>
 </div>
 
 <div style="position: relative;" class="chart-content">
-    <div dialogAnchor></div>
-    <chart [model]="model" class="chart-absolute"></chart>
+	<div dialogAnchor></div>
+	<chart [model]="model"></chart>
 </div>

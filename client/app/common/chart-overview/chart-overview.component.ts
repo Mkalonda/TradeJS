@@ -10,7 +10,7 @@ import {InstrumentModel} from '../../models/instrument.model';
 	selector: 'chart-overview',
 	templateUrl: './chart-overview.component.html',
 	styleUrls: ['./chart-overview.component.scss'],
-	changeDetection: ChangeDetectionStrategy.OnPush,
+	// changeDetection: ChangeDetectionStrategy.OnPush,
 	entryComponents: [ChartBoxComponent]
 })
 
@@ -35,9 +35,9 @@ export class ChartOverviewComponent implements OnInit {
 			len = this.charts.length;
 
 		this.charts.forEach((chart, i) => {
-			chart.mode = 'windowed';
+			chart.toggleViewState('windowed');
 
-			chart.$el.removeAttr('style').addClass('animate');
+			chart.$el.addClass('animate');
 
 			setTimeout(() => {
 				chart.$el.removeClass('animate');
@@ -49,8 +49,6 @@ export class ChartOverviewComponent implements OnInit {
 				chart.setPosition(0, (i * chartW) + (i * 1));
 				return;
 			}
-
-			let even = len % 2 === 0;
 		});
 	}
 

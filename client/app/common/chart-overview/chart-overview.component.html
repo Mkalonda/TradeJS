@@ -3,11 +3,7 @@
                *ngFor="let model of instrumentsService.instruments$ | async"
                [ngClass]="{focused: chartBox.focus}"
                [model]="model"
-               [startRandomized]="true"
-               draggable
-               resizable
-               (onBeforeResize)="chartBox._chartComponent.pinToCorner($event)"
-               (onAfterResize)="chartBox._chartComponent.unpinFromCorner()"
+               class="chart-absolute"
                (click)="toggleFocused(chartBox)">
     </chart-box>
 

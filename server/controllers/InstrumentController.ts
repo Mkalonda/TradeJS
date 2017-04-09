@@ -81,6 +81,8 @@ export default class InstrumentController extends Base {
 	}
 
 	public toggleTimeFrame(id, timeFrame) {
+		this.instruments[id].timeFrame = timeFrame;
+
 		return this.instruments[id].worker.send('toggleTimeFrame', {
 			timeFrame: timeFrame
 		});
