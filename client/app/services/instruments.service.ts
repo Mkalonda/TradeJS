@@ -88,6 +88,23 @@ export class InstrumentsService {
 		});
 	}
 
+	public toggleTimeFrame(model: InstrumentModel, timeFrame) {
+		return new Promise((resolve, reject) => {
+
+			model.set({timeFrame});
+
+			this._socketService.socket.emit('instrument:toggleTimeFrame', {
+				id: model.data.id,
+				timeFrame: timeFrame
+			}, (err, data) => {
+				if (err)
+					return reject(err);
+
+				resolve(data);
+			});
+		});
+	}
+
 	private _destroyOnServer(model: InstrumentModel) {
 		return new Promise((resolve, reject) => {
 

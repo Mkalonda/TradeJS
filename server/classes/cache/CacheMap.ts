@@ -104,6 +104,8 @@ export default class Mapper {
 						resolve();
 					})
 				});
+			} else {
+				resolve();
 			}
 		});
 	}

@@ -1,63 +1,60 @@
 <div data-drag-handle class="chart-header clearfix">
 
-    <h6 class="chart-title pull-left">{{model.data.instrument}}</h6>
+    <h6 class="chart-title pull-left">{{model.data.instrument}} - {{model.data.timeFrame}}</h6>
     <div class="chart-options btn-group pull-right">
-        <!-- Single button -->
+        <span>
+                 <!-- Single button -->
+            <button type="button" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+                    aria-expanded="false">
+                Indicator <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li class="dropdown-submenu">
+                    <a tabindex="-1" href="#">Indicators</a>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-header">Custom</li>
+
+                        <li role="separator" class="divider"></li>
+                        <li class="dropdown-header">Default</li>
+
+                        <li><a (click)="addIndicator('MA')">MA</a></li>
+
+                        <li class="dropdown-submenu pull-left">
+                            <a href="#">Even More..</a>
+                            <ul class="dropdown-menu">
+                                <li><a href="#">3rd level</a></li>
+                                <li><a href="#">3rd level</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li><a href="#">Another action</a></li>
+                <li><a href="#">Something else here</a></li>
+                <li role="separator" class="divider"></li>
+                <li><a href="#">Separated link</a></li>
+            </ul>
+        </span>
+
         <button type="button" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
                 aria-expanded="false">
-            Indicator <span class="caret"></span>
+            {{model.data.timeFrame}} <span class="caret"></span>
         </button>
         <ul class="dropdown-menu">
-            <li class="dropdown-submenu">
-                <a tabindex="-1" href="#">Indicators</a>
-                <ul class="dropdown-menu">
-                    <li class="dropdown-header">Custom</li>
-
-                    <li role="separator" class="divider"></li>
-                    <li class="dropdown-header">Default</li>
-
-                    <li><a (click)="addIndicator('MA')">MA</a></li>
-
-                    <li class="dropdown-submenu pull-left">
-                        <a href="#">Even More..</a>
-                        <ul class="dropdown-menu">
-                            <li><a href="#">3rd level</a></li>
-                            <li><a href="#">3rd level</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </li>
-            <li><a href="#">Another action</a></li>
-            <li><a href="#">Something else here</a></li>
-            <li role="separator" class="divider"></li>
-            <li><a href="#">Separated link</a></li>
-        </ul>
-        <button type="button" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
-                aria-expanded="false">
-            15M <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu">
-            <li><a (click)="_chartComponent.toggleTimeFrame('1M')">1M</a></li>
-            <li><a (click)="_chartComponent.toggleTimeFrame('5M')">5M</a></li>
-            <li><a (click)="_chartComponent.toggleTimeFrame('15M')">15M</a></li>
-            <li><a (click)="_chartComponent.toggleTimeFrame('30M')">30M</a></li>
-            <li><a (click)="_chartComponent.toggleTimeFrame('1H')">1H</a></li>
-            <li><a (click)="_chartComponent.toggleTimeFrame('4H')">4H</a></li>
-            <li><a (click)="_chartComponent.toggleTimeFrame('1D')">1D</a></li>
+            <li><a (click)="_chartComponent.toggleTimeFrame('M1')">M1</a></li>
+            <li><a (click)="_chartComponent.toggleTimeFrame('M5')">M5</a></li>
+            <li><a (click)="_chartComponent.toggleTimeFrame('M15')">M15</a></li>
+            <li><a (click)="_chartComponent.toggleTimeFrame('M30')">M30</a></li>
+            <li><a (click)="_chartComponent.toggleTimeFrame('H1')">H1</a></li>
+            <li><a (click)="_chartComponent.toggleTimeFrame('H4')">H4</a></li>
+            <li><a (click)="_chartComponent.toggleTimeFrame('D')">D</a></li>
+            <li><a (click)="_chartComponent.toggleTimeFrame('W')">W</a></li>
         </ul>
 
         <button type="button" class="dropdown-toggle text-dark" data-toggle="dropdown" aria-haspopup="true"
                 aria-expanded="false">
             <i class="fa fa-bar-chart"></i>
         </button>
-        <button *ngIf="mode === 'stretched'"
-                (click)="resize.emit('windowed')"
-                type="button"
-                class="dropdown-toggle text-dark"
-                data-toggle="dropdown" aria-haspopup="true"
-                aria-expanded="false">
-            <i class="fa fa-compress"></i>
-        </button>
+
         <button (click)="_chartComponent.zoom(-1)"
                 type="button"
                 class="dropdown-toggle text-dark"
@@ -84,6 +81,15 @@
                 aria-expanded="false">
             <i class="fa fa-expand"></i>
         </button>
+        <button *ngIf="mode === 'stretched'"
+                (click)="resize.emit('windowed')"
+                type="button"
+                class="dropdown-toggle text-dark"
+                data-toggle="dropdown" aria-haspopup="true"
+                aria-expanded="false">
+            <i class="fa fa-compress"></i>
+        </button>
+
         <button (click)="destroy()" type="button" class="dropdown-toggle text-dark"
                 data-toggle="dropdown" aria-haspopup="true"
                 aria-expanded="false">

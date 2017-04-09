@@ -9,7 +9,7 @@ export default class InstrumentCache extends WorkerChild {
 	public instrument: string = this.opt.instrument;
 	public timeFrame: string = this.opt.timeFrame;
 
-	protected tickCount: number = 0;
+	protected tickCount = 0;
 	protected ticks: any = [];
 
 	protected _map: CacheMapper = new CacheMapper();
@@ -120,6 +120,19 @@ export default class InstrumentCache extends WorkerChild {
 			await this._ipc.send('cache', 'unregister', {id: this.id, instrument: this.instrument}, true);
 			// this.listenForNewTick = false;
 		}
+	}
+
+	protected async reset() {
+		this._toggleNewTickListener(false);
+
+		await this._map.reset();
+
+		this.ticks = null;
+		this.ticks = [];
+
+		this.tickCount = 0;
+
+		return this._doPreFetch();
 	}
 
 	// TODO: on destroy graceful

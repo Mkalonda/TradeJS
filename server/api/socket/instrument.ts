@@ -60,6 +60,15 @@ module.exports = (app: App, socket) => {
 		}
 	});
 
+	socket.on('instrument:toggleTimeFrame', async (options, cb) => {
+		try {
+			cb(null, await app.controllers.instrument.toggleTimeFrame(options.id, options.timeFrame));
+		} catch (error) {
+			console.log(error);
+			cb(error);
+		}
+	});
+
 	socket.on('instrument:indicator:options', async (options, cb) => {
 		cb(null, await app.controllers.instrument.getIndicatorOptions(options));
 	});
@@ -71,5 +80,4 @@ module.exports = (app: App, socket) => {
 	socket.on('instrument:indicator:remove', async (options, cb) => {
 
 	});
-
 };

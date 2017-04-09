@@ -37,6 +37,8 @@ export class ChartComponent implements OnInit, OnDestroy {
 	private _zoomMax = 10;
 	private _zoomMin = 1;
 
+	private _loadingEl = null;
+
 	constructor(private _elementRef: ElementRef,
 				private _socketService: SocketService,
 				private _instrumentsService: InstrumentsService) {
@@ -44,28 +46,11 @@ export class ChartComponent implements OnInit, OnDestroy {
 
 	public ngOnInit() {
 		// Bouncer func to limit onScroll calls
-		this._onScrollBounced = _.throttle(this._onScroll.bind(this), 25);
+		this._onScrollBounced = _.throttle(this._onScroll.bind(this), 33);
 
-		// HighStock instance
-		this._chart = HighStock.stockChart(this._elementRef.nativeElement.firstElementChild, _.cloneDeep(HighchartsDefaultTheme));
+		this._loadingEl = this._elementRef.nativeElement.querySelector('.chart-loading-overlay');
 
-		// Scroll listener
-		this._chart.container.addEventListener('mousewheel', <any>this._onScrollBounced);
-
-		// Just an empty chart
-		if (!this.model)
-			return;
-
-		// Create new server instrument
-		if (!this.model.data.id) {
-			let subscription = this.model.synced.subscribe(() => {
-				subscription.unsubscribe();
-
-				this._fetch(this.chunkLength, this.offset);
-			});
-		} else {
-			this._fetch(this.chunkLength, this.offset);
-		}
+		this._createChart();
 	}
 
 	public addIndicator(indicatorModel: IndicatorModel) {
@@ -121,11 +106,38 @@ export class ChartComponent implements OnInit, OnDestroy {
 		requestAnimationFrame(() => this._updateViewPort());
 	}
 
-	public toggleTimeFrame(timeFrame) {
+	public async toggleTimeFrame(timeFrame) {
+		this._toggleLoading(true);
 
+		this._destroyChart();
+
+		await this._instrumentsService.toggleTimeFrame(this.model, timeFrame);
+
+		this._createChart();
 	}
 
+	private _createChart() {
+		// HighStock instance
+		this._chart = HighStock.stockChart(this._elementRef.nativeElement.firstElementChild, _.cloneDeep(HighchartsDefaultTheme));
 
+		// Scroll listener
+		this._chart.container.addEventListener('mousewheel', <any>this._onScrollBounced);
+
+		// Just an empty chart
+		if (!this.model)
+			return;
+
+		// Create new server instrument
+		if (!this.model.data.id) {
+			let subscription = this.model.synced.subscribe(() => {
+				subscription.unsubscribe();
+
+				this._fetch(this.chunkLength, this.offset);
+			});
+		} else {
+			this._fetch(this.chunkLength, this.offset);
+		}
+	}
 
 	private _updateViewPort(redraw = true, shift = 0) {
 		let data = this._chart.series[0].xData,
@@ -149,10 +161,14 @@ export class ChartComponent implements OnInit, OnDestroy {
 	}
 
 	private async _fetch(count: number, offset: number) {
+		this._toggleLoading(true);
+
 		let {candles, indicators} = await this._instrumentsService.fetch(this.model, count, offset);
 
 		this._updateBars(candles);
 		this._updateIndicators(indicators);
+
+		this._toggleLoading(false);
 	}
 
 	private _updateBars(data: any[] = []) {
@@ -283,6 +299,10 @@ export class ChartComponent implements OnInit, OnDestroy {
 		return false;
 	}
 
+	private _toggleLoading(state = false) {
+		requestAnimationFrame(() => this._loadingEl.style.display = state ? 'block' : 'none');
+	}
+
 	static _prepareData(data: any) {
 		let length = data.length,
 			volume = new Array(length),
@@ -300,12 +320,16 @@ export class ChartComponent implements OnInit, OnDestroy {
 		};
 	}
 
-	public ngOnDestroy() {
+	private _destroyChart() {
 		// Unbind scroll
 		this._chart.container.removeEventListener('mousewheel', <any>this._onScrollBounced);
 
 		// Destroy chart
 		this._chart.destroy();
 		this._chart = null;
+	}
+
+	public ngOnDestroy() {
+		this._destroyChart();
 	}
 }

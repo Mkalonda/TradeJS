@@ -43,7 +43,7 @@ export default class InstrumentController extends Base {
 		instrument = instrument.toUpperCase();
 		timeFrame = timeFrame.toUpperCase();
 
-		let id = `${instrument}_${timeFrame}_${++this._unique}`;
+		let id = `${instrument}_${++this._unique}`;
 
 		let worker = new WorkerHost({
 			ipc: this.app.ipc,
@@ -78,6 +78,12 @@ export default class InstrumentController extends Base {
 			return Promise.reject(`Reject: Instrument '${id}' does not exist`);
 
 		return this.instruments[id].worker.send('read', {from, until, count, indicators, bufferOnly});
+	}
+
+	public toggleTimeFrame(id, timeFrame) {
+		return this.instruments[id].worker.send('toggleTimeFrame', {
+			timeFrame: timeFrame
+		});
 	}
 
 	public async addIndicator(params) {

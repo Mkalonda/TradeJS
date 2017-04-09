@@ -1,12 +1,11 @@
 import * as path        from 'path';
 import InstrumentCache  from './InstrumentCache';
-import Indicator        from "../../../shared/indicators/Indicator";
 
 const PATH_INDICATORS = path.join(__dirname, '../../../shared/indicators');
 
 export default class Instrument extends InstrumentCache {
 
-	private _unique: number = 0;
+	private _unique = 0;
 
 	indicators = {};
 
@@ -22,8 +21,15 @@ export default class Instrument extends InstrumentCache {
 		}
 	}
 
+	toggleTimeFrame(timeFrame) {
+		this.timeFrame = timeFrame;
+
+		return this.reset();
+	}
+
 	addIndicator(name, options): any {
 		let indicator = null;
+		options.name = name;
 
 		try {
 			let id = name + '_' + ++this._unique;
@@ -37,6 +43,10 @@ export default class Instrument extends InstrumentCache {
 		}
 
 		return indicator;
+	}
+
+	removeIndicator(id) {
+		delete this.indicators[id];
 	}
 
 	getIndicatorData(id: string, count?: number, shift?: number) {
@@ -90,5 +100,30 @@ export default class Instrument extends InstrumentCache {
 				cb(error);
 			}
 		});
+
+		this._ipc.on('toggleTimeFrame', async (data: any, cb: Function) => {
+			try {
+				cb(null, await this.toggleTimeFrame(data.timeFrame));
+			} catch (error) {
+				console.log('Error:', error);
+				cb(error);
+			}
+		});
+	}
+
+	async reset(keepIndicators = true) {
+		let indicators = [];
+
+		for (let id in this.indicators) {
+			indicators.push(this.indicators[id].options);
+			this.removeIndicator(id);
+		}
+
+		await super.reset();
+
+		console.log('3333333');
+		for (let i = 0; i < indicators.length; ++i) {
+			this.addIndicator(indicators[i].name, indicators[i]);
+		}
 	}
 }

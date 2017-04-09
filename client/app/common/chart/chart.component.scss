@@ -1,3 +1,12 @@
 .chart {
     height: 100%;
 }
+
+.chart-loading-overlay {
+    position: absolute;
+    top: 0;
+    background: black;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
