@@ -1,5 +1,5 @@
 import {
-	Component, OnInit, ElementRef, QueryList, ViewChildren
+	Component, OnInit, ElementRef, QueryList, ViewChildren, ChangeDetectionStrategy
 }  from '@angular/core';
 
 import {InstrumentsService} from '../../services/instruments.service';
@@ -10,8 +10,10 @@ import {InstrumentModel} from '../../models/instrument.model';
 	selector: 'chart-overview',
 	templateUrl: './chart-overview.component.html',
 	styleUrls: ['./chart-overview.component.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
 	entryComponents: [ChartBoxComponent]
 })
+
 
 export class ChartOverviewComponent implements OnInit {
 

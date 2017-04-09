@@ -27,23 +27,35 @@ export class ChartComponent implements OnInit, OnDestroy {
 	@Input() offset = 0;
 	@Input() chunkLength = 1500;
 
-	public chart: any;
+	private _chart: any;
+	private _onScrollBounced: Function = null;
 
-	private _currentOffset = 0;
+	private _scrollSpeedStep = 100;
+	private _scrollSpeedMin = 2;
+	private _scrollSpeedMax = 20;
+
+	private _scrollOffset = -1;
 
 	constructor(private _elementRef: ElementRef,
 				private _socketService: SocketService,
-				private _zone: NgZone,
 				private _instrumentsService: InstrumentsService) {
 	}
 
-	ngOnInit() {
-		this._createChart();
-		this._setScrollListener();
+	public ngOnInit() {
+		// Bouncer func to limit onScroll calls
+		this._onScrollBounced = _.throttle(this._onScroll.bind(this), 33);
 
+		// HighStock instance
+		this._chart = HighStock.stockChart(this._elementRef.nativeElement.firstElementChild, _.cloneDeep(HighchartsDefaultTheme));
+
+		// Scroll listener
+		this._chart.container.addEventListener('mousewheel', <any>this._onScrollBounced);
+
+		// Just an empty chart
 		if (!this.model)
 			return;
 
+		// Create new server instrument
 		if (!this.model.data.id) {
 			let subscription = this.model.synced.subscribe(() => {
 				subscription.unsubscribe();
@@ -61,7 +73,7 @@ export class ChartComponent implements OnInit, OnDestroy {
 				id: this.model.data.id,
 				name: indicatorModel.name,
 				options: indicatorModel.inputs,
-				readCount: this.chart.series[0].xData.length,
+				readCount: this._chart.series[0].xData.length,
 				shift: 0
 			}, (err, data) => {
 				if (err)
@@ -74,32 +86,29 @@ export class ChartComponent implements OnInit, OnDestroy {
 		});
 	}
 
+	public pinToCorner(edges): void {
+		let el = this._chart.container;
+
+		el.style.position = 'absolute';
+
+		if (edges.right || edges.left) {
+			el.style.left = 'auto';
+			el.style.right = 0;
+		}
+	}
+
+	public unpinFromCorner(reflow = true): void {
+		this._chart.container.style.position = 'static';
+
+		if (reflow)
+			this.reflow();
+	}
+
 	public reflow() {
-		this._zone.runOutsideAngular(() => {
-			requestAnimationFrame(() => {
-				this.chart.reflow();
-				this._updateZoom();
-			});
-		});
-	}
+		this._updateViewPort(false);
 
-	private _createChart(): Promise<any> | void {
-		this._zone.runOutsideAngular(() => {
-			this.chart = HighStock.stockChart(this._elementRef.nativeElement.firstElementChild, _.cloneDeep(HighchartsDefaultTheme));
-		});
-	}
-
-	private _updateZoom(redraw = true) {
-		this._zone.runOutsideAngular(() => {
-			let parentW = this._elementRef.nativeElement.parentNode.clientWidth,
-				data = this.chart.xAxis[0].series[0].data,
-				barW = 12.5,
-				barsToShow = Math.ceil(parentW / barW),
-				firstBar = (data[data.length - barsToShow] || data[0]),
-				lastBar = data[data.length - 1];
-
-			if (firstBar && lastBar)
-				this.chart.xAxis[0].setExtremes(firstBar.x, lastBar.x, redraw, false);
+		requestAnimationFrame(() => {
+			this._chart.reflow();
 		});
 	}
 
@@ -111,25 +120,27 @@ export class ChartComponent implements OnInit, OnDestroy {
 	}
 
 	private _updateBars(_data: any[] = []) {
-		this._zone.runOutsideAngular(() => {
-			if (!_data || !_data.length)
-				return;
+		if (!_data || !_data.length)
+			return;
 
-			let data = ChartComponent._prepareData(_data),
-				last = data.candles[data.candles.length - 1];
+		let data = ChartComponent._prepareData(_data),
+			last = data.candles[data.candles.length - 1];
 
-			this.chart.series[0].setData(data.candles);
-			this.chart.series[1].setData(data.volume);
+		this._chart.series[0].setData(data.candles, false, false);
+		this._chart.series[1].setData(data.volume, false, false);
 
-			this._updateZoom();
-			this._setCurrentPricePlot(last);
-		});
+		// Re-update viewport needed for initial batch of bars
+		this._updateViewPort();
+
+		// PlotLine cannot be delayed, so to prevent instant re-render from updateViewPort,
+		// Do this after
+		this._setCurrentPricePlot(last);
 	}
 
 	private _setCurrentPricePlot(bar) {
-		this.chart.yAxis[0].removePlotLine('current-price');
+		this._chart.yAxis[0].removePlotLine('current-price');
 
-		this.chart.yAxis[0].addPlotLine({
+		this._chart.yAxis[0].addPlotLine({
 			value: bar[1],
 			color: '#646467',
 			width: 1,
@@ -149,103 +160,89 @@ export class ChartComponent implements OnInit, OnDestroy {
 	}
 
 	private _updateIndicators(indicators) {
-		this._zone.runOutsideAngular(() => {
-			for (let id in indicators) {
-				if (indicators.hasOwnProperty(id)) {
-					for (let drawBufferName in indicators[id]) {
-						if (indicators[id].hasOwnProperty(drawBufferName)) {
-							let drawBuffer = indicators[id][drawBufferName];
+		for (let id in indicators) {
+			if (indicators.hasOwnProperty(id)) {
+				for (let drawBufferName in indicators[id]) {
+					if (indicators[id].hasOwnProperty(drawBufferName)) {
+						let drawBuffer = indicators[id][drawBufferName];
 
-							let unique = id + '_' + drawBuffer.id;
+						let unique = id + '_' + drawBuffer.id;
 
-							// New series
-							let series = this.chart.get(unique);
+						// New series
+						let series = this._chart.get(unique);
 
-							// Update
-							if (series) {
-								console.log('SERIES!!!!', series);
-							}
+						// Update
+						if (series) {
+							console.log('SERIES!!!!', series);
+						}
 
-							// Create
-							else {
-								this.chart.addSeries({
-									type: 'line',
-									name: id,
-									// id: unique,
-									data: drawBuffer.data,
-									color: drawBuffer.style.color,
-									yAxis: 0,
-									dataGrouping: {
-										enabled: false
-									}
-								});
-							}
+						// Create
+						else {
+							this._chart.addSeries({
+								type: 'line',
+								name: id,
+								// id: unique,
+								data: drawBuffer.data,
+								color: drawBuffer.style.color,
+								yAxis: 0,
+								dataGrouping: {
+									enabled: false
+								}
+							});
 						}
 					}
 				}
 			}
+		}
+	}
+
+	private _updateViewPort(redraw = true, shift = 0) {
+		let data = this._chart.series[0].xData,
+			offset = this._scrollOffset + shift,
+			viewable = this._calculateViewableBars(),
+			minOffset = 0,
+			maxOffset = data.length - 1 - viewable,
+			min, max;
+
+		if (offset > maxOffset)
+			offset = maxOffset;
+		else if (offset < minOffset)
+			offset = minOffset;
+
+		this._scrollOffset = offset;
+
+		max = data[data.length - offset];
+		min = data[data.length - offset - viewable];
+
+		requestAnimationFrame(() => {
+			this._chart.xAxis[0].setExtremes(min, max, redraw, false);
 		});
 	}
 
-	private _setScrollListener() {
-		let ready = true,
-			data = this.chart.series[0].xData,
-			chart = this.chart;
-
-		$(this.chart.container).bind('mousewheel DOMMouseScroll', (event: any) => {
-			if (ready === false)
-				return false;
-
-			ready = false;
-
-			this._zone.runOutsideAngular(() => {
-				let // _event = chart.pointer.normalize(event),
-					min, max, barsLength, diff;
-
-				// if (!chart.isInsidePlot(_event.chartX - chart.plotLeft, _event.chartY - chart.plotTop))
-				// 	return;
-
-				barsLength = this._calculateViewableBars();
-				diff = Math.ceil(barsLength / 10);
-
-				// Up
-				if (-event.originalEvent.detail || event.originalEvent.wheelDelta < 0) {
-					this._currentOffset += diff;
-
-					if (this._currentOffset > data.length - 1)
-						this._currentOffset = data.length - 1;
-				}
-				// Down
-				else {
-					this._currentOffset -= diff;
-
-					if (this._currentOffset < 0)
-						this._currentOffset = 0;
-				}
-
-				min = data[data.length - 1 - this._currentOffset - barsLength];
-				max = data[data.length - 1 - this._currentOffset];
-
-				// Could be first or last bar
-				if (min && max) {
-					requestAnimationFrame(() => {
-						chart.xAxis[0].setExtremes(min, max, true, false);
-						ready = true;
-					});
-				} else {
-					ready = true;
-				}
-			});
-
-			return false;
-		});
-	}
-
-	private _calculateViewableBars() {
-		let parentW = this.chart.container.clientWidth,
+	private _calculateViewableBars(checkParent = true) {
+		let el = this._elementRef.nativeElement,
 			barW = 12.5;
 
-		return Math.ceil(parentW / barW)
+		if (checkParent)
+			el = el.parentNode;
+
+		return Math.floor(el.clientWidth / barW);
+	}
+
+	private _onScroll(event: MouseWheelEvent): boolean {
+		event.stopPropagation();
+		event.preventDefault();
+
+		let shift = Math.ceil(this._chart.container.clientWidth / this._scrollSpeedStep);
+
+		if (shift < this._scrollSpeedMin)
+			shift = this._scrollSpeedMin;
+		else if (shift > this._scrollSpeedMax)
+			shift = this._scrollSpeedMax;
+
+		this._updateViewPort(true, event.wheelDelta > 0 ? -shift : shift);
+
+		return false;
 	}
 
 	static _prepareData(data: any) {
@@ -265,14 +262,12 @@ export class ChartComponent implements OnInit, OnDestroy {
 		};
 	}
 
-	ngOnDestroy() {
+	public ngOnDestroy() {
 		// Unbind scroll
-		$(this.chart.container).off('mousewheel DOMMouseScroll');
+		this._chart.container.removeEventListener('mousewheel', <any>this._onScrollBounced);
 
 		// Destroy chart
-		this.chart.destroy();
-		this.chart = null;
-
-		// Destroy data;
+		this._chart.destroy();
+		this._chart = null;
 	}
 }

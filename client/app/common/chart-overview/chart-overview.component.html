@@ -6,8 +6,8 @@
                [startRandomized]="true"
                draggable
                resizable
-               (onBeforeResize)="chartBox.forceChartInCorner($event)"
-               (onAfterResize)="chartBox.unlockChartFromCorner() && chartBox.chart.reflow()"
+               (onBeforeResize)="chartBox._chartComponent.pinToCorner($event)"
+               (onAfterResize)="chartBox._chartComponent.unpinFromCorner()"
                (click)="toggleFocused(chartBox)">
     </chart-box>
 

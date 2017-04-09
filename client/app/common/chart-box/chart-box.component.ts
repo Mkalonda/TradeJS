@@ -18,14 +18,14 @@ declare let $: any;
 	selector: 'chart-box',
 	templateUrl: './chart-box.component.html',
 	styleUrls: ['./chart-box.component.scss'],
-	// changeDetection: ChangeDetectionStrategy.OnPush,
+	changeDetection: ChangeDetectionStrategy.OnPush,
 	entryComponents: [DialogComponent]
 })
 
 export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
 
+	@ViewChild(ChartComponent) protected _chartComponent: ChartComponent;
 	@ViewChild(DialogAnchorDirective) private _dialogAnchor: DialogAnchorDirective;
-	@ViewChild(ChartComponent) private _chartComponent: ChartComponent;
 
 	@Input() model: InstrumentModel;
 	@Input() focus = true;
@@ -48,6 +48,9 @@ export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
 		this.$el = $(this._elementRef.nativeElement);
 		this.$elLoadingOverlay = this.$el.find('.chart-loading-overlay');
 
+		if (this.startRandomized)
+			this.setRandomPosition();
+
 		this.resize.subscribe(mode => {
 			this.mode = mode || this.mode;
 
@@ -59,12 +62,9 @@ export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
 				this.restorePosition();
 			}
 			else {
-				this._chartComponent.reflow();
+				// this._chartComponent.reflow();
 			}
 		});
-
-		if (this.startRandomized)
-			this.setRandomPosition();
 
 		this.model.changed.subscribe(() => {
 		});
@@ -104,27 +104,6 @@ export class ChartBoxComponent implements OnInit, OnDestroy, AfterViewInit {
 		let pos = this._getRandomPosition();
 
 		this.setPosition(pos[0], pos[1]);
-	}
-
-	public forceChartInCorner(edges): void {
-		console.log(this._chartComponent);
-
-		let el = this._chartComponent.chart.container;
-
-		el.style.position = 'absolute';
-
-		if (edges.right || edges.left) {
-			el.style.left = 'auto';
-			el.style.right = 0;
-		}
-	}
-
-	public unlockChartFromCorner(): void {
-		let el = this._chartComponent.chart.container;
-
-		el.style.position = 'static';
-
-		this._chartComponent.reflow();
 	}
 
 	public toggleFocus(state: boolean): void {

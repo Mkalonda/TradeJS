@@ -19,7 +19,7 @@ export const HighchartsDefaultTheme = {
 
 		/** TEMP STYLING **/
 		spacingTop: 0,
-		spacingRight: 0,
+		spacingRight: 4,
 		spacingLeft: 0,
 		spacingBottom: 0,
 		// plotBorderWidth: 1,
@@ -77,7 +77,7 @@ export const HighchartsDefaultTheme = {
 				step: 1, // Disable label rotating when there is not enough space
 				staggerLines: false,
 				format: '{value:%d-%m %H:%M}',
-				y: 14
+				y: 12
 			},
 			minorGridLineWidth: 0,
 			lineColor: '#d2d2d5',
@@ -112,7 +112,7 @@ export const HighchartsDefaultTheme = {
 				align: 'left',
 				y: 3,
 				x: 5,
-				format: '{value:.5f}',
+				format: '{value:.4f}',
 				staggerLines: false,
 			},
 			showFirstLabel: false,
@@ -134,10 +134,13 @@ export const HighchartsDefaultTheme = {
 			},
 			showLastLabel: true,
 			title: {
-				text: 'Volume'
+				align: 'middle',
+				text: 'Volume',
+				offset: 0,
+				// y: -10,
+				x: 10
 			},
 			gridLineWidth: 0,
-			tickPixelInterval: 30,
 			top: '70%',
 			height: '30%',
 			minorTickLength: 0,
